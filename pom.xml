@@ -328,6 +328,13 @@
                 <version>${ruoyi-vue-plus.version}</version>
             </dependency>
 
+            <!-- dcims-service模块 -->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>dcims-service</artifactId>
+                <version>4.6.0</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -342,6 +349,7 @@
         <module>ruoyi-extend</module>
         <module>ruoyi-oss</module>
         <module>ruoyi-sms</module>
+        <module>dcims-service</module>
     </modules>
     <packaging>pom</packaging>
 
