@@ -48,12 +48,13 @@ public class DcimsCompetitionAuditBo extends BaseEntity {
     /**
      * 审批意见
      */
+    @NotNull(message = "退回理由不能为空", groups = { RefuseGroup.class })
     private String reason;
 
     /**
      * 下一级审批人id
      */
-    @NotNull(message = "下一级审批人id不能为空", groups = { PermitGroup.class })
+    @NotNull(message = "请输入下一级审核教师工号", groups = { PermitGroup.class })
     private Long nextTeacherId;
 
 

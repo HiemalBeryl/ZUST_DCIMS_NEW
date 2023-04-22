@@ -1,9 +1,9 @@
 package com.ruoyi.system.controller;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.ruoyi.common.core.validate.PermitGroup;
-import com.ruoyi.system.domain.entity.DcimsCompetitionAuditBoList;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import lombok.RequiredArgsConstructor;
 
@@ -66,8 +66,8 @@ public class DcimsCompetitionAuditController extends BaseController {
     @Log(title = "竞赛审核", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
-    public R<Void> add(@Validated(PermitGroup.class) @RequestBody DcimsCompetitionAuditBoList boList) {
-        return toAjax(iDcimsCompetitionAuditService.insertByBo(boList.getDcimsCompetitionAuditBoList()));
+    public R<Void> add(@Validated(PermitGroup.class) @RequestBody List<DcimsCompetitionAuditBo> boList) {
+        return toAjax(iDcimsCompetitionAuditService.insertByBo(boList));
     }
 
     /**

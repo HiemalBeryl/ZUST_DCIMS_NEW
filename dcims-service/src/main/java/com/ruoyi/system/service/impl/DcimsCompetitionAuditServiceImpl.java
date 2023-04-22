@@ -93,14 +93,18 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         List<DcimsCompetitionAudit> comAuditList = new ArrayList<>();
         for (DcimsCompetitionAuditBo bo:boList) {
             //手动为Bo添加操作者等部分数据
-            bo.setTeacherId(AccoutUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
-            bo.setResult(1L);
-            DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
-            DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
-            if(add2.getNextAuditId().equals(add1.getTeacherId())){
-                comAuditList.add(add1);
-                add2.setNextAuditId(bo.getNextTeacherId());
-                comList.add(add2);
+            if(bo.getNextTeacherId().equals(0) && !StpUtil.getRoleList().get(0).equals("AcademicAffairsOffice")){
+                return false;
+            } else {
+                bo.setTeacherId(AccoutUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
+                bo.setResult(1L);
+                DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
+                DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
+                if(add2.getNextAuditId().equals(add1.getTeacherId())){
+                    comAuditList.add(add1);
+                    add2.setNextAuditId(bo.getNextTeacherId());
+                    comList.add(add2);
+                }
             }
         }
         return (competitionBaseMapper.updateBatchById(comList))&&(competitionAuditBaseMapper.insertBatch(comAuditList));
