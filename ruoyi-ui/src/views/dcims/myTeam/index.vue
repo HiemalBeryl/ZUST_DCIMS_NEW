@@ -1,123 +1,131 @@
 <template>
-   <div>
- <!-- <el-descriptions class="margin-top" title="我的团队1" :column="3"  border>
-   
-    <el-descriptions-item>
-      <template slot="label">
-        竞赛名称
-      </template>
-      1
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template slot="label">
-        团队负责人
-      </template>
-       1
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template slot="label">
-       团队人数
-      </template>
-       1
-    </el-descriptions-item>
- 
-    <el-descriptions-item>
-      <template slot="label">
-        指导老师1
-      </template>
-         1
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template slot="label">
-        学生团队
-      </template>
-      1
-    </el-descriptions-item>
-  </el-descriptions>
-
-
-<el-descriptions class="margin-top" title="我的团队2" :column="3"  border>
-   
-    <el-descriptions-item>
-      <template slot="label">
-        竞赛名称
-      </template>
-      1
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template slot="label">
-        团队负责人
-      </template>
-       1
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template slot="label">
-       团队人数
-      </template>
-       1
-    </el-descriptions-item>
- 
-    <el-descriptions-item>
-      <template slot="label">
-        指导老师1
-      </template>
-         1
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template slot="label">
-        学生团队
-      </template>
-      1
-    </el-descriptions-item>
-  </el-descriptions> -->
-  
-
-  <!--这里 myteams是一个对象数组  p为数组中的每个元素 -->
-  <!--这里 value1是一个对象中的每个属性值 既可以是单个属性 也可以是数组 key1是属性名 -->
-  <!--展示的值可以设置为el-button格式 方便查看 -->
-   <el-descriptions class="margin-top" v-for="(p,index) in myteams" :key="index"  :title="`我的团队${index}`" :column="3"  border>
-
-
-       <el-descriptions-item v-for=" (value1,key1,index) in p" :key="index">
-      <template slot="label">
-        {{key1}}
-      </template>
-      <!-- <el-button type="text">{{value1.toString()}}</el-button> -->
-      {{value1.toString()}}
-      </el-descriptions-item>
-
-     
-       <el-descriptions-item>
-          <template slot="label">
-         是否获奖
-      </template>
-        <el-button type="text">查看</el-button>
-         
-       </el-descriptions-item>
-
-
-
-   </el-descriptions>
-
-   </div>
+  <div>
+    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
+      <el-menu-item index="1" @click="myteam" >我的团队</el-menu-item>
+      <el-menu-item index="4" @click="newteam">新增团队</el-menu-item>
+      <el-menu-item index="8" @click="checkteam">查询团队</el-menu-item>
+    </el-menu>
+  </div>
 </template>
 
 <script>
+
 export default {
-    name:'myteam',
-    data(){
-        return{
-          
-        }
-    },
-    computed:{
-     myteams(){
-     return this.$store.state.myteams
-     }
+  name:'tuandui',
+  data() {
+    return {
+      // users:[],
+      search:'',
+      tableData: [{
+        xuehao: '01',
+        name: '1',
+        dianhua: '1'
+      }, {
+        xuehao: '00',
+        name: '1',
+        dianhua:'2'
+      }, {
+        xuehao: '00',
+        name: '1',
+        dianhua: '2'
+      }, {
+        xuehao: '00',
+        name: '1',
+        dianhua: '3'
+      }, {
+        xuehao: '00',
+        name: '1',
+        dianhua: '3'
+      }, {
+        xuehao: '00',
+        name: '1',
+        dianhua: '3'
+      }, {
+        xuehao: '00',
+        name: '1',
+        dianhua: '3'
+      }]
     }
+  },
+
+  //   computed:{
+  //     tableDataSearch() {    //筛选对象中的所有key value
+  //     var input = this.search;  //username为input中的v-model参数
+  //     if (input) {
+  //       return this.tableData.filter((data) => {
+  //         return Object.keys(data).some((key) => {
+  //           return String(data[key]).toLowerCase().indexOf(input) > -1;
+  //         });
+  //       });
+  //     }
+  //     return this.tableData;
+  //   },
+  //        DataSearch() {    //筛选对象中的所有key value
+  //     var input = this.search;  //username为input中的v-model参数
+  //     if (input) {
+  //       return this.users.filter((user) => {
+  //         return Object.keys(user).some((key) => {
+  //           return String(user[key]).toLowerCase().indexOf(input) > -1;
+  //         });
+  //       });
+  //     }
+  //     return this.users;
+  //   },
+  // },
+
+
+  methods:{
+    //     async getdata(){
+    //        const{data:res}= await axios({
+    //         method:'GET',
+    //         url:'https://api.github.com/search/users?q=test'
+    //     });
+    //     console.log(res)   //此时的res就是 返回响应报文中的data
+    //       let i= res.items.length;
+    //     console.log(i)
+    //       for(let j=0;j<i;j++){
+    //           this.users.unshift({'login':res.items[j].login,'html_url':res.items[j].html_url,'avatar_url':res.items[j].avatar_url})
+
+    //       }
+    //     },
+    //      showdata(res){
+    //       let i= res.items.size;
+    //       for(let j=0;j<i;j++){
+    //           this.users.unshift({login:res.items[j].login,html_url:res.items[j].html_url,avatar_url:res.items[j].avatar_url})
+
+    //       }
+    // },
+    myteam(){
+      this.$router.push({
+        name:'myteam'
+      })
+    },
+    newteam(){
+      this.$router.push({
+        name:'newteam'
+      })
+    },
+    checkteam(){
+      this.$router.push({
+        name:'checkteam'
+      })
+    }
+//  async beforeCreate() {
+//          const{data:res}= await axios({
+//           method:'GET',
+//           url:'https://api.github.com/search/users?q=test'
+//       });
+//       console.log(res)   //此时的res就是 返回响应报文中的data
+//         let i= res.items.length;
+//       console.log(i)
+//         for(let j=0;j<i;j++){
+//             this.users.unshift({'login':res.items[j].login,'html_url':res.items[j].html_url,'avatar_url':res.items[j].avatar_url})
+
+//         }
+//       },
+  }
 }
 </script>
-
 <style>
 
 </style>

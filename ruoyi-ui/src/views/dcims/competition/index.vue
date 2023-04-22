@@ -59,37 +59,53 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="校内选拔时间" prop="innerTime">
-        <el-date-picker clearable
-          v-model="queryParams.innerTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择校内选拔时间">
-        </el-date-picker>
+      <el-form-item label="校内选拔时间">
+        <el-date-picker
+          v-model="daterangeInnerTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="['00:00:00', '23:59:59']"
+        ></el-date-picker>
       </el-form-item>
-      <el-form-item label="省赛时间" prop="provinceTime">
-        <el-date-picker clearable
-          v-model="queryParams.provinceTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择省赛时间">
-        </el-date-picker>
+      <el-form-item label="省赛时间">
+        <el-date-picker
+          v-model="daterangeProvinceTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="['00:00:00', '23:59:59']"
+        ></el-date-picker>
       </el-form-item>
-      <el-form-item label="国赛时间" prop="nationalTime">
-        <el-date-picker clearable
-          v-model="queryParams.nationalTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择国赛时间">
-        </el-date-picker>
+      <el-form-item label="国赛时间">
+        <el-date-picker
+          v-model="daterangeNationalTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="['00:00:00', '23:59:59']"
+        ></el-date-picker>
       </el-form-item>
-      <el-form-item label="立项结束时间" prop="stopTime">
-        <el-date-picker clearable
-          v-model="queryParams.stopTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择立项结束时间">
-        </el-date-picker>
+      <el-form-item label="立项结束时间">
+        <el-date-picker
+          v-model="daterangeStopTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="['00:00:00', '23:59:59']"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -145,7 +161,7 @@
 
     <el-table v-loading="loading" :data="competitionList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="false"/>
+      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
       <el-table-column label="赛事名称" align="center" prop="name" />
       <el-table-column label="赛事类别" align="center" prop="level">
         <template slot-scope="scope">
@@ -156,6 +172,7 @@
       <el-table-column label="赛事届次" align="center" prop="term" />
       <el-table-column label="赛事年份" align="center" prop="annual" />
       <el-table-column label="主办单位" align="center" prop="organizer" />
+      <el-table-column label="竞赛负责人工号" align="center" prop="responsiblePersonId" />
       <el-table-column label="竞赛负责人" align="center" prop="responsiblePersonName" />
       <el-table-column label="校内选拔时间" align="center" prop="innerTime" width="180">
         <template slot-scope="scope">
@@ -177,10 +194,10 @@
           <span>{{ parseTime(scope.row.stopTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="集中授课时数" align="center" prop="concentrationOfTeachingHours" />
       <el-table-column label="本年度申报经费" align="center" prop="budget" />
-      <el-table-column label="本年度拨款" align="center" prop="appropriation" />
-      <el-table-column label="审核状态" align="center" prop="state" />
+      <el-table-column label="本年度获奖目标" align="center" prop="goal" />
+      <el-table-column label="个人赛限项" align="center" prop="personLimit" />
+      <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -275,17 +292,11 @@
             placeholder="请选择立项结束时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="集中授课时数" prop="concentrationOfTeachingHours">
-          <el-input v-model="form.concentrationOfTeachingHours" placeholder="请输入集中授课时数" />
-        </el-form-item>
-        <el-form-item label="本年度申报经费" prop="budget">
-          <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
-        </el-form-item>
         <el-form-item label="本年度获奖目标" prop="goal">
           <el-input v-model="form.goal" placeholder="请输入本年度获奖目标" />
         </el-form-item>
-        <el-form-item label="本年度拨款" prop="appropriation">
-          <el-input v-model="form.appropriation" placeholder="请输入本年度拨款" />
+        <el-form-item label="审核人id" prop="nextAuditId">
+          <el-input v-model="form.nextAuditId" placeholder="请输入审核人id" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -324,6 +335,14 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 审核人id时间范围
+      daterangeInnerTime: [],
+      // 审核人id时间范围
+      daterangeProvinceTime: [],
+      // 审核人id时间范围
+      daterangeNationalTime: [],
+      // 审核人id时间范围
+      daterangeStopTime: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -362,9 +381,6 @@ export default {
         level: [
           { required: true, message: "赛事类别不能为空", trigger: "change" }
         ],
-        pastName: [
-          { required: true, message: "往届名称不能为空", trigger: "blur" }
-        ],
         term: [
           { required: true, message: "赛事届次不能为空", trigger: "blur" }
         ],
@@ -380,27 +396,6 @@ export default {
         responsiblePersonName: [
           { required: true, message: "竞赛负责人不能为空", trigger: "blur" }
         ],
-        innerTime: [
-          { required: true, message: "校内选拔时间不能为空", trigger: "blur" }
-        ],
-        provinceTime: [
-          { required: true, message: "省赛时间不能为空", trigger: "blur" }
-        ],
-        nationalTime: [
-          { required: true, message: "国赛时间不能为空", trigger: "blur" }
-        ],
-        stopTime: [
-          { required: true, message: "立项结束时间不能为空", trigger: "blur" }
-        ],
-        concentrationOfTeachingHours: [
-          { required: true, message: "集中授课时数不能为空", trigger: "blur" }
-        ],
-        budget: [
-          { required: true, message: "本年度申报经费不能为空", trigger: "blur" }
-        ],
-        goal: [
-          { required: true, message: "本年度获奖目标不能为空", trigger: "blur" }
-        ],
       }
     };
   },
@@ -411,6 +406,23 @@ export default {
     /** 查询竞赛赛事基本信息列表 */
     getList() {
       this.loading = true;
+      this.queryParams.params = {};
+      if (null != this.daterangeInnerTime && '' != this.daterangeInnerTime) {
+        this.queryParams.params["beginInnerTime"] = this.daterangeInnerTime[0];
+        this.queryParams.params["endInnerTime"] = this.daterangeInnerTime[1];
+      }
+      if (null != this.daterangeProvinceTime && '' != this.daterangeProvinceTime) {
+        this.queryParams.params["beginProvinceTime"] = this.daterangeProvinceTime[0];
+        this.queryParams.params["endProvinceTime"] = this.daterangeProvinceTime[1];
+      }
+      if (null != this.daterangeNationalTime && '' != this.daterangeNationalTime) {
+        this.queryParams.params["beginNationalTime"] = this.daterangeNationalTime[0];
+        this.queryParams.params["endNationalTime"] = this.daterangeNationalTime[1];
+      }
+      if (null != this.daterangeStopTime && '' != this.daterangeStopTime) {
+        this.queryParams.params["beginStopTime"] = this.daterangeStopTime[0];
+        this.queryParams.params["endStopTime"] = this.daterangeStopTime[1];
+      }
       listCompetition(this.queryParams).then(response => {
         this.competitionList = response.rows;
         this.total = response.total;
@@ -441,12 +453,14 @@ export default {
         provinceTime: undefined,
         nationalTime: undefined,
         stopTime: undefined,
-        concentrationOfTeachingHours: undefined,
         budget: undefined,
-        goal: undefined,
         appropriation: undefined,
+        goal: undefined,
         moneyAggregate: undefined,
         workloadAggregate: undefined,
+        personLimit: undefined,
+        teamLimit: undefined,
+        nextAuditId: undefined,
         state: undefined,
         version: undefined,
         createTime: undefined,
@@ -464,6 +478,10 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
+      this.daterangeInnerTime = [];
+      this.daterangeProvinceTime = [];
+      this.daterangeNationalTime = [];
+      this.daterangeStopTime = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },

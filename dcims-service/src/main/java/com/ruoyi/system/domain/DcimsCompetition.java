@@ -16,7 +16,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 竞赛赛事基本信息对象 dcims_competition
  *
  * @author hiemalberyl
- * @date 2023-04-12
+ * @date 2023-04-21
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -28,7 +28,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 主键
      */
-    @TableId(value = "id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 部门id
@@ -91,21 +91,17 @@ public class DcimsCompetition extends BaseEntity {
      */
     private Date stopTime;
     /**
-     * 集中授课时数
-     */
-    private BigDecimal concentrationOfTeachingHours;
-    /**
      * 本年度申报经费（万元）
      */
     private BigDecimal budget;
     /**
-     * 本年度获奖目标
-     */
-    private String goal;
-    /**
      * 本年度拨款
      */
     private BigDecimal appropriation;
+    /**
+     * 本年度获奖目标
+     */
+    private String goal;
     /**
      * 奖金核算状态
      */
@@ -114,6 +110,18 @@ public class DcimsCompetition extends BaseEntity {
      * 工作量核算状态
      */
     private String workloadAggregate;
+    /**
+     * 个人赛限项
+     */
+    private Integer personLimit;
+    /**
+     * 团队赛限项
+     */
+    private Integer teamLimit;
+    /**
+     * 审核人id
+     */
+    private Long nextAuditId;
     /**
      * 审核状态
      */

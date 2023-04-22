@@ -26,7 +26,7 @@ public class DcimsAwardBo extends TreeEntity<DcimsAwardBo> {
     /**
      * 数据编号
      */
-    @NotNull(message = "数据编号不能为空", groups = { AddGroup.class, EditGroup.class })
+
     private Long id;
 
     /**

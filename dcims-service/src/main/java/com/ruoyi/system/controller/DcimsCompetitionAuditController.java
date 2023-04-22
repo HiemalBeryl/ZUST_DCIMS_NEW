@@ -1,11 +1,12 @@
 package com.ruoyi.system.controller;
 
-import java.util.List;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
+import com.ruoyi.common.core.validate.PermitGroup;
+import com.ruoyi.system.domain.entity.DcimsCompetitionAuditBoList;
+import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import lombok.RequiredArgsConstructor;
-import javax.servlet.http.HttpServletResponse;
+
 import javax.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +16,7 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.validate.AddGroup;
-import com.ruoyi.common.core.validate.EditGroup;
-import com.ruoyi.common.core.validate.QueryGroup;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.domain.vo.DcimsCompetitionAuditVo;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -44,8 +40,10 @@ public class DcimsCompetitionAuditController extends BaseController {
      */
     @SaCheckPermission("dcims:competitionAudit:list")
     @GetMapping("/list")
-    public TableDataInfo<DcimsCompetitionAuditVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
-        return iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
+    public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
+        TableDataInfo<DcimsCompetitionVo> dcimsCompetitionVoTableDataInfo = iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
+        System.out.println(dcimsCompetitionVoTableDataInfo);
+        return dcimsCompetitionVoTableDataInfo;
     }
 
 
@@ -56,20 +54,20 @@ public class DcimsCompetitionAuditController extends BaseController {
      */
     @SaCheckPermission("dcims:competitionAudit:query")
     @GetMapping("/{id}")
-    public R<DcimsCompetitionAuditVo> getInfo(@NotNull(message = "主键不能为空")
+    public R<DcimsCompetitionVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
         return R.ok(iDcimsCompetitionAuditService.queryById(id));
     }
 
     /**
-     * 新增竞赛审核
+     * 通过竞赛审核
      */
     @SaCheckPermission("dcims:competitionAudit:add")
     @Log(title = "竞赛审核", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
-    public R<Void> add(@Validated(AddGroup.class) @RequestBody DcimsCompetitionAuditBo bo) {
-        return toAjax(iDcimsCompetitionAuditService.insertByBo(bo));
+    public R<Void> add(@Validated(PermitGroup.class) @RequestBody DcimsCompetitionAuditBoList boList) {
+        return toAjax(iDcimsCompetitionAuditService.insertByBo(boList.getDcimsCompetitionAuditBoList()));
     }
 
     /**

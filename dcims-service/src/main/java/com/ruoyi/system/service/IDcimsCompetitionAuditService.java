@@ -1,10 +1,12 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.system.domain.DcimsCompetitionAudit;
+import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionAuditVo;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,12 +22,12 @@ public interface IDcimsCompetitionAuditService {
     /**
      * 查询竞赛审核
      */
-    DcimsCompetitionAuditVo queryById(Long id);
+    DcimsCompetitionVo queryById(Long id);
 
     /**
      * 查询竞赛审核列表
      */
-    TableDataInfo<DcimsCompetitionAuditVo> queryPageList(DcimsCompetitionAuditBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionAuditBo bo, PageQuery pageQuery);
 
     /**
      * 查询竞赛审核列表
@@ -35,7 +37,7 @@ public interface IDcimsCompetitionAuditService {
     /**
      * 新增竞赛审核
      */
-    Boolean insertByBo(DcimsCompetitionAuditBo bo);
+    Boolean insertByBo(List<DcimsCompetitionAuditBo> boList);
 
     /**
      * 修改竞赛审核

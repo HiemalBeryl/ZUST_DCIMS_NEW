@@ -2,6 +2,8 @@ package com.ruoyi.system.domain.bo;
 
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
+import com.ruoyi.common.core.validate.PermitGroup;
+import com.ruoyi.common.core.validate.RefuseGroup;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import javax.validation.constraints.*;
@@ -24,37 +26,34 @@ public class DcimsCompetitionAuditBo extends BaseEntity {
     /**
      * 主键
      */
-    @NotNull(message = "主键不能为空", groups = { EditGroup.class })
     private Long id;
 
     /**
      * 竞赛id
      */
-    @NotNull(message = "竞赛id不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotNull(message = "竞赛id不能为空", groups = { PermitGroup.class, RefuseGroup.class })
     private Long competitionId;
 
     /**
      * 审批人id
      */
-    @NotNull(message = "审批人id不能为空", groups = { AddGroup.class, EditGroup.class })
+    @Null(message = "不能填入教师id", groups = { PermitGroup.class, RefuseGroup.class })
     private Long teacherId;
 
     /**
      * 审批结果
      */
-    @NotNull(message = "审批结果不能为空", groups = { AddGroup.class, EditGroup.class })
     private Long result;
 
     /**
      * 审批意见
      */
-    @NotBlank(message = "审批意见不能为空", groups = { AddGroup.class, EditGroup.class })
     private String reason;
 
     /**
      * 下一级审批人id
      */
-    @NotNull(message = "下一级审批人id不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotNull(message = "下一级审批人id不能为空", groups = { PermitGroup.class })
     private Long nextTeacherId;
 
 
