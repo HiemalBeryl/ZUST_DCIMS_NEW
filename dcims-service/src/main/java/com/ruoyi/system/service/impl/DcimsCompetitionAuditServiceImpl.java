@@ -88,13 +88,20 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
      */
     @Override
     public Boolean insertByBo(List<DcimsCompetitionAuditBo> boList) {
-        //TODO: 将多次请求改成一次请求，提高效率
         List<DcimsCompetition> comList = new ArrayList<>();
         List<DcimsCompetitionAudit> comAuditList = new ArrayList<>();
         for (DcimsCompetitionAuditBo bo:boList) {
             //手动为Bo添加操作者等部分数据
-            if(bo.getNextTeacherId().equals(0) && !StpUtil.getRoleList().get(0).equals("AcademicAffairsOffice")){
-                return false;
+            if(bo.getNextTeacherId().equals(0L)){
+                StpUtil.checkRole("AcademicAffairsOffice");
+                bo.setTeacherId(AccoutUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
+                bo.setResult(1L);
+                DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
+                DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
+                if(add2.getNextAuditId().equals(add1.getTeacherId())){
+                    comAuditList.add(add1);
+                    comList.add(add2);
+                }
             } else {
                 bo.setTeacherId(AccoutUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
                 bo.setResult(1L);
@@ -131,34 +138,30 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
      * 批量删除竞赛审核
      */
     @Override
-    public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        if(isValid){
-            //TODO 做一些业务上的校验,判断是否需要校验
-        }
-        // 自定义业务，next_audit_id改为0，表示需要提交者重新修改后提交，并在audit表中添加一条驳回记录
-        LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
-        lqw.in(DcimsCompetition::getId,ids);
-        List<DcimsCompetition> comList = competitionBaseMapper.selectList(lqw);
-        List<DcimsCompetitionAudit> auditList = new ArrayList<>();
-        for (DcimsCompetition entity:comList){
-            Long teacherId = AccoutUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId();
-            System.out.println(teacherId);
-            if(entity.getNextAuditId().equals(teacherId)){
-                entity.setNextAuditId(entity.getResponsiblePersonId());
-
-                DcimsCompetitionAudit audit = new DcimsCompetitionAudit();
-                audit.setCompetitionId(entity.getId());
-                audit.setTeacherId(teacherId);
-                audit.setResult(0L);
-                audit.setReason("审批不通过，驳回审批");
-                audit.setNextTeacherId(entity.getResponsiblePersonId());
-                auditList.add(audit);
-            }else {
-                comList.remove(entity);
+    public Boolean deleteWithValidByIds(List<DcimsCompetitionAuditBo> boList) {
+        List<DcimsCompetition> comList = new ArrayList<>();
+        List<DcimsCompetitionAudit> comAuditList = new ArrayList<>();
+        for (DcimsCompetitionAuditBo bo:boList) {
+            //手动为Bo添加操作者等部分数据
+            bo.setTeacherId(AccoutUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
+            bo.setResult(0L);
+            DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
+            DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
+            if(add2 == null)   add2 = new DcimsCompetition();
+            if(add1.getTeacherId().equals(add2.getNextAuditId())){
+                comAuditList.add(add1);
+                add2.setNextAuditId(bo.getNextTeacherId());
+                comList.add(add2);
             }
         }
-        if(!comList.isEmpty()) competitionBaseMapper.updateBatchById(comList);
-        if(!auditList.isEmpty()) competitionAuditBaseMapper.insertBatch(auditList);
-        return !auditList.isEmpty();
+        boolean flag;
+        if (!comList.isEmpty()) {
+            competitionBaseMapper.updateBatchById(comList);
+            competitionAuditBaseMapper.insertBatch(comAuditList);
+            flag = true;
+        }else {
+            flag = false;
+        }
+        return flag;
     }
 }

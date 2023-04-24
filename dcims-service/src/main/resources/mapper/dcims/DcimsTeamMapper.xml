@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DcimsTeamMapper">
+
+    <resultMap type="com.ruoyi.system.domain.DcimsTeam" id="DcimsTeamResult">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="competitionId" column="competition_id"/>
+        <result property="name" column="name"/>
+        <result property="competitionType" column="competition_type"/>
+        <result property="awardLevel" column="award_level"/>
+        <result property="teacherId" column="teacher_id"/>
+        <result property="teacherName" column="teacher_name"/>
+        <result property="studentId" column="student_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="advancedAwardNumber" column="advanced_award_number"/>
+        <result property="competitionTime" column="competition_time"/>
+        <result property="awardTime" column="award_time"/>
+        <result property="supportMaterial" column="support_material"/>
+        <result property="audit" column="audit"/>
+        <result property="auditInformation" column="audit_information"/>
+        <result property="version" column="version"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+
+</mapper>

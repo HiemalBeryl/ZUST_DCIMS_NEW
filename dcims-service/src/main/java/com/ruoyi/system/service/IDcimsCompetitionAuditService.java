@@ -47,5 +47,5 @@ public interface IDcimsCompetitionAuditService {
     /**
      * 校验并批量删除竞赛审核信息
      */
-    Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+    Boolean deleteWithValidByIds(List<DcimsCompetitionAuditBo> boList);
 }

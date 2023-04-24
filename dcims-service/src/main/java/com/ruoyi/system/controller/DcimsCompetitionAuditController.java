@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.ruoyi.common.core.validate.PermitGroup;
+import com.ruoyi.common.core.validate.RefuseGroup;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import lombok.RequiredArgsConstructor;
 
@@ -72,14 +73,11 @@ public class DcimsCompetitionAuditController extends BaseController {
 
     /**
      * 驳回竞赛审核
-     *
-     * @param ids 主键串
      */
     @SaCheckPermission("dcims:competitionAudit:remove")
     @Log(title = "竞赛审核", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
-    public R<Void> remove(@NotEmpty(message = "主键不能为空")
-                          @PathVariable Long[] ids) {
-        return toAjax(iDcimsCompetitionAuditService.deleteWithValidByIds(Arrays.asList(ids), true));
+    @DeleteMapping()
+    public R<Void> remove(@Validated(RefuseGroup.class) @RequestBody List<DcimsCompetitionAuditBo> boList) {
+        return toAjax(iDcimsCompetitionAuditService.deleteWithValidByIds(boList));
     }
 }
