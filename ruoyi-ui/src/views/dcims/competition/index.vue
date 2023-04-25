@@ -1,4 +1,4 @@
-<template>
+<template>   <!-- 赛事信息 -->
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="赛事名称" prop="name">
@@ -226,7 +226,7 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改竞赛赛事基本信息对话框 -->
+    <!-- 添加或修改竞赛赛事基本信息对话框  弹出框    -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="赛事名称" prop="name">

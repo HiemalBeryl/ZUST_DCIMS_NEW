@@ -19,7 +19,7 @@
                   赛事等级:
               </div>
               <div>
-                  <el-select v-model="value" placeholder="请选择赛事等级">
+                  <el-select v-model="formcheck.jingSaiDengJi" placeholder="请选择赛事等级">
                       <el-option
                         v-for="item in levelOption"
                         :key="item.value"
@@ -36,7 +36,7 @@
                 <div class="block">
 
                   <el-date-picker
-                    v-model="date1"
+                    v-model="formcheck.shenQingShiJian"
                     type="daterange"
                     align="right"
                     range-separator="至"
@@ -51,7 +51,7 @@
           <el-col :span="5"><div class="grid-content">
               <div>关键词搜索:</div>
               <div>
-                  <el-input clearable="true" v-model="keyWord" placeholder="请键入关键词"></el-input>
+                  <el-input clearable="true" v-model="formcheck.keyword" placeholder="请键入关键词"></el-input>
 
               </div>
           </div></el-col>
@@ -69,7 +69,7 @@
               ><div class="grid-content">
                 <el-table
                   ref="multipleTable"
-                  :data="gongZuoLiangFenPei"
+                  :data="showdata2"
                   tooltip-effect="dark"
                   style="width: 100%"
                   max-height="500px"
@@ -110,7 +110,7 @@
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                      <el-button type="info" @click="note">备注</el-button>
+                   
                   </div>
                 </div>
               </div></el-col
@@ -199,6 +199,55 @@
             shenQingShiJian:"2023-01-31"
         },
       ],
+      olddata:[{
+            saiShiMingCheng: "服务外包",
+            liXiangJieCi: "zustTeamI",
+            jingSaiDengJi: "A类",
+            jingSaiFuZeRen: "XXX",
+            shenBaoJingFei: "国一",
+            shenQingShiJian:"2023-01-31"
+        },
+        {
+            saiShiMingCheng: "服务外包",
+            liXiangJieCi: "zustTeamI",
+            jingSaiDengJi: "A类",
+            jingSaiFuZeRen: "XXX",
+            shenBaoJingFei: "国一",
+            shenQingShiJian:"2023-01-31"
+        },
+        {
+            saiShiMingCheng: "服务外包",
+            liXiangJieCi: "zustTeamI",
+            jingSaiDengJi: "A类",
+            jingSaiFuZeRen: "XXX",
+            shenBaoJingFei: "国一",
+            shenQingShiJian:"2023-01-31"
+        },
+        {
+            saiShiMingCheng: "服务外包",
+            liXiangJieCi: "zustTeamI",
+            jingSaiDengJi: "A类",
+            jingSaiFuZeRen: "XXX",
+            shenBaoJingFei: "国一",
+            shenQingShiJian:"2023-01-31"
+        },
+        {
+            saiShiMingCheng: "服务外包",
+            liXiangJieCi: "zustTeamI",
+            jingSaiDengJi: "A类",
+            jingSaiFuZeRen: "XXX",
+            shenBaoJingFei: "国一",
+            shenQingShiJian:"2023-01-31"
+        },
+        {
+            saiShiMingCheng: "服务外包",
+            liXiangJieCi: "zustTeamI",
+            jingSaiDengJi: "A类",
+            jingSaiFuZeRen: "XXX",
+            shenBaoJingFei: "国一",
+            shenQingShiJian:"2023-01-31"
+        },],
+      
         dateOptions: {
           shortcuts: [{
             text: '最近一周',
@@ -226,26 +275,48 @@
             }
           }]
         },
-        date1: '',
         levelOption: [{
-          value: '选项1',
+          value: 'A',
           label: 'A'
         }, {
-          value: '选项2',
+          value: 'B',
           label: 'B'
         }, {
-          value: '选项3',
+          value: 'C',
           label: 'C'
         }, {
-          value: '选项4',
+          value: '其他',
           label: '其他'
         }],
-        value: '',
-        keyWord:'',
+        
+        //筛选条件表单
+        formcheck:{
+          jingSaiDengJi:'',
+          shenQingShiJian:[],
+          keyword:''
+        }
 
     };
     },
     methods: {
+
+
+  filterData() {
+    if (this.dateRange.length === 0) {
+      // 如果日期范围为空，则显示所有数据
+      this.filteredData = this.rawData;
+    } else {
+      // 根据日期范围筛选数据
+      this.filteredData = this.rawData.filter((item) => {
+        return (
+          new Date(this.dateRange[0]) <= new Date(item.shenQingShiJian) &&
+          new Date(item.shenQingShiJian) <= new Date(this.dateRange[1])
+        );
+      });
+    }
+  },
+
+      
     toggleSelection(rows) {
       if (rows) {
         rows.forEach((row) => {
@@ -264,43 +335,44 @@
         });
     }
     ,
-    returnWarn() {
-      this.$confirm("此操作将退回该申请, 是否继续?", "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          this.$message({
-            type: "success",
-            message: "退回成功!",
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消退回",
-          });
-        });
+       returnWarn() {
+    const h = this.$createElement;
+this.$prompt(h(
+	'div', null, [
+		h('div', { style: "display:flex;align-items: center" }, [
+			h('span',{style:"width: 70px"}, '审核人id:'),
+			h('el-input',null)
+		]),
+      ]), 
+		'退回提示', 
+		{
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+			inputPlaceholder: '退回备注',
+			inputType:'textarea'
+		}).then(({ value }) => {
+			//  todo .....
+		}).catch();
     },
-    submitWarn() {
-      this.$confirm("此操作将提交勾选的获奖申请, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          this.$message({
-            type: "success",
-            message: "提交成功!",
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消提交",
-          });
-        });
+       submitWarn() {
+         console.log(new Date(this.formcheck.shenQingShiJian[0]).getTime())
+    const h = this.$createElement;
+this.$prompt(h(
+	'div', null, [
+		h('div', { style: "display:flex;align-items: center" }, [
+			h('span',{style:"width: 70px"}, '审核人id:'),
+			h('el-input',null)
+		]),
+      ]), 
+		'上交提示', 
+		{
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+			inputPlaceholder: '上交备注',
+			inputType:'textarea'
+		}).then(({ value }) => {
+			//  todo .....
+		}).catch();
     },
         note() {
         this.$prompt('请输入备注', '提示', {
@@ -319,7 +391,89 @@
         });
       },
 
+      onFilterData(filter) {
+    this.filteredData = this.rawData.filter((item) => {
+      return (
+        String(item.jingSaiFuZeRen + item.saiShiMingCheng + item.jingSaiDengJi)
+          .toLowerCase()
+          .includes(filter.keyword.toLowerCase()) &&
+        (filter.dateRange.length === 0 ||
+          (new Date(filter.dateRange[0]) <= new Date(item.shenQingShiJian) &&
+            new Date(item.shenQingShiJian) <= new Date(filter.dateRange[1])))
+      );
+    });
   },
+
+  },
+  computed:{
+  //   filters() {
+  //   const selectedDateRange = this.formcheck.date;
+  //   if (selectedDateRange && selectedDateRange.length === 2) {
+  //     const start = selectedDateRange[0];
+  //     const end = selectedDateRange[1];
+  //     return {
+  //       date: [
+  //         {
+  //           text: `${start} 至 ${end}`,
+  //           value: (row, index) => {
+  //             const rowDate = new Date(row.shenQingShiJian);
+  //             return rowDate >= new Date(start) && rowDate <= new Date(end);
+  //           }
+  //         }
+  //       ]
+  //     };
+  //   } else {
+  //     return {};
+  //   }
+  // },
+    //    showdata2(){
+           
+    //    return  this.gongZuoLiangFenPei.filter( item => {    // 
+    //     return Object.keys( this.formcheck ).every( key => { 
+    //       if(key==='keyword'){
+    //         console.log(String( item.jingSaiFuZeRen+item.saiShiMingCheng+item.jingSaiDengJi ))
+    //         return String( item.jingSaiFuZeRen+item.saiShiMingCheng+item.jingSaiDengJi ).includes( 
+    //                String( this.formcheck[key] ).trim().toLowerCase() )
+    //       }
+
+
+    //       if (key===' shenQingShiJian'){
+             
+            
+
+
+
+    //          if(this.formcheck.key[0]==='' && this.formcheck.key[1]===''){
+    //           return true
+    //         }
+
+           
+           
+            
+    //         if(   new Date(this.formcheck.key[0]).getTime()  <=new Date(item[key]).getTime()&& new Date(item[key]).getTime()>= new Date(this.formcheck.key[1]).getTime()){
+    //             return true;
+    //         }
+    //         else {
+    //           return false;
+    //         }
+
+
+    //       } 
+
+
+    //       else{   
+    //        return String( item[ key ] ).toLowerCase().includes( 
+    //                String( this.formcheck[ key ] ).trim().toLowerCase() )
+    //         }
+
+    //     }
+            
+    //          )
+        
+    //  })
+    // },
+  
+  }
   };
 </script>
 

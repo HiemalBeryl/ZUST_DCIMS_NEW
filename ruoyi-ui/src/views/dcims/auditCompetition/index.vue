@@ -109,7 +109,7 @@
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">
-                            <el-button type="info" @click="note">备注</el-button>
+                            <!-- <el-button type="info" @click="note">备注</el-button> -->
                         </div>
                       </div>
                     </div></el-col
@@ -269,43 +269,83 @@ import {listCompetitionAudit, getCompetitionAudit} from "@/api/dcims/competition
         });
     }
     ,
-    returnWarn() {
-      this.$confirm("此操作将退回该申请, 是否继续?", "警告", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          this.$message({
-            type: "success",
-            message: "退回成功!",
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消退回",
-          });
-        });
+    // returnWarn() {
+    //   this.$confirm("此操作将退回该申请, 是否继续?", "警告", {
+    //     confirmButtonText: "确定",
+    //     cancelButtonText: "取消",
+    //     type: "warning",
+    //   })
+    //     .then(() => {
+    //       this.$message({
+    //         type: "success",
+    //         message: "退回成功!",
+    //       });
+    //     })
+    //     .catch(() => {
+    //       this.$message({
+    //         type: "info",
+    //         message: "已取消退回",
+    //       });
+    //     });
+    // },
+    // submitWarn() {
+    //   this.$confirm("此操作将提交勾选的立项申请, 是否继续?", "提示", {
+    //     confirmButtonText: "确定",
+    //     cancelButtonText: "取消",
+    //     type: "warning",
+    //   })
+    //     .then(() => {
+    //       this.$message({
+    //         type: "success",
+    //         message: "提交成功!",
+    //       });
+    //     })
+    //     .catch(() => {
+    //       this.$message({
+    //         type: "info",
+    //         message: "已取消提交",
+    //       });
+    //     });
+    // },
+     returnWarn() {
+    const h = this.$createElement;
+this.$prompt(h(
+	'div', null, [
+		h('div', { style: "display:flex;align-items: center" }, [
+			h('span',{style:"width: 70px"}, '审核人id:'),
+			h('el-input',null)
+		]),
+      ]), 
+		'退回提示', 
+		{
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+			inputPlaceholder: '退回备注',
+			inputType:'textarea'
+		}).then(({ value }) => {
+			//  todo .....
+		}).catch();
     },
     submitWarn() {
-      this.$confirm("此操作将提交勾选的立项申请, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(() => {
-          this.$message({
-            type: "success",
-            message: "提交成功!",
-          });
-        })
-        .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消提交",
-          });
-        });
+    
+const h = this.$createElement;
+this.$prompt(h(
+	'div', null, [
+		h('div', { style: "display:flex;align-items: center" }, [
+			h('span',{style:"width: 70px"}, '审核人id:'),
+			h('el-input',null)
+		]),
+      ]), 
+		'上交提示', 
+		{
+			confirmButtonText: '确定',
+			cancelButtonText: '取消',
+			inputPlaceholder: '备注消息',
+			inputType:'textarea'
+		}).then(({ value }) => {
+			//  todo .....
+		}).catch();
+
     },
         note() {
         this.$prompt('请输入备注', '提示', {

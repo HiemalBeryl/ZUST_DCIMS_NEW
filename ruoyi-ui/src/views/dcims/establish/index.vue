@@ -1,4 +1,4 @@
-<template>
+<template> <!--赛事立项 -->
 <div>
 
    <div style="border-bottom: 1px solid #dbdbdb;height:60px;width:600px ;">
@@ -8,41 +8,87 @@
   <el-form :model="ruleForm"  ref="ruleForm" label-width="150px" class="demo-ruleForm" label-position="right" style="margin-top:20px">
   
 
-  <el-form-item label="立项赛事" prop="region">
-    <el-select v-model="ruleForm.lixiangsaishi" placeholder="请选择赛事名称">
+ <el-row>
+   <el-col>
+ <el-form-item label="立项赛事" prop="region" required>
+    <el-select v-model="ruleForm.name" placeholder="请选择赛事名称">
       <el-option label="蓝桥杯" value="蓝桥杯"></el-option>
       <el-option label="icpc" value="icpc"></el-option>
       <el-option label="服务外包" value="服务外包"></el-option>
     </el-select>
   </el-form-item>
+  </el-col>
+
+ <el-col :span="5">
+  <el-form-item label="立项届次" prop="term" >
+    <el-input type="text" v-model="ruleForm.term" style="width:100px" placeholder="2届"></el-input>
+  </el-form-item>
+   </el-col>
 
 
-  <el-form-item label="立项届次" prop="lixiangjieci" >
-    <el-input type="text" v-model="ruleForm.lixiangjieci" style="width:100px" placeholder="2021届"></el-input>
+<el-col :span="5">
+<el-form-item label="赛事性质" style="width:250px">
+ <el-select v-model="ruleForm.level" placeholder="A类">
+      
+      <el-option label="A类" value="A类"></el-option>
+       <el-option label="B类" value="B类"></el-option>
+        <el-option label="C类" value="C类"></el-option>
+        <el-option label="其他" value="其他"></el-option>
+
+    </el-select> 
+
   </el-form-item>
 
+</el-col>
 
-  <el-form-item label="立项时间" required style="width:500px">
-    <el-col :span="11">
-      <el-form-item prop="day">
-        <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.day" style="width: 100%;"></el-date-picker>
-      </el-form-item>
-    </el-col>
-    <el-col class="line" :span="2">-</el-col>
-    <el-col :span="11">
-      <el-form-item prop="time">
-        <el-time-picker placeholder="选择时间" v-model="ruleForm.time" style="width: 100%;"></el-time-picker>
-      </el-form-item>
-    </el-col>
+<el-col :span="5">
+   <el-form-item label="赛事年份" prop="annual"  required>
+    <el-input type="text" v-model="ruleForm.annual" style="width:150px" ></el-input>
   </el-form-item>
+</el-col>
 
 
-   <el-form-item label="主办单位" prop="zhubandanwei" >
-    <el-input type="text" v-model="ruleForm.zhubandanwei" style="width:150px" ></el-input>
+ </el-row>
+
+
+
+<el-row>
+<el-col :span="5">
+   <el-form-item label="主办单位" prop="organizer"  required>
+    <el-input type="text" v-model="ruleForm.organizer" style="width:150px" ></el-input>
   </el-form-item>
-   <el-form-item label="竞赛负责人" prop="saishifuzeren" >
+</el-col>
+
+<el-col :span="6">
+     <el-form-item label="竞赛负责人" prop="responsiblePersonName"  required>
     <el-input type="text" v-model="ruleForm.responsiblePersonName" style="width:150px" ></el-input>
   </el-form-item>
+</el-col>
+
+<el-col :span="5">
+   <el-form-item label="竞赛负责人工号" prop="responsiblePersonId"  required>
+    <el-input type="text" v-model="ruleForm.responsiblePersonId" style="width:150px" ></el-input>
+  </el-form-item>
+</el-col>
+</el-row>
+
+
+
+
+<el-row>
+<el-col :span="5">
+   <el-form-item label="立项开始时间" prop="startTime" >
+    <el-input type="text" v-model="ruleForm.startTime" style="width:150px" ></el-input>
+  </el-form-item>
+</el-col>
+
+<el-col :span="5">
+   <el-form-item label="立项结束时间" prop="stopTime" >
+    <el-input type="text" v-model="ruleForm.stopTime" style="width:150px" ></el-input>
+  </el-form-item>
+</el-col>
+
+</el-row>
 
  
   <!-- <el-form-item label="赛事性质" prop="type">
@@ -55,19 +101,23 @@
   </el-form-item> -->
 
 
-  <el-form-item label="赛事性质" style="width:250px">
- <el-select v-model="ruleForm.level" placeholder="A类">
-      
-      <el-option label="A类" value="A类"></el-option>
-       <el-option label="B类" value="B类"></el-option>
-        <el-option label="C类" value="C类"></el-option>
-        <el-option label="其他" value="其他"></el-option>
-
-    </el-select> 
-
-  </el-form-item>
 
   
+
+<!-- <el-form-item label="立项时间" style="width:500px ">
+    <el-col :span="11">
+      <el-form-item prop="day">
+        <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.day" style="width: 100%;"></el-date-picker>
+      </el-form-item>
+    </el-col>
+    <el-col class="line" :span="2">-</el-col>
+    <el-col :span="11">
+      <el-form-item prop="time">
+        <el-time-picker placeholder="选择时间" v-model="ruleForm.time" style="width: 100%;"></el-time-picker>
+      </el-form-item>
+    </el-col>
+  </el-form-item> -->
+
 
 
     <el-form-item label="校内选拔赛时间" required style="width:500px">
@@ -115,6 +165,10 @@
   </el-form-item>
 
 
+
+<el-row>
+  <el-col :span="6">
+
    <el-form-item label="本年度申报经费"  required style="width:500px" >
     <el-col :span="11">
       <el-form-item prop="yearmoney">
@@ -123,6 +177,10 @@
     </el-col>
     <el-col class="line" :span="2">万元</el-col>
     </el-form-item>
+
+  </el-col>
+
+  <el-col :span="6">
 
 
     <el-form-item label="本年度拨款"  required style="width:500px" >
@@ -134,6 +192,11 @@
     <el-col class="line" :span="2">万元</el-col>
     </el-form-item>
 
+  </el-col>
+  
+  
+  <el-col :span="6">
+
 
     <el-form-item label="集中授课时数"  required style="width:500px" >
     <el-col :span="11">
@@ -143,6 +206,11 @@
     </el-col>
     <el-col class="line" :span="2">课时</el-col>
     </el-form-item>
+
+
+  </el-col>
+
+  </el-row>
   
 
   
@@ -193,14 +261,21 @@ import axios from 'axios'
 
       
         ruleForm: {
-          name: '',
-          lixiangsaishi: '', //立项赛事
-          lixiangjieci:'',   //立项届次
-          day: '',           //立项时间
-          time: '',          
-          zhubandanwei:'',   //主办单位
-          saishifuzeren:'', //赛事负责人
-          responsiblePersonName:'',
+          level:'',         //赛事性质
+          name: '', //立项赛事名称
+          term:'',   //立项届次
+          annual:'', //赛事年份
+
+          startTime: '', //立项时间
+          stopTime:'', //立项结束时间
+          innerTime:'',     //校内选拔赛时间
+          provinceTime:'',//省赛时间
+          nationalTime:'' , //国赛时间
+          
+          nextAuditId:''  , //审核人id        
+          organizer:'',   //主办单位
+          responsiblePersonName:'', //赛事负责人
+          responsiblePersonId:'',   //赛事负责人ID
           
           prodate1:'',      //省赛时间
           prodate2:'',
@@ -211,7 +286,7 @@ import axios from 'axios'
           teachtime:'',     //授课时长
           rewardtarget:'',  //本年度获奖目标
           type: '',
-          level:'',         //赛事性质
+        
           resource: '',
           desc: ''
         },
@@ -253,26 +328,38 @@ import axios from 'axios'
     methods: {
 
       //上交项目
-      submitForm(formName) {
+      submitForm(formName){
 
-          var data={
-            "name": formName.lixiangsaishi,
+         var data={
+            "name": formName.name,
             "level":formName.level,
-            "annual": formName.lixiangjieci,
-            "responsiblePersonName": formName.responsiblePersonName
+            'term':formName.term,
+            "annual": formName.annual,
+            "responsiblePersonName": formName.responsiblePersonName,
+            "organizer":formName.organizer,
+            'responsiblePersonId':formName.responsiblePersonId
               
-            };
+         }
+          
+          const axios1 = axios.create({
+            baseURL:'/dev-api/dcims',
+          }) 
+          // axios.post({
+          //    baseURL:'',
+             
+          // })
+
+
             var config = {
               method: 'post',
-              url: 'http://localhost/competition',
-              headers: { 
-                  'User-Agent': 'Apifox/1.0.0 (https://www.apifox.cn)', 
-                  'Content-Type': 'application/json'
-              },
+               headers: {
+                'Authorization':"Bearer " + window.localStorage.getItem('token')
+                },
+              url: '/competition',
               data:data
             };
 
-            axios(config)
+            axios1(config)
             .then(function (response) {
               console.log(JSON.stringify(response.data));
               alert("立项增加成功 请前往当前年份赛事信息查看")

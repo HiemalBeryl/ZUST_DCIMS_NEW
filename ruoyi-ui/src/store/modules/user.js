@@ -3,7 +3,7 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
   state: {
-    token: getToken(),
+    token: getToken(),    //我真服了 token 和登录方法是写在vuex中的 真就一坨
     name: '',
     avatar: '',
     roles: [],
@@ -29,7 +29,7 @@ const user = {
   },
 
   actions: {
-    // 登录
+    // 登录   
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
       const password = userInfo.password
@@ -37,6 +37,8 @@ const user = {
       const uuid = userInfo.uuid
       return new Promise((resolve, reject) => {
         login(username, password, code, uuid).then(res => {
+          window.localStorage.setItem("token",res.data.token)
+          console.log(window.localStorage.getItem('token'))
           setToken(res.data.token)
           commit('SET_TOKEN', res.data.token)
           resolve()

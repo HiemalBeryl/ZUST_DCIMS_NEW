@@ -35,7 +35,7 @@ export default {
   },
   data() {
     return {
-      title: 'RuoYi-Vue-Plus',
+      title: '竞赛信息管理系统',
       logo: logoImg
     }
   }
@@ -66,8 +66,8 @@ export default {
     width: 100%;
 
     & .sidebar-logo {
-      width: 32px;
-      height: 32px;
+      width: 57px;
+      height: 18px;
       vertical-align: middle;
       margin-right: 12px;
     }
