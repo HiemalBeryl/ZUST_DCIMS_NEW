@@ -79,7 +79,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         validEntityBeforeSave(add);
         boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
-            //bo.setId(add.getId());
+            bo.setId(add.getId());
         }
         return flag;
     }

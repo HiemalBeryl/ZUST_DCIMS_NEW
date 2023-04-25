@@ -24,6 +24,12 @@ public class DcimsTeamVo {
     private static final long serialVersionUID = 1L;
 
     /**
+     * 主键
+     */
+    @ExcelProperty(value = "主键")
+    private Long id;
+
+    /**
      * 竞赛id
      */
     @ExcelProperty(value = "竞赛id")

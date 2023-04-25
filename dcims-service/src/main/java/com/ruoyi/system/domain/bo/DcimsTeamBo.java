@@ -24,6 +24,11 @@ import com.ruoyi.common.core.domain.BaseEntity;
 public class DcimsTeamBo extends BaseEntity {
 
     /**
+     * 主键
+     */
+    private Long id;
+
+    /**
      * 竞赛id
      */
     @NotNull(message = "竞赛id不能为空", groups = { AddGroup.class, EditGroup.class })

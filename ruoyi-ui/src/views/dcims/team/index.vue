@@ -28,12 +28,14 @@
         </el-select>
       </el-form-item>
       <el-form-item label="奖项等级" prop="awardLevel">
-        <el-input
-          v-model="queryParams.awardLevel"
-          placeholder="请输入奖项等级"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.awardLevel" placeholder="请选择奖项等级" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_award_level"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="指导教师姓名" prop="teacherName">
         <el-input
@@ -105,7 +107,7 @@
 
     <el-table v-loading="loading" :data="teamList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="false"/>
+      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
       <el-table-column label="竞赛id" align="center" prop="competitionId" />
       <el-table-column label="队伍名称" align="center" prop="name" />
       <el-table-column label="比赛类型" align="center" prop="competitionType">
@@ -171,7 +173,14 @@
           </el-select>
         </el-form-item>
         <el-form-item label="奖项等级" prop="awardLevel">
-          <el-input v-model="form.awardLevel" placeholder="请输入奖项等级" />
+          <el-select v-model="form.awardLevel" placeholder="请选择奖项等级">
+            <el-option
+              v-for="dict in dict.type.dcims_award_level"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="指导教师工号" prop="teacherId">
           <el-input v-model="form.teacherId" type="textarea" placeholder="请输入内容" />
@@ -218,7 +227,7 @@ import { listTeam, getTeam, delTeam, addTeam, updateTeam } from "@/api/dcims/tea
 
 export default {
   name: "Team",
-  dicts: ['dcims_award_type'],
+  dicts: ['dcims_award_type', 'dcims_award_level'],
   data() {
     return {
       // 按钮loading
@@ -263,7 +272,7 @@ export default {
           { required: true, message: "比赛类型不能为空", trigger: "change" }
         ],
         awardLevel: [
-          { required: true, message: "奖项等级不能为空", trigger: "blur" }
+          { required: true, message: "奖项等级不能为空", trigger: "change" }
         ],
         teacherId: [
           { required: true, message: "指导教师工号不能为空", trigger: "blur" }
