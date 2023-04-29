@@ -89,7 +89,7 @@
                         </el-table-column>
                         <el-table-column fixed="right" label="查看详情" width="120">
                           <template slot-scope="scope">
-                            <el-button type="text" @click="getOneDetail(scope.row)">查看详情</el-button>
+                            <el-button type="text" @click="handleUpdate(scope.row)">编辑</el-button>
                           </template>
                         </el-table-column>
                       </el-table>
@@ -123,9 +123,31 @@
 
         </div>
 
-        <!-- 添加或修改竞赛赛事基本信息对话框 -->
-      <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <!-- 添加或修改竞赛赛事基本信息对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <h2>以下是校级管理员（教务处）需要填写的信息</h2>
+        <el-form-item label="赛事类别" prop="level">
+          <el-select v-model="form.level" placeholder="请选择赛事类别">
+            <el-option
+              v-for="dict in dict.type.dcims_competition_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="本年度拨款" prop="appropriation">
+          <el-input v-model="form.appropriation" placeholder="请输入本年度拨款" />
+        </el-form-item>
+        <el-form-item label="个人赛限项" prop="personLimit">
+          <el-input v-model="form.personLimit" placeholder="请输入个人赛限项" />
+        </el-form-item>
+        <el-form-item label="团队赛限项" prop="teamLimit">
+          <el-input v-model="form.teamLimit" placeholder="请输入团队赛限项" />
+        </el-form-item>
+      <hr/>
+      <h2>以下是竞赛基本信息</h2>
         <el-form-item label="赛事名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入赛事名称" />
         </el-form-item>
@@ -194,15 +216,17 @@
         <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
-      </el-dialog>
+    </el-dialog>
     </div>
 </template>
 
 <script>
-import {listCompetitionAudit, getCompetitionAudit, permitAudit, refuseAudit} from "@/api/dcims/competitionAudit";
+import {listCompetitionAudit, permitAudit, refuseAudit} from "@/api/dcims/competitionAudit";
+import {getCompetition, updateCompetition} from "@/api/dcims/competition"
 
   export default {
     name:"liXiangShenHe",
+    dicts: ['dcims_audit_result', 'dcims_competition_type'],
     data() {
       return {
       // 按钮loading
@@ -223,17 +247,48 @@ import {listCompetitionAudit, getCompetitionAudit, permitAudit, refuseAudit} fro
       competitionList: [],
       // 弹出层标题
       title: "",
+      // 是否显示弹出层
+      open: false,
         // 查询参数
         queryParams: {
           pageNum: 1,
           pageSize: 10
         },
-        // 竞赛赛事基本信息表格数据
-        competitionList: [],
-        // 遮罩层
-        loading: true,
         // 表单参数
         form: {},
+        // 表单校验
+      rules: {
+        id: [
+          { required: true, message: "主键不能为空", trigger: "blur" }
+        ],
+        orderNum: [
+          { required: true, message: "排序号不能为空", trigger: "blur" }
+        ],
+        name: [
+          { required: true, message: "赛事名称不能为空", trigger: "blur" }
+        ],
+        level: [
+          { required: true, message: "赛事类别不能为空", trigger: "change" }
+        ],
+        term: [
+          { required: true, message: "赛事届次不能为空", trigger: "blur" }
+        ],
+        annual: [
+          { required: true, message: "赛事年份不能为空", trigger: "blur" }
+        ],
+        organizer: [
+          { required: true, message: "主办单位不能为空", trigger: "blur" }
+        ],
+        responsiblePersonId: [
+          { required: true, message: "竞赛负责人工号不能为空", trigger: "blur" }
+        ],
+        responsiblePersonName: [
+          { required: true, message: "竞赛负责人不能为空", trigger: "blur" }
+        ],
+        attachment: [
+          { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
+        ],
+      },
         dateOptions: {
           shortcuts: [{
             text: '最近一周',
@@ -294,20 +349,18 @@ import {listCompetitionAudit, getCompetitionAudit, permitAudit, refuseAudit} fro
           this.loading = false;
         });
       },
-      /** 查询竞赛赛事基本信息详细 */
-      getOneDetail(row) {
-        this.loading = true;
-        this.reset();
-        const id = row.id || this.ids
-        console.log(id)
-        getCompetitionAudit(id).then(response => {
-          
-          this.loading = false;
-          this.form = response.data;
-          this.open = true;
-          this.title = "赛事详情";
-        });
-      },
+      /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.loading = true;
+      this.reset();
+      const id = row.id || this.ids
+      getCompetition(id).then(response => {
+        this.loading = false;
+        this.form = response.data;
+        this.open = true;
+        this.title = "修改竞赛赛事基本信息";
+      });
+    },
       // 表单重置
       reset() {
         this.form = {
@@ -377,21 +430,21 @@ import {listCompetitionAudit, getCompetitionAudit, permitAudit, refuseAudit} fro
               this.buttonLoading = false;
             });
           } else {
-           
+
           }
         }
       });
     },
      returnWarn() {
-    const h = this.$createElement;
+const h = this.$createElement;
 this.$prompt(h(
 	'div', null, [
 		h('div', { style: "display:flex;align-items: center" }, [
-			h('span',{style:"width: 70px"}, '审核人id:'),
+			h('span',{style:"width: 70px"}, '审核人工号:'),
 			h('el-input',null)
 		]),
-      ]), 
-		'退回提示', 
+      ]),
+		'退回提示',
 		{
 			confirmButtonText: '确定',
 			cancelButtonText: '取消',
@@ -402,16 +455,16 @@ this.$prompt(h(
 		}).catch();
     },
     submitWarn() {
-    
+
 const h = this.$createElement;
 this.$prompt(h(
 	'div', null, [
 		h('div', { style: "display:flex;align-items: center" }, [
-			h('span',{style:"width: 70px"}, '审核人id:'),
+			h('span',{style:"width: 70px"}, '审核人工号:'),
 			h('el-input',null)
 		]),
-      ]), 
-		'上交提示', 
+      ]),
+		'上交提示',
 		{
 			confirmButtonText: '确定',
 			cancelButtonText: '取消',
