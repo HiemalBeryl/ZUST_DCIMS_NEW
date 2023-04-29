@@ -88,9 +88,9 @@
                         <el-table-column prop="shenQingShiJian" label="申请时间" width="120">
                         </el-table-column>
                         <el-table-column fixed="right" label="查看详情" width="120">
-                          <el-button type="text" @click="getOneDetail(scope.row)"
-                            >查看详情</el-button
-                          >
+                          <template slot-scope="scope">
+                            <el-button type="text" @click="getOneDetail(scope.row)">查看详情</el-button>
+                          </template>
                         </el-table-column>
                       </el-table>
 
@@ -122,16 +122,107 @@
 
 
         </div>
+
+        <!-- 添加或修改竞赛赛事基本信息对话框 -->
+      <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="赛事名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入赛事名称" />
+        </el-form-item>
+        <el-form-item label="往届名称" prop="pastName">
+          <el-input v-model="form.pastName" placeholder="请输入往届名称" />
+        </el-form-item>
+        <el-form-item label="赛事官网" prop="website">
+          <el-input v-model="form.website" placeholder="请输入赛事官网" />
+        </el-form-item>
+        <el-form-item label="赛事届次" prop="term">
+          <el-input v-model="form.term" placeholder="请输入赛事届次" />
+        </el-form-item>
+        <el-form-item label="赛事年份" prop="annual">
+          <el-input v-model="form.annual" placeholder="请输入赛事年份" />
+        </el-form-item>
+        <el-form-item label="主办单位" prop="organizer">
+          <el-input v-model="form.organizer" placeholder="请输入主办单位" />
+        </el-form-item>
+        <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
+          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
+        </el-form-item>
+        <el-form-item label="竞赛负责人" prop="responsiblePersonName">
+          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
+        </el-form-item>
+        <el-form-item label="校内选拔时间" prop="innerTime">
+          <el-date-picker clearable
+            v-model="form.innerTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择校内选拔时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="省赛时间" prop="provinceTime">
+          <el-date-picker clearable
+            v-model="form.provinceTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择省赛时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="国赛时间" prop="nationalTime">
+          <el-date-picker clearable
+            v-model="form.nationalTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择国赛时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="本年度申报经费" prop="budget">
+          <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+        </el-form-item>
+        <el-form-item label="获奖目标" prop="goal">
+          <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="赛事简介" prop="introduction">
+          <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="竞赛申报书" prop="attachment">
+          <file-upload v-model="form.attachment"/>
+        </el-form-item>
+        <el-form-item label="审核人工号" prop="nextAuditId">
+          <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+      </el-dialog>
     </div>
 </template>
 
 <script>
-import {listCompetitionAudit, getCompetitionAudit} from "@/api/dcims/competitionAudit";
+import {listCompetitionAudit, getCompetitionAudit, permitAudit, refuseAudit} from "@/api/dcims/competitionAudit";
 
   export default {
     name:"liXiangShenHe",
     data() {
       return {
+      // 按钮loading
+      buttonLoading: false,
+      // 遮罩层
+      loading: true,
+      // 选中数组
+      ids: [],
+      // 非单个禁用
+      single: true,
+      // 非多个禁用
+      multiple: true,
+      // 显示搜索条件
+      showSearch: true,
+      // 总条数
+      total: 0,
+      // 竞赛赛事基本信息表格数据
+      competitionList: [],
+      // 弹出层标题
+      title: "",
         // 查询参数
         queryParams: {
           pageNum: 1,
@@ -203,17 +294,18 @@ import {listCompetitionAudit, getCompetitionAudit} from "@/api/dcims/competition
           this.loading = false;
         });
       },
-      /** 修改按钮操作 */
+      /** 查询竞赛赛事基本信息详细 */
       getOneDetail(row) {
         this.loading = true;
-        //this.reset();
+        this.reset();
         const id = row.id || this.ids
         console.log(id)
         getCompetitionAudit(id).then(response => {
+          
           this.loading = false;
           this.form = response.data;
           this.open = true;
-          this.title = "修改竞赛赛事基本信息";
+          this.title = "赛事详情";
         });
       },
       // 表单重置
@@ -260,53 +352,36 @@ import {listCompetitionAudit, getCompetitionAudit} from "@/api/dcims/competition
         this.$refs.multipleTable.clearSelection();
       }
     },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
+    // 多选框选中数据
+    handleSelectionChange(selection) {
+      this.ids = selection.map(item => item.id)
+      this.single = selection.length!==1
+      this.multiple = !selection.length
     },
-    checkDetail(){
-        this.$alert('<strong>这里将会用于显示所有在立项时输入的信息</strong>', '详细信息', {
-          dangerouslyUseHTMLString: true
-        });
-    }
-    ,
-    // returnWarn() {
-    //   this.$confirm("此操作将退回该申请, 是否继续?", "警告", {
-    //     confirmButtonText: "确定",
-    //     cancelButtonText: "取消",
-    //     type: "warning",
-    //   })
-    //     .then(() => {
-    //       this.$message({
-    //         type: "success",
-    //         message: "退回成功!",
-    //       });
-    //     })
-    //     .catch(() => {
-    //       this.$message({
-    //         type: "info",
-    //         message: "已取消退回",
-    //       });
-    //     });
-    // },
-    // submitWarn() {
-    //   this.$confirm("此操作将提交勾选的立项申请, 是否继续?", "提示", {
-    //     confirmButtonText: "确定",
-    //     cancelButtonText: "取消",
-    //     type: "warning",
-    //   })
-    //     .then(() => {
-    //       this.$message({
-    //         type: "success",
-    //         message: "提交成功!",
-    //       });
-    //     })
-    //     .catch(() => {
-    //       this.$message({
-    //         type: "info",
-    //         message: "已取消提交",
-    //       });
-    //     });
-    // },
+    // 取消按钮
+    cancel() {
+      this.open = false;
+      this.reset();
+    },
+    /** 提交按钮 */
+    submitForm() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          this.buttonLoading = true;
+          if (this.form.id != null) {
+            updateCompetition(this.form).then(response => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            }).finally(() => {
+              this.buttonLoading = false;
+            });
+          } else {
+           
+          }
+        }
+      });
+    },
      returnWarn() {
     const h = this.$createElement;
 this.$prompt(h(

@@ -16,3 +16,19 @@ export function getCompetitionAudit(id) {
     method: 'get'
   })
 }
+
+// 通过竞赛审核
+export function permitAudit(id) {
+  return request({
+    url: '/dcims/competitionAudit/' + id,
+    method: 'get'
+  })
+}
+
+// 退回竞赛审核
+export function refuseAudit(id) {
+  return request({
+    url: '/dcims/competitionAudit/' + id,
+    method: 'get'
+  })
+}
