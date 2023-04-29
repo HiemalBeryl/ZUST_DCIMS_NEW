@@ -23,7 +23,7 @@ import java.util.Collection;
  * 竞赛赛事基本信息Service业务层处理
  *
  * @author hiemalberyl
- * @date 2023-04-21
+ * @date 2023-04-29
  */
 @RequiredArgsConstructor
 @Service
@@ -74,8 +74,6 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
             DcimsCompetition::getProvinceTime ,params.get("beginProvinceTime"), params.get("endProvinceTime"));
         lqw.between(params.get("beginNationalTime") != null && params.get("endNationalTime") != null,
             DcimsCompetition::getNationalTime ,params.get("beginNationalTime"), params.get("endNationalTime"));
-        lqw.between(params.get("beginStopTime") != null && params.get("endStopTime") != null,
-            DcimsCompetition::getStopTime ,params.get("beginStopTime"), params.get("endStopTime"));
         return lqw;
     }
 

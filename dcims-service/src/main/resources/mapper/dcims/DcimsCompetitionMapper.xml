@@ -6,12 +6,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <resultMap type="com.ruoyi.system.domain.DcimsCompetition" id="DcimsCompetitionResult">
         <result property="id" column="id"/>
-        <result property="deptId" column="dept_id"/>
-        <result property="userId" column="user_id"/>
         <result property="orderNum" column="order_num"/>
         <result property="name" column="name"/>
         <result property="level" column="level"/>
         <result property="pastName" column="past_name"/>
+        <result property="website" column="website"/>
         <result property="term" column="term"/>
         <result property="annual" column="annual"/>
         <result property="organizer" column="organizer"/>
@@ -24,6 +23,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="budget" column="budget"/>
         <result property="appropriation" column="appropriation"/>
         <result property="goal" column="goal"/>
+        <result property="introduction" column="introduction"/>
+        <result property="attachment" column="attachment"/>
         <result property="moneyAggregate" column="money_aggregate"/>
         <result property="workloadAggregate" column="workload_aggregate"/>
         <result property="personLimit" column="person_limit"/>

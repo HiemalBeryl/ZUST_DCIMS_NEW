@@ -13,7 +13,7 @@ import java.util.List;
  * 竞赛赛事基本信息Service接口
  *
  * @author hiemalberyl
- * @date 2023-04-21
+ * @date 2023-04-29
  */
 public interface IDcimsCompetitionService {
 

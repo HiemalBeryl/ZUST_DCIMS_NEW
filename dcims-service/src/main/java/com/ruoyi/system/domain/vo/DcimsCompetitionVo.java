@@ -16,7 +16,7 @@ import java.util.Date;
  * 竞赛赛事基本信息视图对象 dcims_competition
  *
  * @author hiemalberyl
- * @date 2023-04-21
+ * @date 2023-04-29
  */
 @Data
 @ExcelIgnoreUnannotated
@@ -98,23 +98,11 @@ public class DcimsCompetitionVo {
     private Date nationalTime;
 
     /**
-     * 立项结束时间
+     * 本年度拨款（万元）
      */
-    @ExcelProperty(value = "立项结束时间")
-    private Date stopTime;
-
-    /**
-     * 本年度申报经费（万元）
-     */
-    @ExcelProperty(value = "本年度申报经费", converter = ExcelDictConvert.class)
+    @ExcelProperty(value = "本年度拨款", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "万=元")
-    private BigDecimal budget;
-
-    /**
-     * 本年度获奖目标
-     */
-    @ExcelProperty(value = "本年度获奖目标")
-    private String goal;
+    private BigDecimal appropriation;
 
     /**
      * 个人赛限项

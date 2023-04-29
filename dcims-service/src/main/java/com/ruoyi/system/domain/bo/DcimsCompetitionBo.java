@@ -17,7 +17,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 竞赛赛事基本信息业务对象 dcims_competition
  *
  * @author hiemalberyl
- * @date 2023-04-21
+ * @date 2023-04-29
  */
 
 @Data
@@ -39,13 +39,18 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 赛事类别
      */
-    @NotBlank(message = "赛事类别不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
     private String level;
 
     /**
      * 往届名称
      */
     private String pastName;
+
+    /**
+     * 赛事官网
+     */
+    private String website;
 
     /**
      * 赛事届次
@@ -93,17 +98,33 @@ public class DcimsCompetitionBo extends BaseEntity {
     private Date nationalTime;
 
     /**
-     * 立项结束时间
+     * 本年度申报经费（万元）
      */
-    private Date stopTime;
+    private BigDecimal budget;
 
     /**
-     * 本年度获奖目标
+     * 本年度拨款（万元）
+     */
+    private BigDecimal appropriation;
+
+    /**
+     * 获奖目标
      */
     private String goal;
 
     /**
-     * 审核人id
+     * 赛事简介
+     */
+    private String introduction;
+
+    /**
+     * 竞赛申报书
+     */
+    @NotBlank(message = "竞赛申报书不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String attachment;
+
+    /**
+     * 审核人工号
      */
     private Long nextAuditId;
 
