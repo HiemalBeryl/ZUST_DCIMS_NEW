@@ -37,30 +37,6 @@ public class DcimsCompetitionAuditController extends BaseController {
     private final IDcimsCompetitionAuditService iDcimsCompetitionAuditService;
 
     /**
-     * 查询竞赛审核列表
-     */
-    @SaCheckPermission("dcims:competitionAudit:list")
-    @GetMapping("/list")
-    public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
-        TableDataInfo<DcimsCompetitionVo> dcimsCompetitionVoTableDataInfo = iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
-        System.out.println(dcimsCompetitionVoTableDataInfo);
-        return dcimsCompetitionVoTableDataInfo;
-    }
-
-
-    /**
-     * 获取竞赛审核详细信息
-     *
-     * @param id 主键
-     */
-    @SaCheckPermission("dcims:competitionAudit:query")
-    @GetMapping("/{id}")
-    public R<DcimsCompetitionVo> getInfo(@NotNull(message = "主键不能为空")
-                                     @PathVariable Long id) {
-        return R.ok(iDcimsCompetitionAuditService.queryById(id));
-    }
-
-    /**
      * 通过竞赛审核
      */
     @SaCheckPermission("dcims:competitionAudit:add")

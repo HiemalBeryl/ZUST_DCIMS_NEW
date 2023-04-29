@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
+import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -38,6 +40,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 public class DcimsCompetitionController extends BaseController {
 
     private final IDcimsCompetitionService iDcimsCompetitionService;
+    private final IDcimsCompetitionAuditService iDcimsCompetitionAuditService;
 
     /**
      * 查询竞赛赛事基本信息列表
@@ -46,6 +49,17 @@ public class DcimsCompetitionController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionBo bo, PageQuery pageQuery) {
         return iDcimsCompetitionService.queryPageList(bo, pageQuery);
+    }
+
+    /**
+     * 查询待审核竞赛列表
+     */
+    @SaCheckPermission("dcims:competitionAudit:list")
+    @GetMapping("/audit/list")
+    public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
+        TableDataInfo<DcimsCompetitionVo> dcimsCompetitionVoTableDataInfo = iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
+        System.out.println(dcimsCompetitionVoTableDataInfo);
+        return dcimsCompetitionVoTableDataInfo;
     }
 
     /**

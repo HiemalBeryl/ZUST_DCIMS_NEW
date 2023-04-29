@@ -50,6 +50,11 @@ public class DcimsCompetitionVo {
     private String pastName;
 
     /**
+     * 赛事官网
+     */
+    private String website;
+
+    /**
      * 赛事届次
      */
     @ExcelProperty(value = "赛事届次")
@@ -98,11 +103,41 @@ public class DcimsCompetitionVo {
     private Date nationalTime;
 
     /**
+     * 本年度申报经费（万元）
+     */
+    private BigDecimal budget;
+
+    /**
      * 本年度拨款（万元）
      */
     @ExcelProperty(value = "本年度拨款", converter = ExcelDictConvert.class)
     @ExcelDictFormat(readConverterExp = "万=元")
     private BigDecimal appropriation;
+
+    /**
+     * 获奖目标
+     */
+    private String goal;
+
+    /**
+     * 赛事简介
+     */
+    private String introduction;
+
+    /**
+     * 竞赛申报书
+     */
+    private String attachment;
+
+    /**
+     * 奖金核算状态
+     */
+    private String moneyAggregate;
+
+    /**
+     * 工作量核算状态
+     */
+    private String workloadAggregate;
 
     /**
      * 个人赛限项
@@ -116,5 +151,13 @@ public class DcimsCompetitionVo {
     @ExcelProperty(value = "团队赛限项")
     private Integer teamLimit;
 
+    /**
+     * 审核人工号
+     */
+    private Long nextAuditId;
 
+    /**
+     * 审核状态
+     */
+    private String state;
 }
