@@ -1,4 +1,4 @@
-<template>   <!-- 赛事信息 -->
+<template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="赛事名称" prop="name">
@@ -95,18 +95,6 @@
           :default-time="['00:00:00', '23:59:59']"
         ></el-date-picker>
       </el-form-item>
-      <el-form-item label="立项结束时间">
-        <el-date-picker
-          v-model="daterangeStopTime"
-          style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="['00:00:00', '23:59:59']"
-        ></el-date-picker>
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -189,13 +177,7 @@
           <span>{{ parseTime(scope.row.nationalTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="立项结束时间" align="center" prop="stopTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.stopTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="本年度申报经费" align="center" prop="budget" />
-      <el-table-column label="本年度获奖目标" align="center" prop="goal" />
+      <el-table-column label="本年度拨款" align="center" prop="appropriation" />
       <el-table-column label="个人赛限项" align="center" prop="personLimit" />
       <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -226,24 +208,17 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改竞赛赛事基本信息对话框  弹出框    -->
+    <!-- 添加或修改竞赛赛事基本信息对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="赛事名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入赛事名称" />
         </el-form-item>
-        <el-form-item label="赛事类别" prop="level">
-          <el-select v-model="form.level" placeholder="请选择赛事类别">
-            <el-option
-              v-for="dict in dict.type.dcims_competition_type"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item label="往届名称" prop="pastName">
           <el-input v-model="form.pastName" placeholder="请输入往届名称" />
+        </el-form-item>
+        <el-form-item label="赛事官网" prop="website">
+          <el-input v-model="form.website" placeholder="请输入赛事官网" />
         </el-form-item>
         <el-form-item label="赛事届次" prop="term">
           <el-input v-model="form.term" placeholder="请输入赛事届次" />
@@ -284,19 +259,20 @@
             placeholder="请选择国赛时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="立项结束时间" prop="stopTime">
-          <el-date-picker clearable
-            v-model="form.stopTime"
-            type="datetime"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            placeholder="请选择立项结束时间">
-          </el-date-picker>
+        <el-form-item label="本年度申报经费" prop="budget">
+          <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
         </el-form-item>
-        <el-form-item label="本年度获奖目标" prop="goal">
-          <el-input v-model="form.goal" placeholder="请输入本年度获奖目标" />
+        <el-form-item label="获奖目标" prop="goal">
+          <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="审核人id" prop="nextAuditId">
-          <el-input v-model="form.nextAuditId" placeholder="请输入审核人id" />
+        <el-form-item label="赛事简介" prop="introduction">
+          <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="竞赛申报书" prop="attachment">
+          <file-upload v-model="form.attachment"/>
+        </el-form-item>
+        <el-form-item label="审核人工号" prop="nextAuditId">
+          <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -312,7 +288,7 @@ import { listCompetition, getCompetition, delCompetition, addCompetition, update
 
 export default {
   name: "Competition",
-  dicts: ['dcims_competition_type'],
+  dicts: ['dcims_audit_result', 'dcims_competition_type'],
   data() {
     return {
       // 按钮loading
@@ -335,13 +311,13 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
-      // 审核人id时间范围
+      // 审核人工号时间范围
       daterangeInnerTime: [],
-      // 审核人id时间范围
+      // 审核人工号时间范围
       daterangeProvinceTime: [],
-      // 审核人id时间范围
+      // 审核人工号时间范围
       daterangeNationalTime: [],
-      // 审核人id时间范围
+      // 审核人工号时间范围
       daterangeStopTime: [],
       // 查询参数
       queryParams: {
@@ -357,7 +333,6 @@ export default {
         innerTime: undefined,
         provinceTime: undefined,
         nationalTime: undefined,
-        stopTime: undefined,
       },
       // 表单参数
       form: {},
@@ -365,12 +340,6 @@ export default {
       rules: {
         id: [
           { required: true, message: "主键不能为空", trigger: "blur" }
-        ],
-        deptId: [
-          { required: true, message: "部门id不能为空", trigger: "blur" }
-        ],
-        userId: [
-          { required: true, message: "用户id不能为空", trigger: "blur" }
         ],
         orderNum: [
           { required: true, message: "排序号不能为空", trigger: "blur" }
@@ -395,6 +364,9 @@ export default {
         ],
         responsiblePersonName: [
           { required: true, message: "竞赛负责人不能为空", trigger: "blur" }
+        ],
+        attachment: [
+          { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
         ],
       }
     };
@@ -438,12 +410,11 @@ export default {
     reset() {
       this.form = {
         id: undefined,
-        deptId: undefined,
-        userId: undefined,
         orderNum: undefined,
         name: undefined,
         level: undefined,
         pastName: undefined,
+        website: undefined,
         term: undefined,
         annual: undefined,
         organizer: undefined,
@@ -456,6 +427,8 @@ export default {
         budget: undefined,
         appropriation: undefined,
         goal: undefined,
+        introduction: undefined,
+        attachment: undefined,
         moneyAggregate: undefined,
         workloadAggregate: undefined,
         personLimit: undefined,

@@ -10,12 +10,8 @@
 
  <el-row>
    <el-col>
- <el-form-item label="立项赛事" prop="region" required>
-    <el-select v-model="ruleForm.name" placeholder="请选择赛事名称">
-      <el-option label="蓝桥杯" value="蓝桥杯"></el-option>
-      <el-option label="icpc" value="icpc"></el-option>
-      <el-option label="服务外包" value="服务外包"></el-option>
-    </el-select>
+ <el-form-item label="赛事名称" prop="name" required>
+    <el-input type="text" v-model="ruleForm.name" style="width:400px" placeholder="中国大学生服务外包创新创业大赛"></el-input>
   </el-form-item>
   </el-col>
 
@@ -301,7 +297,7 @@ import axios from 'axios'
          
         rules: {
           name: [
-            { required: true, message: '请输入活动名称', trigger: 'blur' },
+            { required: true, message: "请输入活动名称", trigger: 'blur' },
             { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
           region: [
