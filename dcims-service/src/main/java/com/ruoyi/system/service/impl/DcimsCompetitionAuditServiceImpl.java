@@ -9,7 +9,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
-import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.utils.AccoutUtils;
