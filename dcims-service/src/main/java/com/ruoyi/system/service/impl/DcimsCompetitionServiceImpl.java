@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -96,6 +97,14 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
      */
     @Override
     public Boolean updateByBo(DcimsCompetitionBo bo) {
+        //对角色进行权限认证，权限不满足的角色不能更改如赛事类别、拨款等字段
+        DcimsCompetition competition = baseMapper.selectById(bo.getId());
+        if (!bo.getLevel().equals(competition.getLevel()) || !bo.getAppropriation().equals(competition.getAppropriation()) || !bo.getPersonLimit().equals(competition.getPersonLimit()) || !bo.getTeamLimit().equals(competition.getTeamLimit())){
+            System.out.println(StpUtil.getRoleList());
+            if(!StpUtil.hasRole("AcademicAffairsOffice")){
+                return false;
+            }
+        }
         DcimsCompetition update = BeanUtil.toBean(bo, DcimsCompetition.class);
         validEntityBeforeSave(update);
         return baseMapper.updateById(update) > 0;

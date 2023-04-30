@@ -54,7 +54,7 @@ public class DcimsCompetitionController extends BaseController {
     /**
      * 查询待审核竞赛列表
      */
-    @SaCheckPermission("dcims:competitionAudit:list")
+    @SaCheckPermission("dcims:competition:list")
     @GetMapping("/audit/list")
     public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
         TableDataInfo<DcimsCompetitionVo> dcimsCompetitionVoTableDataInfo = iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
