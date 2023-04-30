@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import lombok.Data;
@@ -122,6 +123,16 @@ public class DcimsCompetitionBo extends BaseEntity {
      */
     @NotBlank(message = "竞赛申报书不能为空", groups = { AddGroup.class, EditGroup.class })
     private String attachment;
+
+    /**
+     * 个人赛限项
+     */
+    private Integer personLimit;
+
+    /**
+     * 团队赛限项
+     */
+    private Integer teamLimit;
 
     /**
      * 审核人工号
