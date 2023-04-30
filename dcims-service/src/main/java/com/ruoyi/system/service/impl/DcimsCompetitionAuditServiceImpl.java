@@ -151,6 +151,8 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                 comAuditList.add(add1);
                 add2.setNextAuditId(bo.getNextTeacherId());
                 comList.add(add2);
+                add1.setNextTeacherId(add2.getResponsiblePersonId());
+                add2.setNextAuditId(add2.getResponsiblePersonId());
             }
         }
         boolean flag;
