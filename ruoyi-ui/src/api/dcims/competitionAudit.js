@@ -10,17 +10,19 @@ export function listCompetitionAudit(query) {
 }
 
 // 通过竞赛审核
-export function permitAudit(id) {
+export function permitAudit(params) {
   return request({
-    url: '/dcims/competitionAudit/' + id,
-    method: 'get'
+    url: '/dcims/competitionAudit/',
+    method: 'post',
+    data: params
   })
 }
 
 // 退回竞赛审核
-export function refuseAudit(id) {
+export function refuseAudit(params) {
   return request({
-    url: '/dcims/competitionAudit/' + id,
-    method: 'get'
+    url: '/dcims/competitionAudit/',
+    method: 'delete',
+    data: params
   })
 }

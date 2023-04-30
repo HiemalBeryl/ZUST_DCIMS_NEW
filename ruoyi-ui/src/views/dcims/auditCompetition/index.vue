@@ -49,7 +49,7 @@
                 <el-col :span="5"><div class="grid-content">
                     <div>关键词搜索:</div>
                     <div>
-                        <el-input clearable="true" v-model="keyWord" placeholder="请键入关键词"></el-input>
+                        <el-input clearable v-model="keyWord" placeholder="请键入关键词"></el-input>
 
                     </div>
                 </div></el-col>
@@ -101,11 +101,11 @@
                         </div>
 
                         <div style="float: right">
-                          <el-button type="primary" @click="submitWarn">提交</el-button>
+                          <el-button type="primary" @click="submitOrRefuse(1)">提交</el-button>
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">
-                          <el-button type="warning" @click="returnWarn">退回</el-button>
+                          <el-button type="warning" @click="submitOrRefuse(0)">退回</el-button>
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">
@@ -123,8 +123,8 @@
 
         </div>
 
-      <!-- 添加或修改竞赛赛事基本信息对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <!-- 修改竞赛赛事基本信息对话框 -->
+    <el-dialog title="修改竞赛赛事基本信息" :visible.sync="open1" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
       <h2>以下是校级管理员（教务处）需要填写的信息</h2>
         <el-form-item label="赛事类别" prop="level">
@@ -217,6 +217,20 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 提交和退回审核信息对话框-->
+    <el-dialog :title="title" :visible.sync="open2" width="200px" append-to-body>
+    <el-form ref="form2" :model="submitt" label-width="100px">
+      <el-form-item label="审核人工号" prop="nextTeacherId">
+        <el-input v-model="submitt.nextTeacherId" placeholder="请输入下一级审核人的工号" />
+      </el-form-item>
+        <el-input v-model="submitt.reason" type="textArea" placeholder="备注原因" />
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button :loading="buttonLoading" type="primary" @click="submitForm2">确 定</el-button>
+      <el-button @click="cancel">取 消</el-button>
+    </div>
+    </el-dialog>
     </div>
 </template>
 
@@ -247,8 +261,12 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
       competitionList: [],
       // 弹出层标题
       title: "",
-      // 是否显示弹出层
-      open: false,
+      // 是否显示弹出层1
+      open1: false,
+      // 是否显示弹出层2
+      open2: false,
+      // 提交或退回标志
+      flag: 0,
         // 查询参数
         queryParams: {
           pageNum: 1,
@@ -288,6 +306,14 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
         attachment: [
           { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
         ],
+      },
+      // 提交与退回表单
+      submittForm: [],
+      // 单个提交与退回信息
+      submitt: {
+        competitionId: undefined,// 竞赛id
+        reason: undefined,// 退回或提交原因
+        nextTeacherId: undefined// 下一级审核教师的工号
       },
         dateOptions: {
           shortcuts: [{
@@ -337,7 +363,7 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
     },
     created() {
       this.getList();
-      console.log(competitionList);
+      console.log(this.competitionList);
     },
     methods: {
       /** 查询竞赛赛事基本信息列表 */
@@ -357,8 +383,7 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
       getCompetition(id).then(response => {
         this.loading = false;
         this.form = response.data;
-        this.open = true;
-        this.title = "修改竞赛赛事基本信息";
+        this.open1 = true;
       });
     },
       // 表单重置
@@ -394,7 +419,13 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
           updateBy: undefined,
           delFlag: undefined
         };
+        this.submitt = {
+          competitionId: undefined,// 竞赛id
+          reason: undefined,// 退回或提交原因
+          nextTeacherId: undefined// 下一级审核教师的工号
+        };
         this.resetForm("form");
+        this.resetForm("form2");
       },
     toggleSelection(rows) {
       if (rows) {
@@ -413,10 +444,11 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
     },
     // 取消按钮
     cancel() {
-      this.open = false;
+      this.open1 = false;
+      this.open2 = false;
       this.reset();
     },
-    /** 提交按钮 */
+    /** 提交竞赛信息按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
@@ -424,7 +456,7 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
           if (this.form.id != null) {
             updateCompetition(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
-              this.open = false;
+              this.open1 = false;
               this.getList();
             }).finally(() => {
               this.buttonLoading = false;
@@ -435,12 +467,60 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
         }
       });
     },
+    /** 提交审核信息按钮 */
+    submitForm2() {
+            this.buttonLoading = true;
+            // 对审核信息进行封装
+            for(let i = 0; i < this.ids.length; i++){
+              const submitt1 = Object.assign({}, this.submitt);
+              submitt1.competitionId = this.ids[i];
+              this.submittForm.push(submitt1);
+            }
+            console.log(this.submittForm);
+            if(this.flag){
+              // 执行通过审核逻辑
+              permitAudit(this.submittForm).then(response => {
+                this.$modal.msgSuccess("通过选中竞赛成功");
+                this.submittForm = [];
+                this.open2 = false;
+                this.getList();
+              }).catch((err) => {
+                this.submittForm = [];
+              }).finally(() => {
+              this.buttonLoading = false;
+            });
+            }else{
+              // 执行退回审核逻辑
+              refuseAudit(this.submittForm).then(response => {
+                this.$modal.msgSuccess("退回选中竞赛成功");
+                this.submittForm = [];
+                this.open2 = false;
+                this.getList();
+              }).catch((err) => {
+                this.submittForm = [];
+              }).finally(() => {
+              this.buttonLoading = false;
+            });
+            }
+    },
+    /** 激活竞赛审核信息窗口 */
+    submitOrRefuse(flag){
+      this.loading = true;
+      this.reset();
+      // flag为0，表示退回；flag为1，表示通过
+      this.flag = flag;
+      this.loading = false;
+      this.open2 = true;
+    },
+
+
+
      returnWarn() {
 const h = this.$createElement;
 this.$prompt(h(
 	'div', null, [
 		h('div', { style: "display:flex;align-items: center" }, [
-			h('span',{style:"width: 70px"}, '审核人工号:'),
+			h('span',{style:"width: 100px"}, '审核人工号:'),
 			h('el-input',null)
 		]),
       ]),
@@ -460,7 +540,7 @@ const h = this.$createElement;
 this.$prompt(h(
 	'div', null, [
 		h('div', { style: "display:flex;align-items: center" }, [
-			h('span',{style:"width: 70px"}, '审核人工号:'),
+			h('span',{style:"width: 100px"}, '审核人工号:'),
 			h('el-input',null)
 		]),
       ]),
@@ -472,6 +552,10 @@ this.$prompt(h(
 			inputType:'textarea'
 		}).then(({ value }) => {
 			//  todo .....
+      console.log(value);
+      permitAudit().then(response => {
+        
+      })
 		}).catch();
 
     },
