@@ -51,7 +51,7 @@ public class SysOssController extends BaseController {
     /**
      * 查询OSS对象存储列表
      */
-    @SaCheckPermission("system:oss:list")
+    //@SaCheckPermission("system:oss:list")
     @GetMapping("/list")
     public TableDataInfo<SysOssVo> list(@Validated(QueryGroup.class) SysOssBo bo, PageQuery pageQuery) {
         return iSysOssService.queryPageList(bo, pageQuery);
@@ -62,7 +62,7 @@ public class SysOssController extends BaseController {
      *
      * @param ossIds OSS对象ID串
      */
-    @SaCheckPermission("system:oss:list")
+    //@SaCheckPermission("system:oss:list")
     @GetMapping("/listByIds/{ossIds}")
     public R<List<SysOssVo>> listByIds(@NotEmpty(message = "主键不能为空")
                                        @PathVariable Long[] ossIds) {
@@ -75,7 +75,7 @@ public class SysOssController extends BaseController {
      *
      * @param file 文件
      */
-    @SaCheckPermission("system:oss:upload")
+    //@SaCheckPermission("system:oss:upload")
     @Log(title = "OSS对象存储", businessType = BusinessType.INSERT)
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public R<Map<String, String>> upload(@RequestPart("file") MultipartFile file) {
@@ -95,7 +95,7 @@ public class SysOssController extends BaseController {
      *
      * @param ossId OSS对象ID
      */
-    @SaCheckPermission("system:oss:download")
+    //@SaCheckPermission("system:oss:download")
     @GetMapping("/download/{ossId}")
     public void download(@PathVariable Long ossId, HttpServletResponse response) throws IOException {
         iSysOssService.download(ossId,response);
@@ -106,7 +106,7 @@ public class SysOssController extends BaseController {
      *
      * @param ossIds OSS对象ID串
      */
-    @SaCheckPermission("system:oss:remove")
+    //@SaCheckPermission("system:oss:remove")
     @Log(title = "OSS对象存储", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ossIds}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
