@@ -37,10 +37,26 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="指导教师工号" prop="teacherId">
+        <el-input
+          v-model="queryParams.teacherId"
+          placeholder="请输入指导教师工号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="指导教师姓名" prop="teacherName">
         <el-input
           v-model="queryParams.teacherName"
           placeholder="请输入指导教师姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="参赛学生学号" prop="studentId">
+        <el-input
+          v-model="queryParams.studentId"
+          placeholder="请输入参赛学生学号"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -52,6 +68,16 @@
           clearable
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>
+      <el-form-item label="审核状态" prop="audit">
+        <el-select v-model="queryParams.audit" placeholder="请选择审核状态" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_declare_award_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -125,6 +151,11 @@
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
       <el-table-column label="佐证材料" align="center" prop="supportMaterial" />
+      <el-table-column label="审核状态" align="center" prop="audit">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -227,7 +258,7 @@ import { listTeam, getTeam, delTeam, addTeam, updateTeam } from "@/api/dcims/tea
 
 export default {
   name: "Team",
-  dicts: ['dcims_award_type', 'dcims_award_level'],
+  dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status'],
   data() {
     return {
       // 按钮loading
@@ -258,21 +289,21 @@ export default {
         name: undefined,
         competitionType: undefined,
         awardLevel: undefined,
+        teacherId: undefined,
         teacherName: undefined,
+        studentId: undefined,
         studentName: undefined,
+        audit: undefined,
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
+        id: [
+          { required: true, message: "主键不能为空", trigger: "blur" }
+        ],
         competitionId: [
           { required: true, message: "竞赛id不能为空", trigger: "blur" }
-        ],
-        competitionType: [
-          { required: true, message: "比赛类型不能为空", trigger: "change" }
-        ],
-        awardLevel: [
-          { required: true, message: "奖项等级不能为空", trigger: "change" }
         ],
         teacherId: [
           { required: true, message: "指导教师工号不能为空", trigger: "blur" }
@@ -314,8 +345,6 @@ export default {
     reset() {
       this.form = {
         id: undefined,
-        deptId: undefined,
-        userId: undefined,
         orderNum: undefined,
         competitionId: undefined,
         name: undefined,
@@ -330,7 +359,6 @@ export default {
         awardTime: undefined,
         supportMaterial: undefined,
         audit: undefined,
-        auditInformation: undefined,
         version: undefined,
         createTime: undefined,
         createBy: undefined,
