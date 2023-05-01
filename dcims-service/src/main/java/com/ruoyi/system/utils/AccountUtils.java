@@ -5,19 +5,21 @@ import com.ruoyi.system.utils.domain.Account;
 import com.ruoyi.system.utils.mapper.AccountMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
-public class AccoutUtils {
+public class AccountUtils {
 
     private static AccountMapper accountMapper;
 
     @Autowired
     public void AccountUtils(AccountMapper accountMapper){
-        AccoutUtils.accountMapper = accountMapper;
+        AccountUtils.accountMapper = accountMapper;
+    }
+
+    public static Account getTeacherId(){
+        return accountMapper.selectById(StpUtil.getLoginIdAsString().substring(9));
     }
 
     public static Account getTeacherId(String id){
