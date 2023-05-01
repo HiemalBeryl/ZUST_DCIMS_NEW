@@ -123,6 +123,9 @@ export default {
         attachment: [
           { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
         ],
+        nextAuditId: [
+          { required: true, message: "审核人工号不能为空", trigger: "blur"}
+        ],
       }
     }
   },
