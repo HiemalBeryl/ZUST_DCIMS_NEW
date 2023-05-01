@@ -1,9 +1,9 @@
 <template>
-<el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+<el-form :model="form" :rules="rules" ref="form" label-width="100px" class="form">
 
   <el-form-item label="导入信息" >
     <el-select v-model="form.id" placeholder="请选择团队">
-      <el-option label="团队1" value="1"></el-option>
+      <el-option label="团队1652996017461710849" value="1652996017461710849"></el-option>
       <el-option label="团队2" value="2"></el-option>
     </el-select>
   </el-form-item>
@@ -35,17 +35,20 @@
             <file-upload v-model="form.supportMaterial"/>
   </el-form-item>
 
+  <el-form-item label="审核人工号" prop="nextAuditId">
+            <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
+  </el-form-item>
   
   
 
   <el-form-item>
     <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
-    <el-button @click="resetForm('ruleForm')">重置</el-button>
+    <el-button @click="resetForm('form')">重置</el-button>
   </el-form-item>
 </el-form>
 </template>
 <script>
-  import { addTeam, updateTeam } from "@/api/dcims/team";
+  import { declareAward } from "@/api/dcims/team";
 export default {
     name: "CreateTeam",
     dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status'],
@@ -78,6 +81,9 @@ export default {
               supportMaterial: [
                 { required: true, message: "佐证材料不能为空", trigger: "blur" }
               ],
+              nextAuditId: [
+                { required: true, message: "审核人工号不能为空", trigger: "blur"}
+              ],
             }
         }
     },
@@ -107,6 +113,7 @@ export default {
             awardTime: undefined,
             supportMaterial: undefined,
             audit: undefined,
+            nextAuditId: undefined,
             version: undefined,
             createTime: undefined,
             createBy: undefined,
@@ -122,21 +129,15 @@ export default {
             if (valid) {
               this.buttonLoading = true;
               if (this.form.id != null) {
-                updateTeam(this.form).then(response => {
+                declareAward(this.form).then(response => {
                   this.$modal.msgSuccess("修改成功");
                   this.open = false;
-                  this.getList();
+                  this.resetForm('form');
                 }).finally(() => {
                   this.buttonLoading = false;
                 });
               } else {
-                addTeam(this.form).then(response => {
-                  this.$modal.msgSuccess("新增成功");
-                  this.open = false;
-                  this.getList();
-                }).finally(() => {
-                  this.buttonLoading = false;
-                });
+                
               }
             }
           });

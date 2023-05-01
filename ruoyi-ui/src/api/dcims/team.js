@@ -9,6 +9,15 @@ export function listTeam(query) {
   })
 }
 
+// 根据登录人的工号查询参赛团队列表
+export function listTeamByTeacherId(query) {
+  return request({
+    url: '/dcims/team/listByTeacherId',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询参赛团队详细
 export function getTeam(id) {
   return request({
@@ -30,6 +39,15 @@ export function addTeam(data) {
 export function updateTeam(data) {
   return request({
     url: '/dcims/team',
+    method: 'put',
+    data: data
+  })
+}
+
+// 为团队申报huojiangxinxi
+export function declareAward(data) {
+  return request({
+    url: '/dcims/team/award',
     method: 'put',
     data: data
   })

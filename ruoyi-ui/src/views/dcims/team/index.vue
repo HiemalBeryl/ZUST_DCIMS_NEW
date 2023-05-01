@@ -293,7 +293,7 @@ export default {
         teacherName: undefined,
         studentId: undefined,
         studentName: undefined,
-        audit: undefined,
+        audit: '2',
       },
       // 表单参数
       form: {},
@@ -359,6 +359,7 @@ export default {
         awardTime: undefined,
         supportMaterial: undefined,
         audit: undefined,
+        nextAuditId: undefined,
         version: undefined,
         createTime: undefined,
         createBy: undefined,

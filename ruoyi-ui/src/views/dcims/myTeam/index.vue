@@ -34,6 +34,13 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['dcims:team:edit']"
           >修改</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['dcims:team:remove']"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -96,7 +103,7 @@
 </template>
 
 <script>
-import { listTeam, getTeam, delTeam, addTeam, updateTeam } from "@/api/dcims/team";
+import { listTeamByTeacherId, getTeam, delTeam, addTeam, updateTeam } from "@/api/dcims/team";
 
 export default {
   name: "Team",
@@ -172,7 +179,7 @@ export default {
     /** 查询参赛团队列表 */
     getList() {
       this.loading = true;
-      listTeam(this.queryParams).then(response => {
+      listTeamByTeacherId(this.queryParams).then(response => {
         this.teamList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -201,6 +208,7 @@ export default {
         awardTime: undefined,
         supportMaterial: undefined,
         audit: undefined,
+        nextAuditId: undefined,
         version: undefined,
         createTime: undefined,
         createBy: undefined,

@@ -42,7 +42,6 @@
               placeholder="请选择比赛时间">
             </el-date-picker>
           </el-form-item>
-          
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -83,9 +82,6 @@ export default {
               studentName: [
                 { required: true, message: "参赛学生姓名不能为空", trigger: "blur" }
               ],
-              supportMaterial: [
-                { required: true, message: "佐证材料不能为空", trigger: "blur" }
-              ],
             }
         }
     },
@@ -115,6 +111,7 @@ export default {
             awardTime: undefined,
             supportMaterial: undefined,
             audit: undefined,
+            nextAuditId: undefined,
             version: undefined,
             createTime: undefined,
             createBy: undefined,
@@ -144,6 +141,7 @@ export default {
                   this.getList();
                 }).finally(() => {
                   this.buttonLoading = false;
+                  this.reset();
                 });
               }
             }
