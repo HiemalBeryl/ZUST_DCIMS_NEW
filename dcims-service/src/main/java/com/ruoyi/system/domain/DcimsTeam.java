@@ -15,7 +15,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 参赛团队对象 dcims_team
  *
  * @author hiemalberyl
- * @date 2023-04-24
+ * @date 2023-05-01
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -27,16 +27,8 @@ public class DcimsTeam extends BaseEntity {
     /**
      * 主键
      */
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     private Long id;
-    /**
-     * 部门id
-     */
-    private Long deptId;
-    /**
-     * 用户id
-     */
-    private Long userId;
     /**
      * 排序号
      */
@@ -74,7 +66,7 @@ public class DcimsTeam extends BaseEntity {
      */
     private String studentName;
     /**
-     * 更高级奖项编号（覆盖本项）;留空表示没有，否则指向更高级奖项对应队伍的编号
+     * 更高级奖项id
      */
     private Long advancedAwardNumber;
     /**
@@ -92,11 +84,7 @@ public class DcimsTeam extends BaseEntity {
     /**
      * 审核状态
      */
-    private String audit;
-    /**
-     * 审核信息;关于审核状态的详细说明
-     */
-    private String auditInformation;
+    private Integer audit;
     /**
      * 版本
      */

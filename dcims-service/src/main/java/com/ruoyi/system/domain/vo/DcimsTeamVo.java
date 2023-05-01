@@ -15,7 +15,7 @@ import java.util.Date;
  * 参赛团队视图对象 dcims_team
  *
  * @author hiemalberyl
- * @date 2023-04-24
+ * @date 2023-05-01
  */
 @Data
 @ExcelIgnoreUnannotated
@@ -80,10 +80,32 @@ public class DcimsTeamVo {
     private String studentName;
 
     /**
+     * 更高级奖项id
+     */
+    private Long advancedAwardNumber;
+
+    /**
+     * 比赛时间
+     */
+    private Date competitionTime;
+
+    /**
+     * 获奖时间
+     */
+    private Date awardTime;
+
+    /**
      * 佐证材料
      */
     @ExcelProperty(value = "佐证材料")
     private String supportMaterial;
+
+    /**
+     * 审核状态
+     */
+    @ExcelProperty(value = "审核状态", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(dictType = "dcims_declare_award_status")
+    private Integer audit;
 
 
 }

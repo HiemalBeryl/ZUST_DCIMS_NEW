@@ -13,7 +13,7 @@ import java.util.List;
  * 参赛团队Service接口
  *
  * @author hiemalberyl
- * @date 2023-04-24
+ * @date 2023-05-01
  */
 public interface IDcimsTeamService {
 

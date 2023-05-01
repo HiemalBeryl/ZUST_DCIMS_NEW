@@ -29,7 +29,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
  * 参赛团队
  *
  * @author hiemalberyl
- * @date 2023-04-24
+ * @date 2023-05-01
  */
 @Validated
 @RequiredArgsConstructor

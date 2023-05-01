@@ -16,7 +16,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
  * 参赛团队业务对象 dcims_team
  *
  * @author hiemalberyl
- * @date 2023-04-24
+ * @date 2023-05-01
  */
 
 @Data
@@ -26,6 +26,7 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 主键
      */
+    @NotNull(message = "主键不能为空", groups = { EditGroup.class })
     private Long id;
 
     /**
@@ -42,13 +43,11 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 比赛类型
      */
-    @NotBlank(message = "比赛类型不能为空", groups = { AddGroup.class, EditGroup.class })
     private String competitionType;
 
     /**
      * 奖项等级
      */
-    @NotBlank(message = "奖项等级不能为空", groups = { AddGroup.class, EditGroup.class })
     private String awardLevel;
 
     /**
@@ -90,6 +89,11 @@ public class DcimsTeamBo extends BaseEntity {
      */
     @NotBlank(message = "佐证材料不能为空", groups = { AddGroup.class, EditGroup.class })
     private String supportMaterial;
+
+    /**
+     * 审核状态
+     */
+    private Integer audit;
 
 
 }

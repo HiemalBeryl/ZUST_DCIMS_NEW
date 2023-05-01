@@ -23,7 +23,7 @@ import java.util.Collection;
  * 参赛团队Service业务层处理
  *
  * @author hiemalberyl
- * @date 2023-04-24
+ * @date 2023-05-01
  */
 @RequiredArgsConstructor
 @Service
@@ -65,8 +65,11 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.like(StringUtils.isNotBlank(bo.getName()), DcimsTeam::getName, bo.getName());
         lqw.eq(StringUtils.isNotBlank(bo.getCompetitionType()), DcimsTeam::getCompetitionType, bo.getCompetitionType());
         lqw.eq(StringUtils.isNotBlank(bo.getAwardLevel()), DcimsTeam::getAwardLevel, bo.getAwardLevel());
+        lqw.like(StringUtils.isNotBlank(bo.getTeacherId()), DcimsTeam::getTeacherId, bo.getTeacherId());
         lqw.like(StringUtils.isNotBlank(bo.getTeacherName()), DcimsTeam::getTeacherName, bo.getTeacherName());
+        lqw.like(StringUtils.isNotBlank(bo.getStudentId()), DcimsTeam::getStudentId, bo.getStudentId());
         lqw.like(StringUtils.isNotBlank(bo.getStudentName()), DcimsTeam::getStudentName, bo.getStudentName());
+        lqw.eq(bo.getAudit() != null, DcimsTeam::getAudit, bo.getAudit());
         return lqw;
     }
 
