@@ -7,6 +7,8 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
@@ -45,6 +47,15 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     @Override
     public TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    @Override
+    public TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
+        LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        // 添加查询登录人工号的限制条件
+        lqw.like(AccountUtils.getTeacherId().getTeacherId() != null, DcimsTeam::getTeacherId, AccountUtils.getTeacherId().getTeacherId().toString());
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -92,6 +103,31 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      */
     @Override
     public Boolean updateByBo(DcimsTeamBo bo) {
+        DcimsTeam update = BeanUtil.toBean(bo, DcimsTeam.class);
+        validEntityBeforeSave(update);
+        return baseMapper.updateById(update) > 0;
+    }
+
+    /**
+     * 为团队添加获奖信息
+     */
+    @Override
+    public Boolean declareAwardByBo(DcimsDeclareAwardBo bo) {
+        // 先查询对应竞赛，获取到id以外的其他数据
+        DcimsTeam dcimsTeam = baseMapper.selectById(bo.getId());
+        if (dcimsTeam == null) {
+            return false;
+        }
+        bo.setCompetitionId(dcimsTeam.getCompetitionId());
+        bo.setName(dcimsTeam.getName());
+        bo.setCompetitionType(dcimsTeam.getCompetitionType());
+        bo.setTeacherId(dcimsTeam.getTeacherId());
+        bo.setTeacherName(dcimsTeam.getTeacherName());
+        bo.setStudentId(dcimsTeam.getStudentId());
+        bo.setStudentName(dcimsTeam.getStudentName());
+        bo.setCompetitionTime(dcimsTeam.getCompetitionTime());
+        bo.setAudit(dcimsTeam.getAudit() + 1);
+        // 执行更新操作
         DcimsTeam update = BeanUtil.toBean(bo, DcimsTeam.class);
         validEntityBeforeSave(update);
         return baseMapper.updateById(update) > 0;

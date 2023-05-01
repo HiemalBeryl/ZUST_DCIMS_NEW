@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -49,6 +50,15 @@ public class DcimsTeamController extends BaseController {
     }
 
     /**
+     * 根据教师工号查询参赛团队列表
+     */
+    @SaCheckPermission("dcims:team:list")
+    @GetMapping("/listByTeacherId")
+    public TableDataInfo<DcimsTeamVo> listByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
+        return iDcimsTeamService.queryPageListByTeacherId(bo, pageQuery);
+    }
+
+    /**
      * 导出参赛团队列表
      */
     @SaCheckPermission("dcims:team:export")
@@ -91,6 +101,17 @@ public class DcimsTeamController extends BaseController {
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsTeamBo bo) {
         return toAjax(iDcimsTeamService.updateByBo(bo));
+    }
+
+    /**
+     * 为参赛团队添加佐证材料
+     */
+    @SaCheckPermission("dcims:team:edit")
+    @Log(title = "参赛团队", businessType = BusinessType.UPDATE)
+    @RepeatSubmit()
+    @PutMapping("/award")
+    public R<Void> addAward(@Validated(EditGroup.class) @RequestBody DcimsDeclareAwardBo bo) {
+        return toAjax(iDcimsTeamService.declareAwardByBo(bo));
     }
 
     /**

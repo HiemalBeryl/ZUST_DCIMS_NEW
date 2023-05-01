@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.system.domain.DcimsTeam;
+import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -28,6 +29,11 @@ public interface IDcimsTeamService {
     TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamBo bo, PageQuery pageQuery);
 
     /**
+     * 根据教师工号查询参赛团队列表
+     */
+    TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery);
+
+    /**
      * 查询参赛团队列表
      */
     List<DcimsTeamVo> queryList(DcimsTeamBo bo);
@@ -41,6 +47,12 @@ public interface IDcimsTeamService {
      * 修改参赛团队
      */
     Boolean updateByBo(DcimsTeamBo bo);
+
+    /**
+     * 为团队添加获奖信息
+     */
+
+    Boolean declareAwardByBo(DcimsDeclareAwardBo bo);
 
     /**
      * 校验并批量删除参赛团队信息

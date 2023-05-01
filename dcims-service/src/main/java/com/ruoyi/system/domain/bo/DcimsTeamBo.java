@@ -48,6 +48,7 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 奖项等级
      */
+    @Null(message = "创建队伍时不能填写奖项等级，如需填写，请进入获奖申报页面", groups = { AddGroup.class })
     private String awardLevel;
 
     /**
@@ -82,18 +83,17 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 获奖时间
      */
+    @Null(message = "创建队伍时不能填写获奖时间，如需填写，请进入获奖申报页面", groups = { AddGroup.class })
     private Date awardTime;
 
     /**
      * 佐证材料
      */
-    @NotBlank(message = "佐证材料不能为空", groups = { AddGroup.class, EditGroup.class })
+    @Null(message = "创建队伍时不能上传佐证材料，如需上传，请进入获奖申报页面", groups = { AddGroup.class })
     private String supportMaterial;
 
     /**
      * 审核状态
      */
     private Integer audit;
-
-
 }

@@ -107,5 +107,9 @@ public class DcimsTeamVo {
     @ExcelDictFormat(dictType = "dcims_declare_award_status")
     private Integer audit;
 
+    /**
+     * 下一级审核人工号
+     */
+    private Integer nextAuditId;
 
 }
