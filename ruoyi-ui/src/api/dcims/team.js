@@ -12,7 +12,7 @@ export function listTeam(query) {
 // 根据登录人的工号查询参赛团队列表
 export function listTeamByTeacherId(query) {
   return request({
-    url: '/dcims/team/listByTeacherId',
+    url: '/dcims/team/listTeamByTeacherId',
     method: 'get',
     params: query
   })

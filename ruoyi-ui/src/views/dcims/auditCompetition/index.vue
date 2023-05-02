@@ -1,5 +1,6 @@
 <template>
     <div style="height:100%">
+      <!-- 顶部 -->
         <div>
             <el-row>
               <el-col :span="24" ><div class="grid-content bg-purple-light" style="height:20px"></div></el-col>
@@ -508,73 +509,13 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
       this.flag = flag;
       this.loading = false;
       this.open2 = true;
-    },
+    }
+    }
+  }
+  
 
-
-
-     returnWarn() {
-const h = this.$createElement;
-this.$prompt(h(
-	'div', null, [
-		h('div', { style: "display:flex;align-items: center" }, [
-			h('span',{style:"width: 100px"}, '审核人工号:'),
-			h('el-input',null)
-		]),
-      ]),
-		'退回提示',
-		{
-			confirmButtonText: '确定',
-			cancelButtonText: '取消',
-			inputPlaceholder: '退回备注',
-			inputType:'textarea'
-		}).then(({ value }) => {
-			//  todo .....
-		}).catch();
-    },
-    submitWarn() {
-
-const h = this.$createElement;
-this.$prompt(h(
-	'div', null, [
-		h('div', { style: "display:flex;align-items: center" }, [
-			h('span',{style:"width: 100px"}, '审核人工号:'),
-			h('el-input',null)
-		]),
-      ]),
-		'上交提示',
-		{
-			confirmButtonText: '确定',
-			cancelButtonText: '取消',
-			inputPlaceholder: '备注消息',
-			inputType:'textarea'
-		}).then(({ value }) => {
-			//  todo .....
-      console.log(value);
-      permitAudit().then(response => {
-        
-      })
-		}).catch();
-
-    },
-        note() {
-        this.$prompt('请输入备注', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          }).then(({ value }) => {
-          this.$message({
-            type: 'success',
-            message: '备注成功'
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消输入'
-          });
-        });
-      }
-
-  },
-  };
+     
+  
 </script>
 
 <style>
