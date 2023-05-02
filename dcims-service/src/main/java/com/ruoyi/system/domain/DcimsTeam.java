@@ -88,7 +88,7 @@ public class DcimsTeam extends BaseEntity {
     /**
      * 下一级审核人工号
      */
-    private Integer nextAuditId;
+    private Long nextAuditId;
     /**
      * 版本
      */
