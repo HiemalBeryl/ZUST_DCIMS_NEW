@@ -4,7 +4,7 @@
   <el-form-item label="导入信息" >
     <el-select v-model="form.id" placeholder="请选择团队">
       <el-option label="团队1652996017461710849" value="1652996017461710849"></el-option>
-      <el-option label="团队2" value="2"></el-option>
+      <el-option label="团队1653358318320689153" value="1653358318320689153"></el-option>
     </el-select>
   </el-form-item>
 
