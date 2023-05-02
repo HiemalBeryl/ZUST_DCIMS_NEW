@@ -52,7 +52,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     public TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
         // 自定义业务，获取当前登录账号对应的教师工号
         String id = StpUtil.getLoginIdAsString();
-        String teacherId = AccountUtils.getTeacherId(id).getTeacherId().toString();
+        String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsCompetition::getNextAuditId,teacherId);
 
@@ -92,7 +92,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
             //手动为Bo添加操作者等部分数据
             if(bo.getNextTeacherId().equals(0L)){
                 StpUtil.checkRole("AcademicAffairsOffice");
-                bo.setTeacherId(AccountUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
+                bo.setTeacherId(AccountUtils.getAccount(StpUtil.getLoginIdAsString()).getTeacherId());
                 bo.setResult(1L);
                 DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
                 DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
@@ -101,7 +101,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                     comList.add(add2);
                 }
             } else {
-                bo.setTeacherId(AccountUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
+                bo.setTeacherId(AccountUtils.getAccount(StpUtil.getLoginIdAsString()).getTeacherId());
                 bo.setResult(1L);
                 DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
                 DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
@@ -124,7 +124,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         List<DcimsCompetitionAudit> comAuditList = new ArrayList<>();
         for (DcimsCompetitionAuditBo bo:boList) {
             //手动为Bo添加操作者等部分数据
-            bo.setTeacherId(AccountUtils.getTeacherId(StpUtil.getLoginIdAsString()).getTeacherId());
+            bo.setTeacherId(AccountUtils.getAccount(StpUtil.getLoginIdAsString()).getTeacherId());
             bo.setResult(0L);
             DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
             DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());

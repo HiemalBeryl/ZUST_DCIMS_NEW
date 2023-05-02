@@ -18,11 +18,11 @@ public class AccountUtils {
         AccountUtils.accountMapper = accountMapper;
     }
 
-    public static Account getTeacherId(){
+    public static Account getAccount(){
         return accountMapper.selectById(StpUtil.getLoginIdAsString().substring(9));
     }
 
-    public static Account getTeacherId(String id){
+    public static Account getAccount(String id){
         return accountMapper.selectById(id.substring(9));
     }
 
