@@ -53,9 +53,18 @@ public class DcimsTeamController extends BaseController {
      * 根据教师工号查询参赛团队列表
      */
     @SaCheckPermission("dcims:team:list")
-    @GetMapping("/listByTeacherId")
-    public TableDataInfo<DcimsTeamVo> listByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
+    @GetMapping("/listTeamByTeacherId")
+    public TableDataInfo<DcimsTeamVo> listTeamByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
         return iDcimsTeamService.queryPageListByTeacherId(bo, pageQuery);
+    }
+
+    /**
+     * 查询待审核竞赛列表
+     */
+    @SaCheckPermission("dcims:team:list")
+    @GetMapping("/audit/list")
+    public TableDataInfo<DcimsTeamVo> listByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
+        return iDcimsTeamService.queryPageListAudit(bo, pageQuery);
     }
 
     /**

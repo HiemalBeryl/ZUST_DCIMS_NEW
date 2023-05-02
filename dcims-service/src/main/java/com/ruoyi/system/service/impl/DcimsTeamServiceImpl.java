@@ -51,11 +51,25 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         return TableDataInfo.build(result);
     }
 
+    /**
+     * 根据教师工号查询参赛团队列表
+     */
     @Override
     public TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
         // 添加查询登录人工号的限制条件
-        lqw.like(AccountUtils.getAccount().getTeacherId() != null, DcimsTeam::getTeacherId, AccountUtils.getAccount().getTeacherId().toString());
+        lqw.like(AccountUtils.getAccount().getTeacherId() != null, DcimsTeam::getTeacherId, AccountUtils.getAccount().getTeacherId());
+        Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    /**
+     * 查询待审核团队列表
+     */
+    public TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamBo bo,PageQuery pageQuery){
+        LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        // 添加查询登录人工号的限制条件
+        lqw.eq(AccountUtils.getAccount().getTeacherId() != null, DcimsTeam::getNextAuditId, AccountUtils.getAccount().getTeacherId());
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
