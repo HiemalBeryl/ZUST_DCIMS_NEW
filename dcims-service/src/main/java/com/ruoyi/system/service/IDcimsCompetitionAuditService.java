@@ -40,11 +40,6 @@ public interface IDcimsCompetitionAuditService {
     Boolean insertByBo(List<DcimsCompetitionAuditBo> boList);
 
     /**
-     * 修改竞赛审核
-     */
-    Boolean updateByBo(DcimsCompetitionAuditBo bo);
-
-    /**
      * 校验并批量删除竞赛审核信息
      */
     Boolean deleteWithValidByIds(List<DcimsCompetitionAuditBo> boList);

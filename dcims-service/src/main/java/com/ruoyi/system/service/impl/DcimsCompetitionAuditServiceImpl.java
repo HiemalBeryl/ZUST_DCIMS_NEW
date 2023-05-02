@@ -82,7 +82,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     }
 
     /**
-     * 新增竞赛审核
+     * 通过竞赛审核
      */
     @Override
     public Boolean insertByBo(List<DcimsCompetitionAuditBo> boList) {
@@ -116,24 +116,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     }
 
     /**
-     * 修改竞赛审核
-     */
-    @Override
-    public Boolean updateByBo(DcimsCompetitionAuditBo bo) {
-        DcimsCompetitionAudit update = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
-        validEntityBeforeSave(update);
-        return competitionAuditBaseMapper.updateById(update) > 0;
-    }
-
-    /**
-     * 保存前的数据校验
-     */
-    private void validEntityBeforeSave(DcimsCompetitionAudit entity){
-        //TODO 做一些数据校验,如唯一约束
-    }
-
-    /**
-     * 批量删除竞赛审核
+     * 退回竞赛审核
      */
     @Override
     public Boolean deleteWithValidByIds(List<DcimsCompetitionAuditBo> boList) {
