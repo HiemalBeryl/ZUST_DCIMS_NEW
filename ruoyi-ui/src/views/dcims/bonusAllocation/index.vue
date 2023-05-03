@@ -73,7 +73,7 @@
 
     <el-table v-loading="loading" :data="bonusAllocationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
+      <!-- <el-table-column label="主键" align="center" prop="id" v-if="true"/> -->
       <el-table-column label="年份" align="center" prop="years" />
       <el-table-column label="学院" align="center" prop="college">
         <template slot-scope="scope">
@@ -81,10 +81,10 @@
         </template>
       </el-table-column>
       <el-table-column label="奖金总数" align="center" prop="totalAmount" />
-      <el-table-column label="留存比例" align="center" prop="retentionRatio" />
+      <!-- <el-table-column label="留存比例" align="center" prop="retentionRatio" />
       <el-table-column label="可分配总额" align="center" prop="distributable" />
       <el-table-column label="已分配金额" align="center" prop="allocated" />
-      <el-table-column label="未分配金额" align="center" prop="unallocated" />
+      <el-table-column label="未分配金额" align="center" prop="unallocated" /> -->
       <el-table-column label="开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
@@ -176,7 +176,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
+        <el-button :loading="buttonLoading" type="primary" @click="submitForm" >确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -184,7 +184,13 @@
 </template>
 
 <script>
-import { listBonusAllocation, getBonusAllocation, delBonusAllocation, addBonusAllocation, updateBonusAllocation } from "@/api/dcims/bonusAllocation";
+import {
+  listBonusAllocation,
+  getBonusAllocation,
+  delBonusAllocation,
+  addBonusAllocation,
+  updateBonusAllocation
+} from "@/api/dcims/bonusAllocation";
 
 export default {
   name: "BonusAllocation",

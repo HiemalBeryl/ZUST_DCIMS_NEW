@@ -1,23 +1,23 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.core.domain.PageQuery;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.DcimsBonusAllocation;
 import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
-import com.ruoyi.system.domain.DcimsBonusAllocation;
 import com.ruoyi.system.mapper.DcimsBonusAllocationMapper;
 import com.ruoyi.system.service.IDcimsBonusAllocationService;
+import com.ruoyi.system.utils.AccountUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 /**
  * 奖金分配总Service业务层处理
@@ -107,4 +107,22 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
         }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
+
+
+
+    /**
+    * 获取单条数据，用于获取总金额，可分配余额，以及日期
+    */
+    @Override
+    public DcimsBonusAllocationVo getTotalAmount() {
+        Long teacherId = AccountUtils.getAccount().getTeacherId();
+        LambdaQueryWrapper<DcimsBonusAllocation> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsBonusAllocation::getYears,2022);
+        lqw.eq(DcimsBonusAllocation::getTeacherInCharge,teacherId);
+        return baseMapper.selectVoOne(lqw);
+    }
+
+
+
+
 }

@@ -1,10 +1,9 @@
 package com.ruoyi.system.service;
 
-import com.ruoyi.system.domain.DcimsBonusAllocation;
-import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
-import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
-import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
+import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
 
 import java.util.Collection;
 import java.util.List;
@@ -46,4 +45,10 @@ public interface IDcimsBonusAllocationService {
      * 校验并批量删除奖金分配总信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    /**
+     * 获取学院总金额
+     */
+    DcimsBonusAllocationVo getTotalAmount();
+
 }

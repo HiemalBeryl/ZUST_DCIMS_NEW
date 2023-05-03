@@ -13,7 +13,9 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.bo.DcimsBonusAllocationPersonalBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationPersonalVo;
+import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
 import com.ruoyi.system.service.IDcimsBonusAllocationPersonalService;
+import com.ruoyi.system.service.IDcimsBonusAllocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +39,8 @@ import java.util.List;
 public class DcimsBonusAllocationPersonalController extends BaseController {
 
     private final IDcimsBonusAllocationPersonalService iDcimsBonusAllocationPersonalService;
+
+    private final IDcimsBonusAllocationService iDcimsBonusAllocationService;
 
     /**
      * 查询奖金分配个人列表
@@ -104,4 +108,16 @@ public class DcimsBonusAllocationPersonalController extends BaseController {
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsBonusAllocationPersonalService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
+
+    /**
+     * 获取学院总金额
+     *
+     *
+     * */
+    @SaCheckPermission("dcims:bonusAllocation:query")
+    @GetMapping("/getTotal")
+    public R<DcimsBonusAllocationVo> getTotalAmount() {
+        return R.ok(iDcimsBonusAllocationService.getTotalAmount());
+    }
+
 }

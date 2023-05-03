@@ -1,11 +1,54 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item>
+      <!-- <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
+      </el-form-item> -->
     </el-form>
+ <!-- 用于显示共有多少钱需要分配，剩余多少钱可以分配，分配截至日期 -->
+ <div>
+      <el-row :gutter="20">
+        <!-- <el-col :span="1"><div class="grid-content"></div></el-col> -->
+
+          <!-- 总共有多少钱需要分配 -->
+          <el-col :span="6">
+            <div class="grid-content">
+              <h3>
+                您共有 <span style="color: red">{{ jiangJinTotal }}</span> 元需要分配
+              </h3>
+            </div>
+          </el-col>
+
+          <!-- 目前还剩余多少钱可以分配 -->
+          <el-col :span="6">
+            <div class="grid-content">
+              <h3>
+                您目前剩余 <span style="color: red">{{ jiangjinRemain }}</span> 元可以分配
+              </h3>
+            </div>
+          </el-col>
+
+          <!-- 留存比例 -->
+          <el-col :span="4">
+            <div class="grid-content">
+              <h3>
+                目前留存比例 <span style="color: red">{{ retentionRadio }}%</span> 
+              </h3>
+            </div>
+          </el-col>
+          
+          <!-- 本次奖金分配截止日期 -->
+          <el-col :span="8">
+            <div class="grid-content" style="text-align: right">
+              <h3>
+                本次奖金分配截止日期 <span>{{ assignmentEndDate }}</span>
+              </h3>
+            </div>
+          </el-col>
+        
+      </el-row>
+    </div>
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
@@ -18,7 +61,7 @@
           v-hasPermi="['dcims:bonusAllocationPersonal:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -28,7 +71,7 @@
           @click="handleUpdate"
           v-hasPermi="['dcims:bonusAllocationPersonal:edit']"
         >修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="danger"
@@ -55,8 +98,8 @@
 
     <el-table v-loading="loading" :data="bonusAllocationPersonalList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
-      <el-table-column label="年份" align="center" prop="years" />
+      <!-- <el-table-column label="主键" align="center" prop="id" v-if="true"/>
+      <el-table-column label="年份" align="center" prop="years" /> -->
       <el-table-column label="获得人" align="center" prop="gainer" />
       <el-table-column label="负责竞赛" align="center" prop="competition" />
       <el-table-column label="获得奖金数" align="center" prop="bonus" />
@@ -75,13 +118,13 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['dcims:bonusAllocationPersonal:edit']"
           >修改</el-button>
-          <el-button
+          <!-- <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['dcims:bonusAllocationPersonal:remove']"
-          >删除</el-button>
+          >删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -130,7 +173,14 @@
 </template>
 
 <script>
-import { listBonusAllocationPersonal, getBonusAllocationPersonal, delBonusAllocationPersonal, addBonusAllocationPersonal, updateBonusAllocationPersonal } from "@/api/dcims/bonusAllocationPersonal";
+import {
+  listBonusAllocationPersonal,
+  getBonusAllocationPersonal,
+  delBonusAllocationPersonal,
+  addBonusAllocationPersonal,
+  updateBonusAllocationPersonal,
+  getBonusAllocationCollegeTotal,
+} from "@/api/dcims/bonusAllocationPersonal";
 
 export default {
   name: "BonusAllocationPersonal",
@@ -161,6 +211,14 @@ export default {
         pageNum: 1,
         pageSize: 10,
       },
+      // 奖金总数，奖金剩余，留存比例
+      jiangJinTotal: 0,
+      jiangjinRemain: 0,
+      retentionRadio: 0,
+      assignmentEndDate: "8888-88-88 88:88:88",
+      // 用于预存原本获得的金额
+      add: 0,
+      
       // 表单参数
       form: {},
       // 表单校验
@@ -191,6 +249,14 @@ export default {
   },
   created() {
     this.getList();
+    // 初始化最上面的信息
+    getBonusAllocationCollegeTotal().then(response => {
+      console.log(response);
+      this.jiangJinTotal = response.data.totalAmount;
+      this.jiangjinRemain = response.data.unallocated;
+      this.assignmentEndDate = response.data.endTime;
+      this.retentionRadio = Math.round((response.data.unallocated/response.data.totalAmount)*100);
+    })
   },
   methods: {
     /** 查询奖金分配个人列表 */
@@ -202,6 +268,8 @@ export default {
         this.loading = false;
       });
     },
+    
+
     // 取消按钮
     cancel() {
       this.open = false;
@@ -258,6 +326,8 @@ export default {
         this.form = response.data;
         this.open = true;
         this.title = "修改奖金分配个人";
+        //获取原本的获得金额放入add中
+        this.add = response.data.bonus;
       });
     },
     /** 提交按钮 */
@@ -268,6 +338,11 @@ export default {
           if (this.form.id != null) {
             updateBonusAllocationPersonal(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
+              // 总金额加上原本再减去后来设置的金额
+              this.jiangjinRemain = this.jiangjinRemain + this.add - this.form.bonus;
+              // 重新计算留存比例
+              this.retentionRadio = Math.round((this.jiangjinRemain/this.jiangJinTotal)*100);
+              
               this.open = false;
               this.getList();
             }).finally(() => {
@@ -276,6 +351,11 @@ export default {
           } else {
             addBonusAllocationPersonal(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
+              // 总金额减去后来设置的金额
+               this.jiangjinRemain = this.jiangjinRemain - this.form.bonus;
+              // 重新计算留存比例
+              this.retentionRadio = Math.round((this.jiangjinRemain/this.jiangJinTotal)*100);
+
               this.open = false;
               this.getList();
             }).finally(() => {
@@ -309,3 +389,35 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.juZhong {
+  text-align: center;
+}
+.el-row {
+  margin-bottom: 20px;
+}
+ .el-row:last-child {
+    margin-bottom: 0;
+  }
+.el-col {
+  border-radius: 4px;
+}
+.bg-purple-dark {
+  background: #99a9bf;
+}
+.bg-purple {
+  background: #d3dce6;
+}
+.bg-purple-light {
+  background: #e5e9f2;
+}
+.grid-content {
+  border-radius: 4px;
+  min-height: 36px;
+}
+.row-bg {
+  padding: 10px 0;
+  background-color: #f9fafc;
+}
+</style>
