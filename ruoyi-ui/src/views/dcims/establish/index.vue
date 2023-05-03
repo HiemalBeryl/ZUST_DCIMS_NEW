@@ -1,7 +1,9 @@
 <template> <!--赛事立项 -->
 <div>
   <div style="border-bottom: 1px solid #dbdbdb;height:60px;width:600px ;">
-    <h1 style="margin-top:20px">竞赛立项</h1>
+    <el-tooltip class="item" effect="dark" content="作为竞赛负责人，您可以在本页面提交当年的竞赛申报材料。" placement="right">
+      <h1>竞赛立项</h1>
+    </el-tooltip>
   </div>
 
   <!-- 添加或修改竞赛赛事基本信息对话框 -->
