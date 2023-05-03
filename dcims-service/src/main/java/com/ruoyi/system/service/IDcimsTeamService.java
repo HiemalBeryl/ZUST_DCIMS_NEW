@@ -34,11 +34,6 @@ public interface IDcimsTeamService {
     TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery);
 
     /**
-     * 查询待审核团队列表
-     */
-    TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamBo bo,PageQuery pageQuery);
-
-    /**
      * 查询参赛团队列表
      */
     List<DcimsTeamVo> queryList(DcimsTeamBo bo);

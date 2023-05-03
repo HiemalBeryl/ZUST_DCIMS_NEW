@@ -49,7 +49,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
      * 查询团队获奖审核列表
      */
     @Override
-    public TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamAuditBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery) {
         // 自定义业务，获取当前登录账号对应的教师工号
         String id = StpUtil.getLoginIdAsString();
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();

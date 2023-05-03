@@ -24,7 +24,7 @@ public interface IDcimsTeamAuditService {
     /**
      * 查询竞赛审核列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamAuditBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery);
 
     /**
      * 查询竞赛审核列表

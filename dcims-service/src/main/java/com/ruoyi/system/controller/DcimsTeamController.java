@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.service.IDcimsTeamAuditService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -39,6 +41,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 public class DcimsTeamController extends BaseController {
 
     private final IDcimsTeamService iDcimsTeamService;
+    private final IDcimsTeamAuditService iDcimsTeamAuditService;
 
     /**
      * 查询参赛团队列表
@@ -63,8 +66,8 @@ public class DcimsTeamController extends BaseController {
      */
     @SaCheckPermission("dcims:team:list")
     @GetMapping("/audit/list")
-    public TableDataInfo<DcimsTeamVo> listByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
-        return iDcimsTeamService.queryPageListAudit(bo, pageQuery);
+    public TableDataInfo<DcimsTeamVo> listByTeacherId(DcimsTeamAuditBo bo, PageQuery pageQuery) {
+        return iDcimsTeamAuditService.queryPageListAudit(bo, pageQuery);
     }
 
     /**
