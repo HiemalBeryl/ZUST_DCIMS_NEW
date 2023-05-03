@@ -1,10 +1,15 @@
 <template>
 <el-form :model="form" :rules="rules" ref="form" label-width="100px" class="form">
 
-  <el-form-item label="导入信息" >
+  <el-form-item label="选择团队" >
     <el-select v-model="form.id" placeholder="请选择团队">
-      <el-option label="团队1652996017461710849" value="1652996017461710849"></el-option>
-      <el-option label="团队1653358318320689153" value="1653358318320689153"></el-option>
+      <el-option
+        v-for="team in teamList"
+        :key="team.name"
+        :label="team.name"
+        :value="team.id"
+        :disabled="team.audit"
+      ></el-option>
     </el-select>
   </el-form-item>
 
@@ -38,8 +43,8 @@
   <el-form-item label="审核人工号" prop="nextAuditId">
             <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
   </el-form-item>
-  
-  
+
+
 
   <el-form-item>
     <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
@@ -48,7 +53,7 @@
 </el-form>
 </template>
 <script>
-  import { declareAward } from "@/api/dcims/team";
+  import { listTeamByTeacherId,declareAward } from "@/api/dcims/team";
 export default {
     name: "CreateTeam",
     dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status'],
@@ -56,8 +61,28 @@ export default {
         return {
             // 按钮loading
             buttonLoading: false,
+            // 遮罩层
+            loading: true,
             // 表单参数
             form: {},
+            // 总条数
+            total: 0,
+            // 参赛团队表格数据
+            teamList: [],
+            // 查询参数
+            queryParams: {
+              pageNum: undefined,
+              pageSize: undefined,
+              competitionId: undefined,
+              name: undefined,
+              competitionType: undefined,
+              awardLevel: undefined,
+              teacherId: undefined,
+              teacherName: undefined,
+              studentId: undefined,
+              studentName: undefined,
+              audit: undefined,
+            },
             // 表单校验
             rules: {
               id: [
@@ -88,7 +113,7 @@ export default {
         }
     },
     created(){
-
+      this.getList();
     },
     methods: {
         // 取消按钮
@@ -137,9 +162,21 @@ export default {
                   this.buttonLoading = false;
                 });
               } else {
-                
+
               }
             }
+          });
+        },
+        /** 查询参赛团队列表 */
+        getList() {
+          this.loading = true;
+          listTeamByTeacherId(this.queryParams).then(response => {
+            this.teamList = response.rows;
+            this.total = response.total;
+            // 过滤掉已经提交佐证材料或已通过审核的团队
+            const filtersList = this.teamList.filter(element => element.audit === 0);
+            this.teamList = filtersList;
+            this.loading = false;
           });
         },
 
