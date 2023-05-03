@@ -22,8 +22,8 @@ import java.util.Collection;
 /**
  * 奖金分配个人Service业务层处理
  *
- * @author ruoyi
- * @date 2023-05-02
+ * @author Andy
+ * @date 2023-05-03
  */
 @RequiredArgsConstructor
 @Service

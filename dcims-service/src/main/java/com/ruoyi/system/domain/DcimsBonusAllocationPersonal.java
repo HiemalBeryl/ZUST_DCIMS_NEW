@@ -14,8 +14,8 @@ import com.ruoyi.common.core.domain.BaseEntity;
 /**
  * 奖金分配个人对象 dcims_bonus_allocation_personal
  *
- * @author ruoyi
- * @date 2023-05-02
+ * @author Andy
+ * @date 2023-05-03
  */
 @Data
 @EqualsAndHashCode(callSuper = true)

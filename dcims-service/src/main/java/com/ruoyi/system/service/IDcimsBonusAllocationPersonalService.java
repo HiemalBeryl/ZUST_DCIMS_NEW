@@ -12,8 +12,8 @@ import java.util.List;
 /**
  * 奖金分配个人Service接口
  *
- * @author ruoyi
- * @date 2023-05-02
+ * @author Andy
+ * @date 2023-05-03
  */
 public interface IDcimsBonusAllocationPersonalService {
 

@@ -7,8 +7,8 @@ import com.ruoyi.common.core.mapper.BaseMapperPlus;
 /**
  * 奖金分配个人Mapper接口
  *
- * @author ruoyi
- * @date 2023-05-02
+ * @author Andy
+ * @date 2023-05-03
  */
 public interface DcimsBonusAllocationPersonalMapper extends BaseMapperPlus<DcimsBonusAllocationPersonalMapper, DcimsBonusAllocationPersonal, DcimsBonusAllocationPersonalVo> {
 

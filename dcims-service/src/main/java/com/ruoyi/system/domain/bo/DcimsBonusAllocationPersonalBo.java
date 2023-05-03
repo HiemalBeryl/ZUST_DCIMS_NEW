@@ -1,22 +1,19 @@
 package com.ruoyi.system.domain.bo;
 
+import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import javax.validation.constraints.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
-
-import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
  * 奖金分配个人业务对象 dcims_bonus_allocation_personal
  *
- * @author ruoyi
- * @date 2023-05-02
+ * @author Andy
+ * @date 2023-05-03
  */
 
 @Data
