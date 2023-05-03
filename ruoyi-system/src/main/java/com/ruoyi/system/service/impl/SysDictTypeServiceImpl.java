@@ -96,6 +96,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
         if (CollUtil.isNotEmpty(dictDatas)) {
             return dictDatas;
         }
+        // 如果在若依系统字典中没找到，再去到自定义字典中查找
         return null;
     }
 
@@ -145,6 +146,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
      */
     @Override
     public void loadingDictCache() {
+        // system下手动设置的静态字典
         List<SysDictData> dictDataList = dictDataMapper.selectList(
             new LambdaQueryWrapper<SysDictData>().eq(SysDictData::getStatus, UserConstants.DICT_NORMAL));
         Map<String, List<SysDictData>> dictDataMap = StreamUtils.groupByKey(dictDataList, SysDictData::getDictType);
@@ -152,6 +154,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
             List<SysDictData> dictList = StreamUtils.sorted(v, Comparator.comparing(SysDictData::getDictSort));
             CacheUtils.put(CacheNames.SYS_DICT, k, dictList);
         });
+        //TODO: 根据业务需求载入动态字典，如全部教师信息字典、全部学生信息字典等...
     }
 
     /**
