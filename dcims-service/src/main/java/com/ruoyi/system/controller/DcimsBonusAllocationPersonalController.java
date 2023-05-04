@@ -113,7 +113,7 @@ public class DcimsBonusAllocationPersonalController extends BaseController {
      * 获取学院总金额
      *
      *
-     * */
+     */
     @SaCheckPermission("dcims:bonusAllocation:query")
     @GetMapping("/getTotal")
     public R<DcimsBonusAllocationVo> getTotalAmount() {
