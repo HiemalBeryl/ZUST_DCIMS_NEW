@@ -1,7 +1,7 @@
 <template>
 <el-form :model="form" :rules="rules" ref="form" label-width="100px" class="form">
 
-  <el-form-item label="选择团队" >
+  <el-form-item label="选择团队" prop="id">
     <el-select v-model="form.id" placeholder="请选择团队">
       <el-option
         v-for="team in teamList"
@@ -159,6 +159,7 @@ export default {
                   this.open = false;
                   this.resetForm('form');
                 }).finally(() => {
+                  this.getList();
                   this.buttonLoading = false;
                 });
               } else {
