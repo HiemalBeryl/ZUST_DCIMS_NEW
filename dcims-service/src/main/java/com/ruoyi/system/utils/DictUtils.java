@@ -47,8 +47,21 @@ public class DictUtils {
         // 创建新字典数据
         String allData = new String();
         List<DcimsTeacher> teachers = dcimsTeacherMapper.selectList(new QueryWrapper<>());
+        int index = 0;
+        boolean flag;
         for(DcimsTeacher teacher:teachers){
             allData = allData + '('+Math.toIntExact(teacher.getTeacherId())+','+'\"'+teacher.getName()+'\"'+','+teacher.getTeacherId()+','+'\"'+"dcims_teacher"+'\"'+','+'\"'+"default"+'\"'+','+'\''+"N"+'\''+','+"0"+')'+",";
+            index++;
+            if (index % 5000 == 0){
+                allData = allData.substring(0, allData.length() - 1);
+                allData += ";";
+                flag = dictDataMapper.InsertList(allData);
+                if(flag == false){
+                    dictDataMapper.delete(dictDataQueryWrapper);
+                    return false;
+                }
+                allData = "";
+            }
         }
         allData = allData.substring(0, allData.length() - 1);
         allData += ";";
@@ -70,8 +83,21 @@ public class DictUtils {
         // 创建新字典数据
         String allData = new String();
         List<DcimsStudent> students = dcimsStudentMapper.selectList(new QueryWrapper<>());
+        int index = 0;
+        boolean flag;
         for(DcimsStudent student:students){
             allData = allData + '('+Math.toIntExact(student.getStudentId())+','+'\"'+student.getName()+'\"'+','+student.getStudentId()+','+'\"'+"dcims_student"+'\"'+','+'\"'+"default"+'\"'+','+'\''+"N"+'\''+','+"0"+')'+",";
+            index++;
+            if (index % 5000 == 0){
+                allData = allData.substring(0, allData.length() - 1);
+                allData += ";";
+                flag = dictDataMapper.InsertList(allData);
+                if(flag == false){
+                    dictDataMapper.delete(dictDataQueryWrapper);
+                    return false;
+                }
+                allData = "";
+            }
         }
         allData = allData.substring(0, allData.length() - 1);
         allData += ";";
