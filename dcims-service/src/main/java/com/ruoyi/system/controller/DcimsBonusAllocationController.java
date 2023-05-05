@@ -1,8 +1,8 @@
 package com.ruoyi.system.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +17,6 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
-import com.ruoyi.common.core.validate.QueryGroup;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
@@ -104,5 +103,26 @@ public class DcimsBonusAllocationController extends BaseController {
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsBonusAllocationService.deleteWithValidByIds(Arrays.asList(ids), true));
+    }
+
+    /**
+     * 生成并查询某一段时间的竞赛奖金数据
+     */
+    @SaCheckPermission("dcims:bonusAllocation:generate")
+    @GetMapping("/generate")
+    public TableDataInfo<DcimsBonusAllocationVo> generateBonusDataByTime(@NotNull(message = "起始时间不能为空") @RequestParam Date startTime,@NotNull(message = "终止时间不能为空") @RequestParam Date endTime){
+
+        return new TableDataInfo<>();
+    }
+
+    /**
+     * 保存竞赛奖金数据
+     */
+    @SaCheckPermission("dcims:bonusAllocation:addList")
+    @Log(title = "奖金分配总", businessType = BusinessType.INSERT)
+    @RepeatSubmit()
+    @PostMapping("/saveList")
+    public R<Void> saveBonus(@Validated(AddGroup.class) @RequestBody List<DcimsBonusAllocationBo> bo){
+        return new R<>();
     }
 }

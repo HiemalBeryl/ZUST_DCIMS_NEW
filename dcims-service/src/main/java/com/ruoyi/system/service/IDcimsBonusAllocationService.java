@@ -6,6 +6,7 @@ import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,4 +52,8 @@ public interface IDcimsBonusAllocationService {
      */
     DcimsBonusAllocationVo getTotalAmount();
 
+    /**
+     * 生成并查询某一段时间的竞赛奖金数据
+     */
+    List<DcimsBonusAllocationVo> generateBonusDataByTime(Date startTime, Date endTime);
 }

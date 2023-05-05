@@ -7,17 +7,23 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.DcimsBonusAllocation;
+import com.ruoyi.system.domain.DcimsBonusAllocationPersonal;
+import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
+import com.ruoyi.system.domain.bo.DcimsBonusAllocationPersonalBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
 import com.ruoyi.system.mapper.DcimsBonusAllocationMapper;
+import com.ruoyi.system.mapper.DcimsBonusAllocationPersonalMapper;
+import com.ruoyi.system.mapper.DcimsCompetitionMapper;
+import com.ruoyi.system.mapper.DcimsTeamMapper;
 import com.ruoyi.system.service.IDcimsBonusAllocationService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * 奖金分配总Service业务层处理
@@ -29,14 +35,17 @@ import java.util.Map;
 @Service
 public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationService {
 
-    private final DcimsBonusAllocationMapper baseMapper;
+    private final DcimsBonusAllocationMapper bonusAllocationMapper;
+    private final DcimsBonusAllocationPersonalMapper bonusAllocationPersonalMapper;
+    private final DcimsTeamMapper teamMapper;
+    private final DcimsCompetitionMapper competitionMapper;
 
     /**
      * 查询奖金分配总
      */
     @Override
     public DcimsBonusAllocationVo queryById(Long id){
-        return baseMapper.selectVoById(id);
+        return bonusAllocationMapper.selectVoById(id);
     }
 
     /**
@@ -44,8 +53,8 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
      */
     @Override
     public TableDataInfo<DcimsBonusAllocationVo> queryPageList(DcimsBonusAllocationBo bo, PageQuery pageQuery) {
-        LambdaQueryWrapper<DcimsBonusAllocation> lqw = buildQueryWrapper(bo);
-        Page<DcimsBonusAllocationVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        LambdaQueryWrapper<com.ruoyi.system.domain.DcimsBonusAllocation> lqw = buildQueryWrapper(bo);
+        Page<DcimsBonusAllocationVo> result = bonusAllocationMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
 
@@ -54,15 +63,15 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
      */
     @Override
     public List<DcimsBonusAllocationVo> queryList(DcimsBonusAllocationBo bo) {
-        LambdaQueryWrapper<DcimsBonusAllocation> lqw = buildQueryWrapper(bo);
-        return baseMapper.selectVoList(lqw);
+        LambdaQueryWrapper<com.ruoyi.system.domain.DcimsBonusAllocation> lqw = buildQueryWrapper(bo);
+        return bonusAllocationMapper.selectVoList(lqw);
     }
 
-    private LambdaQueryWrapper<DcimsBonusAllocation> buildQueryWrapper(DcimsBonusAllocationBo bo) {
+    private LambdaQueryWrapper<com.ruoyi.system.domain.DcimsBonusAllocation> buildQueryWrapper(DcimsBonusAllocationBo bo) {
         Map<String, Object> params = bo.getParams();
-        LambdaQueryWrapper<DcimsBonusAllocation> lqw = Wrappers.lambdaQuery();
-        lqw.eq(bo.getYears() != null, DcimsBonusAllocation::getYears, bo.getYears());
-        lqw.eq(bo.getCollege() != null, DcimsBonusAllocation::getCollege, bo.getCollege());
+        LambdaQueryWrapper<com.ruoyi.system.domain.DcimsBonusAllocation> lqw = Wrappers.lambdaQuery();
+        lqw.eq(bo.getYears() != null, com.ruoyi.system.domain.DcimsBonusAllocation::getYears, bo.getYears());
+        lqw.eq(bo.getCollege() != null, com.ruoyi.system.domain.DcimsBonusAllocation::getCollege, bo.getCollege());
         return lqw;
     }
 
@@ -71,9 +80,9 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
      */
     @Override
     public Boolean insertByBo(DcimsBonusAllocationBo bo) {
-        DcimsBonusAllocation add = BeanUtil.toBean(bo, DcimsBonusAllocation.class);
+        com.ruoyi.system.domain.DcimsBonusAllocation add = BeanUtil.toBean(bo, com.ruoyi.system.domain.DcimsBonusAllocation.class);
         validEntityBeforeSave(add);
-        boolean flag = baseMapper.insert(add) > 0;
+        boolean flag = bonusAllocationMapper.insert(add) > 0;
         if (flag) {
             bo.setId(add.getId());
         }
@@ -85,15 +94,15 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
      */
     @Override
     public Boolean updateByBo(DcimsBonusAllocationBo bo) {
-        DcimsBonusAllocation update = BeanUtil.toBean(bo, DcimsBonusAllocation.class);
+        com.ruoyi.system.domain.DcimsBonusAllocation update = BeanUtil.toBean(bo, com.ruoyi.system.domain.DcimsBonusAllocation.class);
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        return bonusAllocationMapper.updateById(update) > 0;
     }
 
     /**
      * 保存前的数据校验
      */
-    private void validEntityBeforeSave(DcimsBonusAllocation entity){
+    private void validEntityBeforeSave(com.ruoyi.system.domain.DcimsBonusAllocation entity){
         //TODO 做一些数据校验,如唯一约束
     }
 
@@ -105,7 +114,7 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
         if(isValid){
             //TODO 做一些业务上的校验,判断是否需要校验
         }
-        return baseMapper.deleteBatchIds(ids) > 0;
+        return bonusAllocationMapper.deleteBatchIds(ids) > 0;
     }
 
 
@@ -116,13 +125,77 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
     @Override
     public DcimsBonusAllocationVo getTotalAmount() {
         Long teacherId = AccountUtils.getAccount().getTeacherId();
-        LambdaQueryWrapper<DcimsBonusAllocation> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(DcimsBonusAllocation::getYears,2022);
-        lqw.eq(DcimsBonusAllocation::getTeacherInCharge,teacherId);
-        return baseMapper.selectVoOne(lqw);
+        LambdaQueryWrapper<com.ruoyi.system.domain.DcimsBonusAllocation> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(com.ruoyi.system.domain.DcimsBonusAllocation::getYears,2022);
+        lqw.eq(com.ruoyi.system.domain.DcimsBonusAllocation::getTeacherInCharge,teacherId);
+        return bonusAllocationMapper.selectVoOne(lqw);
     }
 
+    /**
+     * 生成并查询某一段时间的竞赛奖金数据
+     */
+    @Override
+    public List<DcimsBonusAllocationVo> generateBonusDataByTime(Date startTime, Date endTime) {
+        // 查询限定时间内的所有通过审核的获奖团队
+        LambdaQueryWrapper<DcimsTeam>teamLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        teamLambdaQueryWrapper.between(DcimsTeam::getAwardTime,startTime,endTime);
+        teamLambdaQueryWrapper.eq(DcimsTeam::getAudit,2);
+        List<DcimsTeam> teamList = teamMapper.selectList(teamLambdaQueryWrapper);
+        // 根据团队查询所有含有获奖信息的竞赛
+        LambdaQueryWrapper<DcimsCompetition> competitionLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        Set<Long> idSet = new HashSet<>();
+        for (DcimsTeam team:teamList) {
+            idSet.add(team.getCompetitionId());
+        }
+        competitionLambdaQueryWrapper.eq(DcimsCompetition::getState,1);
+        competitionLambdaQueryWrapper.in(DcimsCompetition::getId,idSet);
+        List<DcimsCompetition> competitionList = competitionMapper.selectList();
+        // 创建奖金分配个人和奖金分配总列表对象
+        // 校级奖金明细，key为学院数据字典中的id，value为数据对象
+        Map<Long, DcimsBonusAllocation> bonusMap = new HashMap<>();
+        // 学院级奖金明细，key为竞赛id，value为数据对象
+        Map<Long, DcimsBonusAllocationPersonal> bonusPersonalMap = new HashMap<>();
+        for (DcimsTeam team:teamList) {
+            DcimsBonusAllocationPersonal personalBo;
+            if(bonusPersonalMap.containsKey(team.getCompetitionId()))   personalBo = bonusPersonalMap.get(team.getCompetitionId());
+            else personalBo = new DcimsBonusAllocationPersonal();
+            DcimsBonusAllocation allBo;
+            // TODO：学院id，目前数据库里没有保存这一条，应该加上！！！
+            Long collegeId = 1L;
+            if(bonusMap.containsKey(collegeId))   allBo = bonusMap.get(collegeId);
+            else allBo = new DcimsBonusAllocation();
+
+            // 计算该名队伍对应的应得奖金数额
+            Long bonus = 100L;
+            // 设置奖金分配个人
+            personalBo.setCompetition(team.getCompetitionId());
+            personalBo.setBonus(personalBo.getBonus() + bonus);
+            personalBo.setAllocateTime(new Date());
+            competitionList.forEach(competition->{
+                if(competition.getId().equals(team.getCompetitionId())){
+                    personalBo.setGainer(competition.getResponsiblePersonId());
+                }
+            });
+            personalBo.setYears(2023);
+            personalBo.setTeacherInCharge(AccountUtils.getAccount().getTeacherId());
+            // 设置奖金分配总
+            allBo.setYears(2023);
+            allBo.setCollege(Math.toIntExact(collegeId));
+            allBo.setTotalAmount(allBo.getTotalAmount() + bonus);
+            allBo.setRetentionRatio(BigDecimal.valueOf(1.00));
+            allBo.setDistributable(allBo.getTotalAmount());
+            allBo.setAllocated(0L);
+            allBo.setUnallocated(allBo.getTotalAmount());
+            allBo.setStartTime(startTime);
+            allBo.setEndTime(endTime);
 
 
-
+            bonusMap.replace(collegeId,allBo);
+            bonusPersonalMap.replace(team.getCompetitionId(),personalBo);
+        }
+        boolean flag = bonusAllocationMapper.insertOrUpdateBatch(bonusMap.values()) && bonusAllocationPersonalMapper.insertOrUpdateBatch(bonusPersonalMap.values());;
+        LambdaQueryWrapper<DcimsBonusAllocation> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsBonusAllocation::getYears,2023);
+        return bonusAllocationMapper.selectVoList(lqw);
+    }
 }
