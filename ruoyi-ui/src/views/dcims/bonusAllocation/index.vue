@@ -105,6 +105,7 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['dcims:bonusAllocation:edit']"
           >修改</el-button>
+          
           <el-button
             size="mini"
             type="text"
@@ -116,6 +117,25 @@
       </el-table-column>
     </el-table>
 
+    <el-row>
+
+      <el-col :span="12">
+        <el-button  class="countButton" @click="setTime()" >计算 </el-button>
+        <el-button  type="warning" class="countButton" @click="upload()" v-show="!countButtonShow" :disabled="uploadDisabled">{{uploadButtonText}}</el-button>
+      </el-col>
+      <el-col :span="12">
+        <pagination
+          v-show="total>0"
+          :total="total"
+          :page.sync="queryParams.pageNum"
+          :limit.sync="queryParams.pageSize"
+          @pagination="getList"
+        />
+      </el-col>
+    </el-row>
+
+<!-- 
+    <el-button>默认按钮</el-button>
     <pagination
       v-show="total>0"
       :total="total"
@@ -123,6 +143,8 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+    -->
+   
 
     <!-- 添加或修改奖金分配总对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -177,9 +199,37 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm" >确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="cancel()">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 设置起止时间对话框 -->
+    <el-dialog :title="title" :visible.sync="setTimeOpen" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="开始时间" prop="countStartTime">
+          <el-date-picker clearable
+            v-model="form.countStartTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择开始时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="结束时间" prop="countEndTime">
+          <el-date-picker clearable
+            v-model="form.countEndTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择结束时间">
+          </el-date-picker>
+        </el-form-item>
+        <div class="dialog-footer">
+          <el-button :loading="buttonLoading" type="primary" @click="setTimeSubmit()" >确 定</el-button>
+          <el-button @click="cancel">取 消</el-button>
+        </div>
+      </el-form>
+        
+    </el-dialog>
+    
   </div>
 </template>
 
@@ -189,7 +239,8 @@ import {
   getBonusAllocation,
   delBonusAllocation,
   addBonusAllocation,
-  updateBonusAllocation
+  updateBonusAllocation,
+  setTimeOfBonus
 } from "@/api/dcims/bonusAllocation";
 
 export default {
@@ -217,6 +268,14 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否显示设置起止时间的窗口
+      setTimeOpen: false,
+      //是否显示计算按钮
+      countButtonShow: true,
+      //上传是否不可用
+      uploadDisabled: false,
+      // 上传按钮上显示的文字
+      uploadButtonText: "上传",
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -261,6 +320,12 @@ export default {
         teacherInCharge: [
           { required: true, message: "负责教师不能为空", trigger: "blur" }
         ],
+        countStartTime: [
+          { required: true, message: "开始时间不能为空", trigger: "blur" }
+        ],
+        countEndTime: [
+          { required: true, message: "结束时间不能为空", trigger: "blur" }
+        ],
       }
     };
   },
@@ -280,6 +345,7 @@ export default {
     // 取消按钮
     cancel() {
       this.open = false;
+      this.setTimeOpen = false;
       this.reset();
     },
     // 表单重置
@@ -301,7 +367,9 @@ export default {
         createBy: undefined,
         updateTime: undefined,
         updateBy: undefined,
-        delFlag: undefined
+        delFlag: undefined,
+        countStartTime: undefined,
+        countEndTime: undefined,
       };
       this.resetForm("form");
     },
@@ -325,6 +393,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
+      
       this.title = "添加奖金分配总";
     },
     /** 修改按钮操作 */
@@ -364,6 +433,38 @@ export default {
         }
       });
     },
+
+    // 设定时间提交按钮
+    setTimeSubmit() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+         
+          this.buttonLoading = true;
+          setTimeOfBonus(this.form).then(response => {
+            this.$modal.msgSuccess("计算成功");
+            this.countButtonShow = false;
+            this.setTimeOpen = false;
+            this.open = false;
+            //TODO 替换表格内容
+            
+          }).finally(() => {
+            this.buttonLoading = false;
+          });
+        }
+      });
+    },
+
+    //上传按钮
+    upload() {
+      this.$modal.confirm('是否确认上传并发布本年度奖金分配，注意一年只能发布一次！！！').then(() => {
+        // 按钮改为不可用
+        this.uploadDisabled = true;
+        this.$modal.msgWarning("上传成功");
+        this.uploadButtonText = "已上传";
+      })
+
+    },
+
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
@@ -384,7 +485,24 @@ export default {
       this.download('dcims/bonusAllocation/export', {
         ...this.queryParams
       }, `bonusAllocation_${new Date().getTime()}.xlsx`)
+    },
+    // 设置时间按钮操作
+    setTime() {
+      this.setTimeOpen = true;
+      this.title = "设定结算起止时间";
     }
   }
 };
 </script>
+
+<style>
+.countButton{
+  margin: 25px 0 ;
+}
+.dialog-footer{
+  text-align: right;
+}
+.stayRight{
+  text-align: right;
+}
+</style>

@@ -42,3 +42,11 @@ export function delBonusAllocation(id) {
     method: 'delete'
   })
 }
+
+// 设置奖金计算起止时间
+export function setTimeOfBonus(data) {
+  return request({
+    url: '/dcims/bonusAllocation/generate?' +"startTime="+ data.countStartTime +"&endTime="+ data.countEndTime,
+    method: 'get',
+  })
+}
