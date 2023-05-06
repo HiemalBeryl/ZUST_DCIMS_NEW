@@ -1,7 +1,7 @@
-package com.ruoyi.system.utils.mapper;
+package com.ruoyi.system.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.ruoyi.system.utils.domain.DcimsStudent;
+import com.ruoyi.system.domain.DcimsStudent;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

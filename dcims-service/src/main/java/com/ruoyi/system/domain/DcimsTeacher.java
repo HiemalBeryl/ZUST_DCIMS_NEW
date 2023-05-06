@@ -1,4 +1,4 @@
-package com.ruoyi.system.utils.domain;
+package com.ruoyi.system.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -10,15 +10,15 @@ import java.math.BigDecimal;
 import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 学生信息对象 dcims_student
+ * 教师信息对象 dcims_teacher
  *
  * @author ruoyi
  * @date 2023-05-03
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("dcims_student")
-public class DcimsStudent extends BaseEntity {
+@TableName("dcims_teacher")
+public class DcimsTeacher extends BaseEntity {
 
     private static final long serialVersionUID=1L;
 
@@ -28,9 +28,9 @@ public class DcimsStudent extends BaseEntity {
     @TableId(value = "id")
     private Long id;
     /**
-     * 学号
+     * 工号
      */
-    private Long studentId;
+    private Long teacherId;
     /**
      * 姓名
      */
@@ -40,13 +40,25 @@ public class DcimsStudent extends BaseEntity {
      */
     private String college;
     /**
+     * 系部
+     */
+    private String department;
+    /**
      * 专业
      */
     private String major;
     /**
-     * 班级
+     * 职称
      */
-    private String classes;
+    private String title;
+    /**
+     * 学历
+     */
+    private String education;
+    /**
+     * 学位
+     */
+    private String degree;
     /**
      * 电话
      */
@@ -55,6 +67,10 @@ public class DcimsStudent extends BaseEntity {
      * 电子邮件
      */
     private String email;
+    /**
+     * 是否为校内教师;0-校外教师 1-校内入职教师
+     */
+    private String isZust;
     /**
      * 逻辑删除;0-未删除 1-已删除
      */
