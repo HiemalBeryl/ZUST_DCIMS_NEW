@@ -6,16 +6,15 @@ import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.domain.entity.SysDictType;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
-import com.ruoyi.system.utils.domain.DcimsStudent;
-import com.ruoyi.system.utils.domain.DcimsTeacher;
-import com.ruoyi.system.utils.mapper.DcimsStudentMapper;
-import com.ruoyi.system.utils.mapper.DcimsTeacherMapper;
+import com.ruoyi.system.domain.DcimsStudent;
+import com.ruoyi.system.domain.DcimsTeacher;
+import com.ruoyi.system.mapper.DcimsStudentMapper;
+import com.ruoyi.system.mapper.DcimsTeacherMapper;
 import com.ruoyi.system.utils.mapper.DictDataMapper;
 import com.ruoyi.system.utils.mapper.DictTypeMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.LinkedList;
 import java.util.List;
 
 @Component
@@ -28,11 +27,12 @@ public class DictUtils {
     private static DcimsCompetitionMapper dcimsCompetitionMapper;
 
     @Autowired
-    public DictUtils(DictDataMapper dictDataMapper, DictTypeMapper dictTypeMapper, DcimsStudentMapper dcimsStudentMapper, DcimsTeacherMapper dcimsTeacherMapper){
+    public DictUtils(DictDataMapper dictDataMapper, DictTypeMapper dictTypeMapper, DcimsStudentMapper dcimsStudentMapper, DcimsTeacherMapper dcimsTeacherMapper, DcimsCompetitionMapper dcimsCompetitionMapper){
         DictUtils.dictDataMapper = dictDataMapper;
         DictUtils.dictTypeMapper = dictTypeMapper;
         DictUtils.dcimsStudentMapper = dcimsStudentMapper;
         DictUtils.dcimsTeacherMapper = dcimsTeacherMapper;
+        DictUtils.dcimsCompetitionMapper = dcimsCompetitionMapper;
     }
 
     /**

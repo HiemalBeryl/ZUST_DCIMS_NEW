@@ -3,6 +3,7 @@ package com.ruoyi.system.mapper;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.common.core.mapper.BaseMapperPlus;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 竞赛赛事基本信息Mapper接口
@@ -10,6 +11,7 @@ import com.ruoyi.common.core.mapper.BaseMapperPlus;
  * @author hiemalberyl
  * @date 2023-04-29
  */
+@Mapper
 public interface DcimsCompetitionMapper extends BaseMapperPlus<DcimsCompetitionMapper, DcimsCompetition, DcimsCompetitionVo> {
 
 }
