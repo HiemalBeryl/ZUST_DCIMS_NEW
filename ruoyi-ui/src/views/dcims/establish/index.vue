@@ -69,8 +69,15 @@
       <el-form-item label="竞赛申报书" prop="attachment">
         <file-upload v-model="form.attachment"/>
       </el-form-item>
-      <el-form-item label="审核人工号" prop="nextAuditId">
-        <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
+      <el-form-item label="审核人" prop="nextAuditId">
+        <el-select filterable v-model="form.nextAuditId" placeholder="请选择审核人">
+          <el-option
+            v-for="dict in dict.type.dcims_teacher"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -84,7 +91,7 @@
 import {addCompetition} from "@/api/dcims/competition";
 export default {
   name: "Competition",
-  dicts: ['dcims_audit_result', 'dcims_competition_type'],
+  dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher'],
   data(){
     return{
       // 按钮loading
@@ -132,7 +139,7 @@ export default {
     }
   },
   created(){
-    
+
   },
   methods: {
     /** 提交按钮 */

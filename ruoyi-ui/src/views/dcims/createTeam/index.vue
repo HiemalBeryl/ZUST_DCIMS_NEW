@@ -6,8 +6,15 @@
     </div>
         <div>
             <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-          <el-form-item label="竞赛id" prop="competitionId">
-            <el-input v-model="form.competitionId" placeholder="请输入竞赛id" />
+          <el-form-item label="所属竞赛" prop="competitionId">
+            <el-select filterable v-model="form.competitionId" placeholder="请选择所属竞赛">
+          <el-option
+            v-for="dict in dict.type.dcims_2023competition"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
           </el-form-item>
           <el-form-item label="队伍名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入队伍名称" />
@@ -23,13 +30,27 @@
             </el-select>
           </el-form-item>
           <el-form-item label="指导教师工号" prop="teacherId">
-            <el-input v-model="form.teacherId" type="textarea" placeholder="请输入内容" />
+            <el-select v-model="form.teacherId" multiple placeholder="请选择指导教师" @change="syncTeacherName">
+              <el-option
+                v-for="dict in dict.type.dcims_teacher"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="指导教师姓名" prop="teacherName">
             <el-input v-model="form.teacherName" type="textarea" placeholder="请输入内容" />
           </el-form-item>
           <el-form-item label="参赛学生学号" prop="studentId">
-            <el-input v-model="form.studentId" type="textarea" placeholder="请输入内容" />
+            <el-select v-model="form.studentId" multiple placeholder="请选择参赛学生" @change="syncStudentName">
+              <el-option
+                v-for="dict in dict.type.dcims_student"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              ></el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="参赛学生姓名" prop="studentName">
             <el-input v-model="form.studentName" type="textarea" placeholder="请输入内容" />
@@ -50,12 +71,12 @@
     </div>
 </div>
 </template>
-    
+
 <script>
 import { addTeam, updateTeam } from "@/api/dcims/team";
 export default {
     name: "CreateTeam",
-    dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status'],
+    dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status', 'dcims_2023competition', 'dcims_teacher', 'dcims_student'],
     data(){
         return {
             // 按钮loading
@@ -147,7 +168,20 @@ export default {
             }
           });
         },
+        // 根据选中学号同步学生姓名
+        syncStudentName(){
+          this.form.studentId.forEach(element => {
 
+          })
+
+          dict.type.dcims_2023competition.forEach(element => {
+
+          });
+        },
+        // 根据选中工号同步教师姓名
+        syncTeacherName(){
+          this.form.teacherId
+        }
     }
 }
 </script>
