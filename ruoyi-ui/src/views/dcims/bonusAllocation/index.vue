@@ -240,7 +240,8 @@ import {
   delBonusAllocation,
   addBonusAllocation,
   updateBonusAllocation,
-  setTimeOfBonus
+  setTimeOfBonus,
+  saveBonus
 } from "@/api/dcims/bonusAllocation";
 
 export default {
@@ -264,6 +265,8 @@ export default {
       total: 0,
       // 奖金分配总表格数据
       bonusAllocationList: [],
+      // 奖金分配个人数据
+      bonusAllocationPersonalList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -446,7 +449,8 @@ export default {
             this.setTimeOpen = false;
             this.open = false;
             //TODO 替换表格内容
-            
+            this.bonusAllocationList = response[0];
+            this.bonusAllocationPersonalList = response[1];
           }).finally(() => {
             this.buttonLoading = false;
           });
@@ -457,10 +461,14 @@ export default {
     //上传按钮
     upload() {
       this.$modal.confirm('是否确认上传并发布本年度奖金分配，注意一年只能发布一次！！！').then(() => {
+        saveBonus(this.bonusAllocationList, this.bonusAllocationPersonalList).then(response => {
         // 按钮改为不可用
         this.uploadDisabled = true;
         this.$modal.msgWarning("上传成功");
         this.uploadButtonText = "已上传";
+        }).finally(() =>{
+          this.getList;
+        })
       })
 
     },

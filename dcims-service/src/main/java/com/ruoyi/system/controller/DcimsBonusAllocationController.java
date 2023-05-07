@@ -1,30 +1,28 @@
 package com.ruoyi.system.controller;
 
+import java.util.*;
+
+import com.ruoyi.system.domain.bo.DcimsBonusAllocationPersonalBo;
+import lombok.RequiredArgsConstructor;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.ruoyi.common.annotation.Log;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.annotation.Validated;
 import com.ruoyi.common.annotation.RepeatSubmit;
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.R;
-import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
+import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
 import com.ruoyi.system.service.IDcimsBonusAllocationService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import com.ruoyi.common.core.page.TableDataInfo;
 
 /**
  * 奖金分配总
@@ -112,14 +110,8 @@ public class DcimsBonusAllocationController extends BaseController {
      */
     @SaCheckPermission("dcims:bonusAllocation:generate")
     @GetMapping("/generate")
-    public TableDataInfo<DcimsBonusAllocationVo> generateBonusDataByTime(@NotNull(message = "起始时间不能为空")
-                                                                         @DateTimeFormat(pattern = "yyyy-MM-dd")
-                                                                         @RequestParam Date startTime,
-                                                                         @NotNull(message = "终止时间不能为空")
-                                                                         @DateTimeFormat(pattern = "yyyy-MM-dd")
-                                                                         @RequestParam Date endTime){
-
-        return new TableDataInfo<>();
+    public List<Object> generateBonusDataByTime(@NotNull(message = "起始时间不能为空") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime, @NotNull(message = "终止时间不能为空") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime){
+        return iDcimsBonusAllocationService.generateBonusDataByTime(startTime, endTime);
     }
 
     /**
@@ -129,7 +121,13 @@ public class DcimsBonusAllocationController extends BaseController {
     @Log(title = "奖金分配总", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping("/saveList")
-    public R<Void> saveBonus(@Validated(AddGroup.class) @RequestBody List<DcimsBonusAllocationBo> bo){
-        return new R<>();
+    public R<Void> saveBonus(@RequestBody Map<String, Object> json){
+        //List<DcimsBonusAllocationBo> allBo = JsonUtils.parseArray((String) json.get("allBo"),DcimsBonusAllocationBo.class);
+        List<DcimsBonusAllocationBo> allBo = (ArrayList<DcimsBonusAllocationBo>) json.get("allBo");
+        //List<DcimsBonusAllocationPersonalBo> personalBo = JsonUtils.parseArray((String) json.get("personalBo"),DcimsBonusAllocationPersonalBo.class);
+        List<DcimsBonusAllocationPersonalBo> personalBo = (ArrayList<DcimsBonusAllocationPersonalBo>) json.get("personalBo");
+        System.out.println(allBo);
+        System.out.println(personalBo);
+        return toAjax(iDcimsBonusAllocationService.insertYearsBonusData(allBo,personalBo));
     }
 }

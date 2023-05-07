@@ -50,3 +50,15 @@ export function setTimeOfBonus(data) {
     method: 'get',
   })
 }
+
+// 保存竞赛奖金数据
+export function saveBonus(allBo, personalBo) {
+  return request({
+    url: '/dcims/bonusAllocation/saveList',
+    method: 'post',
+    data: {
+      allBo,
+      personalBo
+    }
+  })
+}

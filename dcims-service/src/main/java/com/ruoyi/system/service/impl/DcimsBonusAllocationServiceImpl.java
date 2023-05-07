@@ -1,6 +1,8 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -135,7 +137,7 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
      * 生成并查询某一段时间的竞赛奖金数据
      */
     @Override
-    public List<DcimsBonusAllocationVo> generateBonusDataByTime(Date startTime, Date endTime) {
+    public List<Object> generateBonusDataByTime(Date startTime, Date endTime) {
         // 查询限定时间内的所有通过审核的获奖团队
         LambdaQueryWrapper<DcimsTeam>teamLambdaQueryWrapper = new LambdaQueryWrapper<>();
         teamLambdaQueryWrapper.between(DcimsTeam::getAwardTime,startTime,endTime);
@@ -155,6 +157,7 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
         Map<Long, DcimsBonusAllocation> bonusMap = new HashMap<>();
         // 学院级奖金明细，key为竞赛id，value为数据对象
         Map<Long, DcimsBonusAllocationPersonal> bonusPersonalMap = new HashMap<>();
+        Long teacherInCharge = AccountUtils.getAccount().getTeacherId();
         for (DcimsTeam team:teamList) {
             DcimsBonusAllocationPersonal personalBo;
             if(bonusPersonalMap.containsKey(team.getCompetitionId()))   personalBo = bonusPersonalMap.get(team.getCompetitionId());
@@ -169,7 +172,11 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
             Long bonus = 100L;
             // 设置奖金分配个人
             personalBo.setCompetition(team.getCompetitionId());
-            personalBo.setBonus(personalBo.getBonus() + bonus);
+            if (personalBo.getBonus() == null){
+                personalBo.setBonus(bonus);
+            }else{
+                personalBo.setBonus(personalBo.getBonus() + bonus);
+            }
             personalBo.setAllocateTime(new Date());
             competitionList.forEach(competition->{
                 if(competition.getId().equals(team.getCompetitionId())){
@@ -177,11 +184,16 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
                 }
             });
             personalBo.setYears(2023);
-            personalBo.setTeacherInCharge(AccountUtils.getAccount().getTeacherId());
+            personalBo.setTeacherInCharge(teacherInCharge);
+
             // 设置奖金分配总
             allBo.setYears(2023);
             allBo.setCollege(Math.toIntExact(collegeId));
-            allBo.setTotalAmount(allBo.getTotalAmount() + bonus);
+            if (allBo.getTotalAmount() == null){
+                allBo.setTotalAmount(bonus);
+            }else{
+                allBo.setTotalAmount(allBo.getTotalAmount() + bonus);
+            }
             allBo.setRetentionRatio(BigDecimal.valueOf(1.00));
             allBo.setDistributable(allBo.getTotalAmount());
             allBo.setAllocated(0L);
@@ -189,13 +201,46 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
             allBo.setStartTime(startTime);
             allBo.setEndTime(endTime);
 
-
-            bonusMap.replace(collegeId,allBo);
-            bonusPersonalMap.replace(team.getCompetitionId(),personalBo);
+            if(bonusMap.putIfAbsent(collegeId,allBo) != null)
+                bonusMap.replace(collegeId,allBo);
+            if(bonusPersonalMap.putIfAbsent(team.getCompetitionId(),personalBo) != null)
+                bonusPersonalMap.replace(team.getCompetitionId(),personalBo);
         }
-        boolean flag = bonusAllocationMapper.insertOrUpdateBatch(bonusMap.values()) && bonusAllocationPersonalMapper.insertOrUpdateBatch(bonusPersonalMap.values());;
-        LambdaQueryWrapper<DcimsBonusAllocation> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(DcimsBonusAllocation::getYears,2023);
-        return bonusAllocationMapper.selectVoList(lqw);
+        //boolean flag = bonusAllocationMapper.insertOrUpdateBatch(bonusMap.values()) && bonusAllocationPersonalMapper.insertOrUpdateBatch(bonusPersonalMap.values());;
+        //LambdaQueryWrapper<DcimsBonusAllocation> lqw = new LambdaQueryWrapper<>();
+        //lqw.eq(DcimsBonusAllocation::getYears,2023);
+        //return bonusAllocationMapper.selectVoList(lqw);
+        List<Object> list = new ArrayList<>();
+        list.add(bonusMap.values());
+        list.add(bonusPersonalMap.values());
+        return list;
+    }
+
+    /**
+     * 保存竞赛奖金数据
+     */
+    public Boolean insertYearsBonusData(List<DcimsBonusAllocationBo> allBo, List<DcimsBonusAllocationPersonalBo> personalBo){
+        List<DcimsBonusAllocation> alls = new ArrayList<>();
+        List<DcimsBonusAllocationPersonal> personals = new ArrayList<>();
+        for (Object object:allBo) {
+            // 将list中的数据转成json字符串
+            String jsonObject= JSON.toJSONString(object);
+            //将json转成需要的对象
+            DcimsBonusAllocationBo element = JSONObject.parseObject(jsonObject,DcimsBonusAllocationBo.class);
+            DcimsBonusAllocation all = BeanUtil.toBean(element, DcimsBonusAllocation.class);
+            alls.add(all);
+        }
+        for(Object object:personalBo){
+            // 将list中的数据转成json字符串
+            String jsonObject= JSON.toJSONString(object);
+            //将json转成需要的对象
+            DcimsBonusAllocationPersonalBo element = JSONObject.parseObject(jsonObject,DcimsBonusAllocationPersonalBo.class);
+            DcimsBonusAllocationPersonal personal = BeanUtil.toBean(element, DcimsBonusAllocationPersonal.class);
+            personals.add(personal);
+        }
+        System.out.println(alls);
+        System.out.println(personals);
+        boolean flag = bonusAllocationPersonalMapper.insertBatch(personals)&& bonusAllocationMapper.insertBatch(alls);
+        return flag;
     }
 }

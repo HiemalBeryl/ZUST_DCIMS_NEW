@@ -2,12 +2,15 @@ package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.DcimsBonusAllocation;
 import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
+import com.ruoyi.system.domain.bo.DcimsBonusAllocationPersonalBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 奖金分配总Service接口
@@ -55,5 +58,10 @@ public interface IDcimsBonusAllocationService {
     /**
      * 生成并查询某一段时间的竞赛奖金数据
      */
-    List<DcimsBonusAllocationVo> generateBonusDataByTime(Date startTime, Date endTime);
+    List<Object> generateBonusDataByTime(Date startTime, Date endTime);
+
+    /**
+     * 保存竞赛奖金数据
+     */
+    Boolean insertYearsBonusData(List<DcimsBonusAllocationBo> allBo, List<DcimsBonusAllocationPersonalBo> personalBo);
 }
