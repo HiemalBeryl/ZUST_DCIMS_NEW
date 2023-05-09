@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="organizer" column="organizer"/>
         <result property="responsiblePersonId" column="responsible_person_id"/>
         <result property="responsiblePersonName" column="responsible_person_name"/>
+        <result property="college" column="college"/>
         <result property="innerTime" column="inner_time"/>
         <result property="provinceTime" column="province_time"/>
         <result property="nationalTime" column="national_time"/>

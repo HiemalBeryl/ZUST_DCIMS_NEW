@@ -33,6 +33,16 @@
       <el-form-item label="竞赛负责人" prop="responsiblePersonName">
         <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
       </el-form-item>
+      <el-form-item label="所属学院" prop="college">
+        <el-select v-model="form.college" placeholder="请选择所属学院" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_college"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="校内选拔时间" prop="innerTime">
         <el-date-picker clearable
           v-model="form.innerTime"
@@ -91,7 +101,7 @@
 import {addCompetition} from "@/api/dcims/competition";
 export default {
   name: "Competition",
-  dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher'],
+  dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher', 'dcims_college'],
   data(){
     return{
       // 按钮loading
@@ -128,6 +138,9 @@ export default {
         ],
         responsiblePersonName: [
           { required: true, message: "竞赛负责人不能为空", trigger: "blur" }
+        ],
+        college: [
+          { required: true, message: "所属学院不能为空", trigger: "blur"}
         ],
         attachment: [
           { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
@@ -176,6 +189,7 @@ export default {
         organizer: undefined,
         responsiblePersonId: undefined,
         responsiblePersonName: undefined,
+        college: undefined,
         innerTime: undefined,
         provinceTime: undefined,
         nationalTime: undefined,

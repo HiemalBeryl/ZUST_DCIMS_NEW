@@ -85,6 +85,12 @@ public class DcimsCompetitionVo {
     private String responsiblePersonName;
 
     /**
+     * 所属学院
+     */
+    @ExcelProperty(value = "所属学院")
+    private String college;
+
+    /**
      * 校内选拔时间
      */
     @ExcelProperty(value = "校内选拔时间")

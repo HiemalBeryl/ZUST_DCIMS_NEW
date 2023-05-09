@@ -69,6 +69,7 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         lqw.eq(bo.getAnnual() != null, DcimsCompetition::getAnnual, bo.getAnnual());
         lqw.eq(StringUtils.isNotBlank(bo.getOrganizer()), DcimsCompetition::getOrganizer, bo.getOrganizer());
         lqw.like(StringUtils.isNotBlank(bo.getResponsiblePersonName()), DcimsCompetition::getResponsiblePersonName, bo.getResponsiblePersonName());
+        lqw.like(StringUtils.isNotBlank(bo.getCollege()), DcimsCompetition::getCollege, bo.getCollege());
         lqw.between(params.get("beginInnerTime") != null && params.get("endInnerTime") != null,
             DcimsCompetition::getInnerTime ,params.get("beginInnerTime"), params.get("endInnerTime"));
         lqw.between(params.get("beginProvinceTime") != null && params.get("endProvinceTime") != null,

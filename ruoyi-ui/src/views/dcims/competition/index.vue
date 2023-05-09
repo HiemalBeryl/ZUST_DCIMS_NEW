@@ -59,6 +59,16 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="所属学院" prop="college">
+        <el-select v-model="queryParams.college" placeholder="请选择所属学院" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_college"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="校内选拔时间">
         <el-date-picker
           v-model="daterangeInnerTime"
@@ -141,6 +151,11 @@
       <el-table-column label="主办单位" align="center" prop="organizer" />
       <el-table-column label="竞赛负责人工号" align="center" prop="responsiblePersonId" />
       <el-table-column label="竞赛负责人" align="center" prop="responsiblePersonName" />
+      <el-table-column label="所属学院" align="center" prop="college">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.dcims_college" :value="scope.row.college"/>
+        </template>
+      </el-table-column>
       <el-table-column label="校内选拔时间" align="center" prop="innerTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.innerTime, '{y}-{m}-{d}') }}</span>
@@ -189,7 +204,7 @@ import { listCompetition, getCompetition, delCompetition} from "@/api/dcims/comp
 
 export default {
   name: "Competition",
-  dicts: ['dcims_audit_result', 'dcims_competition_type'],
+  dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_college'],
   data() {
     return {
       // 按钮loading
@@ -230,6 +245,7 @@ export default {
         term: undefined,
         annual: undefined,
         organizer: undefined,
+        college: undefined,
         responsiblePersonName: undefined,
         innerTime: undefined,
         provinceTime: undefined,
