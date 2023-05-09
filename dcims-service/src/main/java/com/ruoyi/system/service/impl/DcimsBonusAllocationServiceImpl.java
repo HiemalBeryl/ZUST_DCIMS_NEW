@@ -163,8 +163,12 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
             if(bonusPersonalMap.containsKey(team.getCompetitionId()))   personalBo = bonusPersonalMap.get(team.getCompetitionId());
             else personalBo = new DcimsBonusAllocationPersonal();
             DcimsBonusAllocation allBo;
-            // TODO：学院id，目前数据库里没有保存这一条，应该加上！！！
-            Long collegeId = 1L;
+            Long collegeId = -1L;
+            for (DcimsCompetition competition:competitionList) {
+                if(competition.getId().equals(team.getCompetitionId())){
+                    collegeId = competition.getCollege();
+                }
+            }
             if(bonusMap.containsKey(collegeId))   allBo = bonusMap.get(collegeId);
             else allBo = new DcimsBonusAllocation();
 
