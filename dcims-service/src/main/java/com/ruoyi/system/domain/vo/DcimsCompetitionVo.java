@@ -88,7 +88,7 @@ public class DcimsCompetitionVo {
      * 所属学院
      */
     @ExcelProperty(value = "所属学院")
-    private String college;
+    private Long college;
 
     /**
      * 校内选拔时间

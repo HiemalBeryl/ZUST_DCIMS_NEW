@@ -86,8 +86,8 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 所属学院
      */
-    @NotBlank(message = "所属学院不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String college;
+    @NotNull(message = "所属学院不能为空", groups = { AddGroup.class, EditGroup.class })
+    private Long college;
 
     /**
      * 校内选拔时间

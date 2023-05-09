@@ -73,7 +73,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 所属学院
      */
-    private String college;
+    private Long college;
     /**
      * 校内选拔时间
      */
