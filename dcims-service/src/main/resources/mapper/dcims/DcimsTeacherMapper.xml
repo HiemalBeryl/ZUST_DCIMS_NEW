@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DcimsTeacherMapper">
+
+    <resultMap type="com.ruoyi.system.domain.DcimsTeacher" id="DcimsTeacherResult">
+        <result property="id" column="id"/>
+        <result property="teacherId" column="teacher_id"/>
+        <result property="name" column="name"/>
+        <result property="college" column="college"/>
+        <result property="department" column="department"/>
+        <result property="major" column="major"/>
+        <result property="title" column="title"/>
+        <result property="education" column="education"/>
+        <result property="degree" column="degree"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="isZust" column="is_zust"/>
+        <result property="deleted" column="deleted"/>
+    </resultMap>
+
+
+</mapper>
