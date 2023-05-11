@@ -144,6 +144,9 @@ export default {
         },
         /** 提交按钮 */
         submitForm() {
+          // 数组对象预处理
+          this.form.teacherId = this.form.teacherId.join(",");
+          this.form.studentId = this.form.studentId.join(",");
           this.$refs["form"].validate(valid => {
             if (valid) {
               this.buttonLoading = true;
