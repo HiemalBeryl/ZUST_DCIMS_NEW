@@ -115,6 +115,18 @@ public class DcimsCompetitionBo extends BaseEntity {
     private BigDecimal appropriation;
 
     /**
+     * 总学时
+     */
+    @NotNull(message = "总学时不能为空", groups = { AddGroup.class, EditGroup.class })
+    private BigDecimal teachingHours;
+
+    /**
+     * 集中授课安排表
+     */
+    @NotBlank(message = "请上传集中授课安排表", groups = { AddGroup.class, EditGroup.class })
+    private String teachingHoursAttachment;
+
+    /**
      * 获奖目标
      */
     private String goal;
@@ -127,7 +139,7 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 竞赛申报书
      */
-    @NotBlank(message = "竞赛申报书不能为空", groups = { AddGroup.class, EditGroup.class })
+    @NotBlank(message = "请上传竞赛申报书", groups = { AddGroup.class, EditGroup.class })
     private String attachment;
 
     /**

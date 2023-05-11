@@ -23,6 +23,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="stopTime" column="stop_time"/>
         <result property="budget" column="budget"/>
         <result property="appropriation" column="appropriation"/>
+        <result property="teachingHours" column="teaching_hours"/>
+        <result property="teachingHoursAttachment" column="teaching_hours_attachment"/>
         <result property="goal" column="goal"/>
         <result property="introduction" column="introduction"/>
         <result property="attachment" column="attachment"/>

@@ -70,6 +70,12 @@
       <el-form-item label="本年度申报经费" prop="budget">
         <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
       </el-form-item>
+      <el-form-item label="总学时" prop="teachingHours">
+        <el-input v-model="form.teachingHours" placeholder="请输入总学时" />
+      </el-form-item>
+      <el-form-item label="集中授课安排表附件" prop="teachingHoursAttachment">
+        <file-upload v-model="form.teachingHoursAttachment"/>
+      </el-form-item>
       <el-form-item label="获奖目标" prop="goal">
         <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
       </el-form-item>
@@ -142,8 +148,14 @@ export default {
         college: [
           { required: true, message: "所属学院不能为空", trigger: "blur"}
         ],
+        teachingHours: [
+          { required: true, message: "总学时不能为空", trigger: "blur"}
+        ],
+        teachingHoursAttachment: [
+          { required: true, message: "请上传集中授课安排表", trigger: "blur"}
+        ],
         attachment: [
-          { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
+          { required: true, message: "请上传竞赛申报书", trigger: "blur" }
         ],
         nextAuditId: [
           { required: true, message: "审核人工号不能为空", trigger: "blur"}
@@ -196,6 +208,8 @@ export default {
         stopTime: undefined,
         budget: undefined,
         appropriation: undefined,
+        teachingHours: undefined,
+        teachingHoursAttachment: undefined,
         goal: undefined,
         introduction: undefined,
         attachment: undefined,
