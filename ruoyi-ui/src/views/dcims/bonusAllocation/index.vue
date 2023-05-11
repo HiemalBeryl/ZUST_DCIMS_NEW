@@ -98,12 +98,22 @@
       <el-table-column label="负责教师" align="center" prop="teacherInCharge" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
+          <el-button 
+            size="mini"
+            type="text"
+            icon="el-icon-s-order"
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['dcims:bonusAllocation:edit']"
+            v-if="isCounted === false"
+          >查看详情</el-button>
+
           <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['dcims:bonusAllocation:edit']"
+            v-if="isCounted === true"
           >修改</el-button>
           
           <el-button
@@ -112,6 +122,7 @@
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['dcims:bonusAllocation:remove']"
+            v-if="isCounted === true"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -146,14 +157,14 @@
     -->
    
 
-    <!-- 添加或修改奖金分配总对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <!-- 查看“奖金分配总”详情的对话框 -->
+    <el-dialog :title="title" :visible.sync="openDetail" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="年份" prop="years">
-          <el-input v-model="form.years" placeholder="请输入年份" />
+          <el-input v-model="form.years" :disabled="true" placeholder="请输入年份" />
         </el-form-item>
         <el-form-item label="学院" prop="college">
-          <el-select v-model="form.college" placeholder="请选择学院">
+          <el-select v-model="form.college" :disabled="true" placeholder="请选择学院">
             <el-option
               v-for="dict in dict.type.dcims_college"
               :key="dict.value"
@@ -163,19 +174,19 @@
           </el-select>
         </el-form-item>
         <el-form-item label="奖金总数" prop="totalAmount">
-          <el-input v-model="form.totalAmount" placeholder="请输入奖金总数" />
+          <el-input v-model="form.totalAmount" :disabled="true" placeholder="请输入奖金总数" />
         </el-form-item>
         <el-form-item label="留存比例" prop="retentionRatio">
-          <el-input v-model="form.retentionRatio" placeholder="请输入留存比例" />
+          <el-input v-model="form.retentionRatio" :disabled="true" placeholder="请输入留存比例" />
         </el-form-item>
         <el-form-item label="可分配总额" prop="distributable">
-          <el-input v-model="form.distributable" placeholder="请输入可分配总额" />
+          <el-input v-model="form.distributable" :disabled="true" placeholder="请输入可分配总额" />
         </el-form-item>
         <el-form-item label="已分配金额" prop="allocated">
-          <el-input v-model="form.allocated" placeholder="请输入已分配金额" />
+          <el-input v-model="form.allocated" :disabled="true" placeholder="请输入已分配金额" />
         </el-form-item>
         <el-form-item label="未分配金额" prop="unallocated">
-          <el-input v-model="form.unallocated" placeholder="请输入未分配金额" />
+          <el-input v-model="form.unallocated" :disabled="true" placeholder="请输入未分配金额" />
         </el-form-item>
         <el-form-item label="开始时间" prop="startTime">
           <el-date-picker clearable
@@ -201,6 +212,11 @@
         <el-button :loading="buttonLoading" type="primary" @click="submitForm" >确 定</el-button>
         <el-button @click="cancel()">取 消</el-button>
       </div>
+    </el-dialog>
+
+    <!-- 编辑待提交的年度奖金汇总对话框 -->
+    <el-dialog title="编辑奖金" :visible.sync="openDetail" width="800px" append-to-body>
+      
     </el-dialog>
 
     <!-- 设置起止时间对话框 -->
@@ -269,16 +285,20 @@ export default {
       bonusAllocationPersonalList: [],
       // 弹出层标题
       title: "",
-      // 是否显示弹出层
-      open: false,
+      // 是否显示查看详情对话框
+      openDetail: false,
+      // 是否显示编辑信息对话框
+      openEditor: false,
       // 是否显示设置起止时间的窗口
       setTimeOpen: false,
-      //是否显示计算按钮
+      // 是否显示计算按钮
       countButtonShow: true,
-      //上传是否不可用
+      // 上传是否不可用
       uploadDisabled: false,
       // 上传按钮上显示的文字
       uploadButtonText: "上传",
+      // 是否进行过奖金计算
+      isCounted: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -347,8 +367,9 @@ export default {
     },
     // 取消按钮
     cancel() {
-      this.open = false;
+      this.openDetail = false;
       this.setTimeOpen = false;
+      this.openEditor = false;
       this.reset();
     },
     // 表单重置
@@ -395,7 +416,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.open = true;
+      this.openDetail = true;
       
       this.title = "添加奖金分配总";
     },
@@ -407,7 +428,7 @@ export default {
       getBonusAllocation(id).then(response => {
         this.loading = false;
         this.form = response.data;
-        this.open = true;
+        this.openDetail = true;
         this.title = "修改奖金分配总";
       });
     },
@@ -419,7 +440,7 @@ export default {
           if (this.form.id != null) {
             updateBonusAllocation(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
-              this.open = false;
+              this.openDetail = false;
               this.getList();
             }).finally(() => {
               this.buttonLoading = false;
@@ -427,7 +448,7 @@ export default {
           } else {
             addBonusAllocation(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
-              this.open = false;
+              this.openDetail = false;
               this.getList();
             }).finally(() => {
               this.buttonLoading = false;
@@ -446,8 +467,9 @@ export default {
           setTimeOfBonus(this.form).then(response => {
             this.$modal.msgSuccess("计算成功");
             this.countButtonShow = false;
+            this.isCounted = true;
             this.setTimeOpen = false;
-            this.open = false;
+            this.openDetail = false;
             //TODO 替换表格内容
             this.bonusAllocationList = response[0];
             this.bonusAllocationPersonalList = response[1];

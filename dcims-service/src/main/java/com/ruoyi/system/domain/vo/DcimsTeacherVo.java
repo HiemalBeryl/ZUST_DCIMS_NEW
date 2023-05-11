@@ -1,6 +1,7 @@
 package com.ruoyi.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
@@ -19,12 +20,16 @@ public class DcimsTeacherVo {
     /**
      * 主键
      */
-    @TableId(value = "id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 工号
      */
     private Long teacherId;
+    /**
+     * 指导教师编号
+     */
+    private Long competitionTeacherId;
     /**
      * 姓名
      */

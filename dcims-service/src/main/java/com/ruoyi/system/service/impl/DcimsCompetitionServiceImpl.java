@@ -8,6 +8,12 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.system.domain.DcimsCompetitionTeacher;
+import com.ruoyi.system.domain.DcimsTeacher;
+import com.ruoyi.system.domain.vo.DcimsTeacherVo;
+import com.ruoyi.system.mapper.DcimsCompetitionTeacherMapper;
+import com.ruoyi.system.mapper.DcimsTeacherMapper;
+import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
@@ -16,6 +22,7 @@ import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
@@ -31,6 +38,8 @@ import java.util.Collection;
 public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
 
     private final DcimsCompetitionMapper baseMapper;
+    private final DcimsTeacherMapper teacherMapper;
+    private final DcimsCompetitionTeacherMapper competitionTeacherMapper;
 
     /**
      * 查询竞赛赛事基本信息
@@ -46,6 +55,17 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     @Override
     public TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
+        Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    /**
+     * 根据登录用户对应教师工号，查询竞赛赛事基本信息列表
+     */
+    @Override
+    public TableDataInfo<DcimsCompetitionVo> queryPageListByTeacherId(DcimsCompetitionBo bo, PageQuery pageQuery) {
+        LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
+        lqw.eq(DcimsCompetition::getResponsiblePersonId, AccountUtils.getAccount().getTeacherId());
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
@@ -127,5 +147,56 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
             //TODO 做一些业务上的校验,判断是否需要校验
         }
         return baseMapper.deleteBatchIds(ids) > 0;
+    }
+
+    /**
+     * 获取竞赛对应指导教师
+     */
+    public TableDataInfo<DcimsTeacherVo> getTutorList(Long competitionId){
+        LambdaQueryWrapper<DcimsCompetitionTeacher> lqw1 = new LambdaQueryWrapper<>();
+        lqw1.eq(DcimsCompetitionTeacher::getCompetitionId,competitionId);
+        lqw1.eq(DcimsCompetitionTeacher::getDeleted,"0");
+        List<DcimsCompetitionTeacher> tutorIdList = competitionTeacherMapper.selectList(lqw1);
+
+        LambdaQueryWrapper<DcimsTeacher> lqw2 = new LambdaQueryWrapper<>();
+        List<Long> teacherIds = new ArrayList<>();
+        teacherIds.add(-1L);
+        tutorIdList.forEach(element -> teacherIds.add(element.getTeacherId()));
+        lqw2.in(DcimsTeacher::getTeacherId,teacherIds);
+        List<DcimsTeacherVo> dcimsTeacherVoList = teacherMapper.selectVoList(lqw2);
+        dcimsTeacherVoList.forEach(element -> tutorIdList.forEach(tutor -> {
+            if(tutor.getTeacherId().equals(element.getTeacherId()))
+                element.setCompetitionTeacherId(tutor.getId());
+        }));
+
+        return TableDataInfo.build(dcimsTeacherVoList);
+    }
+
+    /**
+     * 添加多个指导教师
+     */
+    public Boolean addTutor(Long competitionId, Long[] teacherIds){
+        LambdaQueryWrapper<DcimsCompetitionTeacher> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsCompetitionTeacher::getCompetitionId,competitionId);
+        lqw.in(DcimsCompetitionTeacher::getTeacherId,teacherIds);
+        lqw.eq(DcimsCompetitionTeacher::getDeleted,"0");
+        if(competitionTeacherMapper.selectList(lqw).size() > 0){
+            return false;
+        }
+
+        for (Long teacherId:teacherIds) {
+            DcimsCompetitionTeacher entity = new DcimsCompetitionTeacher();
+            entity.setCompetitionId(competitionId);
+            entity.setTeacherId(teacherId);
+            competitionTeacherMapper.insert(entity);
+        }
+        return true;
+    }
+
+    /**
+     * 根据id删除指导教师
+     */
+    public Boolean removeTutor(Long id){
+        return competitionTeacherMapper.deleteById(id) > 0;
     }
 }

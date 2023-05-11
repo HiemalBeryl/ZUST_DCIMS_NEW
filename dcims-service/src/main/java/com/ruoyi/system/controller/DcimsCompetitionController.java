@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
+import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
@@ -49,6 +50,15 @@ public class DcimsCompetitionController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionBo bo, PageQuery pageQuery) {
         return iDcimsCompetitionService.queryPageList(bo, pageQuery);
+    }
+
+    /**
+     * 根据登录用户对应教师工号，查询竞赛赛事基本信息列表
+     */
+    @SaCheckPermission("dcims:competition:listByTeacherId")
+    @GetMapping("/listByTeacherId")
+    public TableDataInfo<DcimsCompetitionVo> listByTeacherId(DcimsCompetitionBo bo, PageQuery pageQuery) {
+        return iDcimsCompetitionService.queryPageListByTeacherId(bo, pageQuery);
     }
 
     /**
@@ -119,4 +129,42 @@ public class DcimsCompetitionController extends BaseController {
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsCompetitionService.deleteWithValidByIds(Arrays.asList(ids), true));
     }
+
+    /**
+     * 获取竞赛对应指导教师
+     *
+     * @param id 主键
+     */
+    @SaCheckPermission("dcims:competition:query")
+    @GetMapping("/tutor/{id}")
+    public TableDataInfo<DcimsTeacherVo> getTutorList(@NotNull(message = "主键不能为空")
+                                         @PathVariable Long id) {
+        return iDcimsCompetitionService.getTutorList(id);
+    }
+
+    /**
+     * 添加多个指导教师
+     *
+     *
+     */
+    @PostMapping("/tutor/competitionId/{competitionId}/teacherIds/{teacherIds}")
+    public R<Void> addTutor(@NotNull(message = "所属竞赛不能为空")
+                            @PathVariable Long competitionId,
+                            @NotEmpty(message = "教师工号不能为空")
+                            @PathVariable Long[] teacherIds){
+        return toAjax(iDcimsCompetitionService.addTutor(competitionId, teacherIds));
+    }
+
+    /**
+     * 根据id删除指导教师
+     *
+     * @param id 主键
+     */
+    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.DELETE)
+    @DeleteMapping("/tutor/{id}")
+    public R<Void> removeTutor(@NotNull(message = "主键不能为空")
+                               @PathVariable Long id){
+        return toAjax(iDcimsCompetitionService.removeTutor(id));
+    }
+
 }
