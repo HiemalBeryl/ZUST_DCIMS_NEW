@@ -173,7 +173,7 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
             else allBo = new DcimsBonusAllocation();
 
             // 计算该名队伍对应的应得奖金数额
-            Long bonus = 100L;
+            Long bonus = getBonusByAwardLevel(team.getAwardLevel(),team.getCompetitionType());
             // 设置奖金分配个人
             personalBo.setCompetition(team.getCompetitionId());
             if (personalBo.getBonus() == null){
@@ -246,5 +246,55 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
         System.out.println(personals);
         boolean flag = bonusAllocationPersonalMapper.insertBatch(personals)&& bonusAllocationMapper.insertBatch(alls);
         return flag;
+    }
+
+    /**
+     * 获取获奖等级和竞赛类型对应的奖金额度
+     */
+    public Long getBonusByAwardLevel(String awardLevel, String type){
+        Map<String,Long> aMap = new HashMap<>();
+        Map<String,Long> bMap = new HashMap<>();
+        Map<String,Long> cMap = new HashMap<>();
+        aMap.put("5",50000L);
+        aMap.put("6",30000L);
+        aMap.put("7",20000L);
+        aMap.put("8",10000L);
+        aMap.put("9",6000L);
+        aMap.put("10",10000L);
+        aMap.put("11",6000L);
+        aMap.put("12",3000L);
+        aMap.put("13",1500L);
+        aMap.put("15",10000L);
+        aMap.put("16",6000L);
+        aMap.put("17",3000L);
+        aMap.put("18",1500L);
+        bMap.put("0",6000L);
+        bMap.put("1",4000L);
+        bMap.put("2",3000L);
+        bMap.put("3",2000L);
+        bMap.put("4",1000L);
+        bMap.put("5",4000L);
+        bMap.put("6",3000L);
+        cMap.put("0",4000L);
+        cMap.put("1",3000L);
+        cMap.put("2",2000L);
+        cMap.put("3",1000L);
+        cMap.put("4",600L);
+        cMap.put("5",3000L);
+        cMap.put("6",2000L);
+
+        Long bonus = 0L;
+        switch (type) {
+            case "A" :
+                bonus += aMap.get(awardLevel);
+                return bonus;
+            case "B" :
+                bonus += bMap.get(awardLevel);
+                return bonus;
+            case "C" :
+                bonus += cMap.get(awardLevel);
+                return bonus;
+        }
+        return bonus;
     }
 }
