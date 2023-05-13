@@ -7,6 +7,8 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.system.mapper.DcimsWorktimeAllocationCompetitionMapper;
+import com.ruoyi.system.mapper.DcimsWorktimeAllocationTeacherMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsWorktimeAllocationBo;
@@ -30,6 +32,8 @@ import java.util.Collection;
 public class DcimsWorktimeAllocationServiceImpl implements IDcimsWorktimeAllocationService {
 
     private final DcimsWorktimeAllocationMapper baseMapper;
+    private final DcimsWorktimeAllocationTeacherMapper teacherBaseMapper;
+    private final DcimsWorktimeAllocationCompetitionMapper competitionBaseMapper;
 
     /**
      * 查询工作量分配
@@ -76,12 +80,12 @@ public class DcimsWorktimeAllocationServiceImpl implements IDcimsWorktimeAllocat
     @Override
     public Boolean insertByBo(DcimsWorktimeAllocationBo bo) {
         DcimsWorktimeAllocation add = BeanUtil.toBean(bo, DcimsWorktimeAllocation.class);
-        validEntityBeforeSave(add);
-        boolean flag = baseMapper.insert(add) > 0;
-        if (flag) {
+        boolean flag1 = baseMapper.insert(add) > 0;
+        if (flag1) {
             bo.setId(add.getId());
         }
-        return flag;
+
+        return flag1;
     }
 
     /**
