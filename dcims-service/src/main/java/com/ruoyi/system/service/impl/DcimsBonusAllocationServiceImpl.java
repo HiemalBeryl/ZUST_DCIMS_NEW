@@ -164,16 +164,18 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
             else personalBo = new DcimsBonusAllocationPersonal();
             DcimsBonusAllocation allBo;
             Long collegeId = -1L;
+            Long bonus = 0L;
             for (DcimsCompetition competition:competitionList) {
                 if(competition.getId().equals(team.getCompetitionId())){
                     collegeId = competition.getCollege();
+
+                    // 计算该名队伍对应的应得奖金数额
+                    bonus = getBonusByAwardLevel(team.getAwardLevel(),competition.getLevel(),team.getCompetitionType());
                 }
             }
             if(bonusMap.containsKey(collegeId))   allBo = bonusMap.get(collegeId);
             else allBo = new DcimsBonusAllocation();
 
-            // 计算该名队伍对应的应得奖金数额
-            Long bonus = getBonusByAwardLevel(team.getAwardLevel(),team.getCompetitionType());
             // 设置奖金分配个人
             personalBo.setCompetition(team.getCompetitionId());
             if (personalBo.getBonus() == null){
@@ -251,7 +253,7 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
     /**
      * 获取获奖等级和竞赛类型对应的奖金额度
      */
-    public Long getBonusByAwardLevel(String awardLevel, String type){
+    public Long getBonusByAwardLevel(String awardLevel, String type, String isTeam){
         Map<String,Long> aMap = new HashMap<>();
         Map<String,Long> bMap = new HashMap<>();
         Map<String,Long> cMap = new HashMap<>();
@@ -283,18 +285,19 @@ public class DcimsBonusAllocationServiceImpl implements IDcimsBonusAllocationSer
         cMap.put("5",3000L);
         cMap.put("6",2000L);
 
-        Long bonus = 0L;
+        Long bonus = null;
         switch (type) {
             case "A" :
-                bonus += aMap.get(awardLevel);
-                return bonus;
+                bonus = aMap.get(awardLevel);
+                break;
             case "B" :
-                bonus += bMap.get(awardLevel);
-                return bonus;
+                bonus = bMap.get(awardLevel);
+                break;
             case "C" :
-                bonus += cMap.get(awardLevel);
-                return bonus;
+                bonus = cMap.get(awardLevel);
+                break;
         }
-        return bonus;
+        if (bonus != null && isTeam.equals("50"))   bonus = bonus / 3;
+        return bonus == null ? 0L:bonus;
     }
 }

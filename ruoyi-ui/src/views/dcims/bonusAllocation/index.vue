@@ -102,7 +102,7 @@
             size="mini"
             type="text"
             icon="el-icon-s-order"
-            @click="handleUpdate(scope.row)"
+            @click="handleDetail(scope.row)"
             v-hasPermi="['dcims:bonusAllocation:edit']"
             v-if="isCounted === false"
           >查看详情</el-button>
@@ -111,7 +111,7 @@
             size="mini"
             type="text"
             icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
+            @click="handleUpdate(scope.row,scope.$index)"
             v-hasPermi="['dcims:bonusAllocation:edit']"
             v-if="isCounted === true"
           >修改</el-button>
@@ -215,13 +215,21 @@
     </el-dialog>
 
     <!-- 编辑待提交的年度奖金汇总对话框 -->
-    <el-dialog title="编辑奖金" :visible.sync="openDetail" width="800px" append-to-body>
-      
+    <el-dialog title="编辑奖金" :visible.sync="openEditor" width="800px" append-to-body>
+      <el-form>
+        <el-form-item label="奖金总数" prop="totalAmount">
+         <el-input v-model="form.totalAmount" placeholder="请输入奖金总数" />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button :loading="buttonLoading" type="primary" @click="submitEditForm" >确 定</el-button>
+        <el-button @click="cancel()">取 消</el-button>
+      </div>
     </el-dialog>
 
     <!-- 设置起止时间对话框 -->
     <el-dialog :title="title" :visible.sync="setTimeOpen" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="开始时间" prop="countStartTime">
           <el-date-picker clearable
             v-model="form.countStartTime"
@@ -308,6 +316,8 @@ export default {
       },
       // 表单参数
       form: {},
+      // 活动列
+      activeRow: undefined,
       // 表单校验
       rules: {
         id: [
@@ -370,6 +380,7 @@ export default {
       this.openDetail = false;
       this.setTimeOpen = false;
       this.openEditor = false;
+      this.activeRow = undefined;
       this.reset();
     },
     // 表单重置
@@ -420,8 +431,8 @@ export default {
       
       this.title = "添加奖金分配总";
     },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
+    /** 查看详情按钮操作 */
+    handleDetail(row) {
       this.loading = true;
       this.reset();
       const id = row.id || this.ids
@@ -431,6 +442,16 @@ export default {
         this.openDetail = true;
         this.title = "修改奖金分配总";
       });
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row,rowIndex) {
+      console.log(rowIndex);
+      this.activeRow = rowIndex;
+      this.loading = true;
+      this.form = row;
+      this.openEditor = true;
+      this.title = "修改奖金分配总";
+      this.loading = false;
     },
     /** 提交按钮 */
     submitForm() {
@@ -489,7 +510,7 @@ export default {
         this.$modal.msgWarning("上传成功");
         this.uploadButtonText = "已上传";
         }).finally(() =>{
-          this.getList;
+          this.getList();
         })
       })
 
@@ -520,6 +541,15 @@ export default {
     setTime() {
       this.setTimeOpen = true;
       this.title = "设定结算起止时间";
+    },
+    // 保存对奖金总数的编辑
+    submitEditForm(){
+      console.log(this.activeRow);
+      this.bonusAllocationList[this.activeRow].totalAmount = this.form.totalAmount
+      this.bonusAllocationList[this.activeRow].distributable = this.form.totalAmount
+      this.bonusAllocationList[this.activeRow].unallocated = this.form.totalAmount
+      this.openEditor = false;
+      this.activeRow = undefined;
     }
   }
 };
