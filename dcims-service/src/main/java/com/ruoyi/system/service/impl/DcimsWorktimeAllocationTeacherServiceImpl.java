@@ -22,6 +22,7 @@ import com.ruoyi.system.domain.DcimsWorktimeAllocationTeacher;
 import com.ruoyi.system.mapper.DcimsWorktimeAllocationTeacherMapper;
 import com.ruoyi.system.service.IDcimsWorktimeAllocationTeacherService;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -130,9 +131,26 @@ public class DcimsWorktimeAllocationTeacherServiceImpl implements IDcimsWorktime
      */
     @Override
     public Boolean updateByBo(DcimsWorktimeAllocationTeacherBo bo) {
-        DcimsWorktimeAllocationTeacher update = BeanUtil.toBean(bo, DcimsWorktimeAllocationTeacher.class);
-        validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        // 先查询，判断是否有剩余工作量
+        LambdaQueryWrapper<DcimsWorktimeAllocationCompetition> lqw1 = new LambdaQueryWrapper<>();
+        lqw1.eq(DcimsWorktimeAllocationCompetition::getId,bo.getWorktimeCompetitionId());
+        DcimsWorktimeAllocationCompetition one = worktimeAllocationCompetitionBaseMapper.selectOne(lqw1);
+        LambdaQueryWrapper<DcimsWorktimeAllocationTeacher> lqw2 = new LambdaQueryWrapper<>();
+        lqw2.eq(DcimsWorktimeAllocationTeacher::getId,bo.getId());
+        DcimsWorktimeAllocationTeacher teacher = baseMapper.selectOne(lqw2);
+        // 判断未分配工作量是否足够本次修改，compareTo函数返回0则相等
+        BigDecimal change = bo.getWorktime().subtract(teacher.getWorktime());
+        Boolean flag = one.getRemain().compareTo(change) > -1;
+        if(flag){
+            // 对剩余工作量做修改
+            one.setRemain(one.getRemain().subtract(change));
+            DcimsWorktimeAllocationTeacher update = BeanUtil.toBean(bo, DcimsWorktimeAllocationTeacher.class);
+            validEntityBeforeSave(update);
+            return baseMapper.updateById(update) > 0 && worktimeAllocationCompetitionBaseMapper.updateById(one) > 0;
+        } else {
+            return false;
+
+        }
     }
 
     /**

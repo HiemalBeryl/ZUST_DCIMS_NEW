@@ -261,6 +261,7 @@ export default {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
+              this.getCompetitionList();
             }).finally(() => {
               this.buttonLoading = false;
             });
