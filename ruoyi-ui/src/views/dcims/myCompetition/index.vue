@@ -51,50 +51,6 @@
             @keyup.enter.native="handleQuery"
           />
         </el-form-item>
-        <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-          <el-input
-            v-model="queryParams.responsiblePersonName"
-            placeholder="请输入竞赛负责人"
-            clearable
-            @keyup.enter.native="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="校内选拔时间">
-          <el-date-picker
-            v-model="daterangeInnerTime"
-            style="width: 240px"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :default-time="['00:00:00', '23:59:59']"
-          ></el-date-picker>
-        </el-form-item>
-        <el-form-item label="省赛时间">
-          <el-date-picker
-            v-model="daterangeProvinceTime"
-            style="width: 240px"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :default-time="['00:00:00', '23:59:59']"
-          ></el-date-picker>
-        </el-form-item>
-        <el-form-item label="国赛时间">
-          <el-date-picker
-            v-model="daterangeNationalTime"
-            style="width: 240px"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :default-time="['00:00:00', '23:59:59']"
-          ></el-date-picker>
-        </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
           <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -102,16 +58,6 @@
       </el-form>
   
       <el-row :gutter="10" class="mb8">
-        <el-col :span="1.5">
-          <el-button
-            type="primary"
-            plain
-            icon="el-icon-plus"
-            size="mini"
-            @click="handleAdd"
-            v-hasPermi="['dcims:competition:add']"
-          >新增</el-button>
-        </el-col>
         <el-col :span="1.5">
           <el-button
             type="success"
@@ -354,8 +300,8 @@
   </template>
   
   <script>
-  import { listCompetitionByTeacherId, getCompetition, delCompetition, addCompetition, updateCompetition, addTutor, getTutor, deleteTutor } from "@/api/dcims/competition";
-  import { listTeacherDict} from "@/api/dcims/basicData";
+  import { listCompetitionByTeacherId, getCompetition, delCompetition, updateCompetition, addTutor, getTutor, deleteTutor } from "@/api/dcims/competition";
+  import { listTeacherDict } from "@/api/dcims/basicData";
   export default {
     name: "Competition",
     dicts: ['dcims_audit_result', 'dcims_competition_type'],

@@ -135,7 +135,7 @@ public class DcimsCompetitionController extends BaseController {
      *
      * @param id 主键
      */
-    @SaCheckPermission("dcims:competition:query")
+    @SaCheckPermission("dcims:competition:getTutor")
     @GetMapping("/tutor/{id}")
     public TableDataInfo<DcimsTeacherVo> getTutorList(@NotNull(message = "主键不能为空")
                                          @PathVariable Long id) {
@@ -147,6 +147,7 @@ public class DcimsCompetitionController extends BaseController {
      *
      *
      */
+    @SaCheckPermission("dcims:competition:addTutor")
     @PostMapping("/tutor/competitionId/{competitionId}/teacherIds/{teacherIds}")
     public R<Void> addTutor(@NotNull(message = "所属竞赛不能为空")
                             @PathVariable Long competitionId,
@@ -160,6 +161,7 @@ public class DcimsCompetitionController extends BaseController {
      *
      * @param id 主键
      */
+    @SaCheckPermission("dcims:competition:removeTutor")
     @Log(title = "竞赛赛事基本信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/tutor/{id}")
     public R<Void> removeTutor(@NotNull(message = "主键不能为空")
