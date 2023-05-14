@@ -98,6 +98,8 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                 DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
                 if(add2.getNextAuditId().equals(add1.getTeacherId())){
                     comAuditList.add(add1);
+                    add2.setState("1");
+                    add2.setNextAuditId(-1L);
                     comList.add(add2);
                 }
             } else {

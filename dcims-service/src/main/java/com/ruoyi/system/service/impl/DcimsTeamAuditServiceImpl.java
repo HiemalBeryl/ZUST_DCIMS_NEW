@@ -98,6 +98,8 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                 DcimsTeam add2 = teamBaseMapper.selectById(bo.getTeamId());
                 if(add2.getNextAuditId().equals(add1.getTeacherId())){
                     teamAuditList.add(add1);
+                    add2.setAudit(2);
+                    add2.setNextAuditId(-1L);
                     teamList.add(add2);
                 }
             } else {
