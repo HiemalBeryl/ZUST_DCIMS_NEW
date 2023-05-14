@@ -35,6 +35,12 @@ public class DcimsWorktimeAllocationCompetitionVo {
     private Long competitionId;
 
     /**
+     * 竞赛id
+     */
+    @ExcelProperty(value = "竞赛名称")
+    private String competitionName;
+
+    /**
      * 总计教学工作量
      */
     @ExcelProperty(value = "总计教学工作量")

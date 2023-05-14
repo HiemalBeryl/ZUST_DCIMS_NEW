@@ -29,6 +29,11 @@ public interface IDcimsWorktimeAllocationCompetitionService {
     TableDataInfo<DcimsWorktimeAllocationCompetitionVo> queryPageList(DcimsWorktimeAllocationCompetitionBo bo, PageQuery pageQuery);
 
     /**
+     * 根据用户工号查询工作量分配竞赛列表
+     */
+    TableDataInfo<DcimsWorktimeAllocationCompetitionVo> queryPageListByTeacherId();
+
+    /**
      * 查询工作量分配竞赛列表
      */
     List<DcimsWorktimeAllocationCompetitionVo> queryList(DcimsWorktimeAllocationCompetitionBo bo);

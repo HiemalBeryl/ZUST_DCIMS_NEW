@@ -49,6 +49,15 @@ public class DcimsWorktimeAllocationCompetitionController extends BaseController
         return iDcimsWorktimeAllocationCompetitionService.queryPageList(bo, pageQuery);
     }
 
+    /*
+     * 根据用户工号查询工作量分配竞赛列表
+     */
+    @SaCheckPermission("dcims:worktimeAllocationCompetition:list")
+    @GetMapping("/listByTeacherId")
+    public TableDataInfo<DcimsWorktimeAllocationCompetitionVo> listByTeacherId() {
+        return iDcimsWorktimeAllocationCompetitionService.queryPageListByTeacherId();
+    }
+
     /**
      * 导出工作量分配竞赛列表
      */

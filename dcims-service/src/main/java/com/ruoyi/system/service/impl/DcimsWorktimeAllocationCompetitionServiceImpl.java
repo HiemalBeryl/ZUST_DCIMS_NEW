@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.vo.AllocationCompetitionDictVo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
+import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import com.ruoyi.system.domain.DcimsWorktimeAllocationCompetition;
 import com.ruoyi.system.mapper.DcimsWorktimeAllocationCompetitionMapper;
 import com.ruoyi.system.service.IDcimsWorktimeAllocationCompetitionService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
@@ -34,6 +36,7 @@ import java.util.Collection;
 public class DcimsWorktimeAllocationCompetitionServiceImpl implements IDcimsWorktimeAllocationCompetitionService {
 
     private final DcimsWorktimeAllocationCompetitionMapper baseMapper;
+    private final DcimsCompetitionMapper competitionBaseMapper;
 
     /**
      * 查询工作量分配竞赛
@@ -50,6 +53,34 @@ public class DcimsWorktimeAllocationCompetitionServiceImpl implements IDcimsWork
     public TableDataInfo<DcimsWorktimeAllocationCompetitionVo> queryPageList(DcimsWorktimeAllocationCompetitionBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsWorktimeAllocationCompetition> lqw = buildQueryWrapper(bo);
         Page<DcimsWorktimeAllocationCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    /**
+     * 查询工作量分配竞赛列表
+     */
+    @Override
+    public TableDataInfo<DcimsWorktimeAllocationCompetitionVo> queryPageListByTeacherId() {
+        LambdaQueryWrapper<DcimsCompetition> lqw1 = new LambdaQueryWrapper<>();
+        lqw1.eq(DcimsCompetition::getResponsiblePersonId, AccountUtils.getAccount().getTeacherId());
+        List<DcimsCompetition> competitionList = competitionBaseMapper.selectList(lqw1);
+        Collection<Long> ids = new ArrayList<>();
+        competitionList.forEach(element -> {
+            ids.add(element.getId());
+        });
+
+        LambdaQueryWrapper<DcimsWorktimeAllocationCompetition> lqw = new LambdaQueryWrapper<>();
+        lqw.in(DcimsWorktimeAllocationCompetition::getCompetitionId, ids);
+        lqw.eq(DcimsWorktimeAllocationCompetition::getStatus, 0);
+        List<DcimsWorktimeAllocationCompetitionVo> result = baseMapper.selectVoList(lqw);
+        result.forEach(element -> {
+            for(DcimsCompetition competition:competitionList){
+                if (competition.getId().equals(element.getCompetitionId())) {
+                    element.setCompetitionName(competition.getName());
+                    break;
+                }
+            }
+        });
         return TableDataInfo.build(result);
     }
 

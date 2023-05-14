@@ -1,6 +1,6 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <div class="app-container" >
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px" v-if="queryParams.worktimeId != undefined">
       <el-form-item label="竞赛id" prop="competitionId">
         <el-input
           v-model="queryParams.competitionId"
@@ -31,7 +31,7 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8" v-if="queryParams.worktimeId != undefined">
       <el-col :span="1.5">
         <el-button
           type="primary"
@@ -77,7 +77,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="worktimeAllocationCompetitionList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="worktimeAllocationCompetitionList" @selection-change="handleSelectionChange" v-if="queryParams.worktimeId != undefined">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" v-if="true"/>
       <el-table-column label="竞赛id" align="center" prop="competitionId" />
@@ -110,6 +110,7 @@
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
+      v-if="queryParams.worktimeId != undefined"
     />
 
     <!-- 添加或修改工作量分配竞赛对话框 -->

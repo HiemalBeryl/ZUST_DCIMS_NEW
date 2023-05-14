@@ -9,6 +9,14 @@ export function listWorktimeAllocationCompetition(query) {
   })
 }
 
+// 根据用户工号查询工作量分配竞赛列表
+export function listWorktimeAllocationCompetitionByTeacherId() {
+  return request({
+    url: '/dcims/worktimeAllocationCompetition/listByTeacherId',
+    method: 'get',
+  })
+}
+
 // 查询工作量分配竞赛详细
 export function getWorktimeAllocationCompetition(id) {
   return request({

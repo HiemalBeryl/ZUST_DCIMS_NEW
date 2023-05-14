@@ -1,15 +1,23 @@
 <template>
   <div class="app-container">
     <div>
-      请选择竞赛：
-      <el-select v-model="queryParams.level" placeholder="请选择竞赛" clearable>
-          <el-option
-            v-for="competition in competitionList"
-            :key="competition.id"
-            :label="competition.name"
-            :value="competition.id"
-          />
-        </el-select>
+      <el-row>
+        <el-col :span="18">
+          请选择竞赛：
+            <el-select v-model="queryParams.level" @change="selectionChange" placeholder="请选择竞赛" clearable>
+             <el-option
+               v-for="competition in competitionList"
+                :key="competition.id"
+               :label="competition.competitionName"
+               :value="competition.id"
+             />
+            </el-select>
+        </el-col>
+        <el-col :span="6">
+          <h3>您目前剩余<span style="color: red">{{ competitionList[0].remain }}</span>单位的工作量可以分配</h3>
+        </el-col>
+      </el-row>
+      
     </div>
     <el-divider></el-divider>
     <el-row :gutter="10" class="mb8">
@@ -97,7 +105,7 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="教师工号" prop="teacherId">
-          <el-input v-model="form.teacherId" placeholder="请输入教师工号" />
+          <el-input v-model="form.teacherId" :disabled="true" placeholder="请输入教师工号" />
         </el-form-item>
         <el-form-item label="教师应得工作量" prop="worktime">
           <el-input v-model="form.worktime" placeholder="请输入教师应得工作量" />
@@ -113,7 +121,7 @@
 
 <script>
 import { listWorktimeAllocationTeacher, getWorktimeAllocationTeacher, delWorktimeAllocationTeacher, addWorktimeAllocationTeacher, updateWorktimeAllocationTeacher } from "@/api/dcims/worktimeAllocationTeacher";
-import { listCompetitionByTeacherId, } from "@/api/dcims/competition";
+import { listWorktimeAllocationCompetitionByTeacherId} from "@/api/dcims/worktimeAllocationCompetition";
 export default {
   name: "WorktimeAllocationTeacher",
   data() {
@@ -159,17 +167,20 @@ export default {
       competitionList: [],
       // 竞赛总数
       competitionTotal: undefined,
+      // 剩余工作量
+      workTimeRemain: undefined,
     };
   },
   created() {
-    this.getList();
     this.getCompetitionList();
+    this.queryParams.worktimeCompetitionId = this.competitionList[0].id;
+    this.getList();
   },
   methods: {
-    /** 查询竞赛列表 */
+    /** 查询待分配工作量的竞赛列表 */
     getCompetitionList(){
       this.loading = true;
-      listCompetitionByTeacherId().then(response => {
+      listWorktimeAllocationCompetitionByTeacherId().then(response => {
         this.competitionList = response.rows;
         this.ompetitionTotal = response.total;
         this.loading = false;
@@ -285,7 +296,16 @@ export default {
       this.download('dcims/worktimeAllocationTeacher/export', {
         ...this.queryParams
       }, `worktimeAllocationTeacher_${new Date().getTime()}.xlsx`)
-    }
+    },
+    /** 下拉框选中竞赛变化 */
+    selectionChange(key){
+      let obj = {};
+      obj = this.competitionList.find((item)=>{
+          return item.id === key;
+      });
+      this.queryParams.worktimeCompetitionId = obj.id;
+      this.getList();
+    },
   }
 };
 </script>
