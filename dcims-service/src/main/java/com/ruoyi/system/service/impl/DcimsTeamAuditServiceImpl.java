@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.DcimsTeam;
@@ -15,6 +16,7 @@ import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.DcimsTeamMapper;
+import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
 
     private final DcimsTeamAuditMapper teamAuditBaseMapper;
     private final DcimsTeamMapper teamBaseMapper;
+    private final SysDeptMapper sysDeptMapper;
 
     /**
      * 查询团队获奖审核
@@ -108,8 +111,14 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                 DcimsTeamAudit add1 = BeanUtil.toBean(bo, DcimsTeamAudit.class);
                 DcimsTeam add2 = teamBaseMapper.selectById(bo.getTeamId());
                 if(add2.getNextAuditId().equals(add1.getTeacherId())){
+                    // 获取校级管理员的工号
+                    LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+                    lqw.eq(SysDept::getParentId,0);
+                    lqw.eq(SysDept::getDeptName,"浙江科技学院");
+                    SysDept sysDept = sysDeptMapper.selectOne(lqw);
+                    add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     teamAuditList.add(add1);
-                    add2.setNextAuditId(bo.getNextTeacherId());
+                    add2.setNextAuditId(sysDept.getLeaderTeacherId());
                     teamList.add(add2);
                 }
             }

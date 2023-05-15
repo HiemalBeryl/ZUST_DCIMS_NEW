@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -13,6 +14,7 @@ import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import com.ruoyi.system.mapper.DcimsCompetitionTeacherMapper;
 import com.ruoyi.system.mapper.DcimsTeacherMapper;
+import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,7 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     private final DcimsCompetitionMapper baseMapper;
     private final DcimsTeacherMapper teacherMapper;
     private final DcimsCompetitionTeacherMapper competitionTeacherMapper;
+    private final SysDeptMapper sysDeptMapper;
 
     /**
      * 查询竞赛赛事基本信息
@@ -127,6 +130,10 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
             }
         }
         DcimsCompetition update = BeanUtil.toBean(bo, DcimsCompetition.class);
+        //判断是否修改了审核人，如果有修改，则重置审核状态
+        if (!bo.getNextAuditId().equals(competition.getNextAuditId())){
+            update.setState("0");
+        }
         validEntityBeforeSave(update);
         return baseMapper.updateById(update) > 0;
     }
@@ -135,7 +142,16 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
      * 保存前的数据校验
      */
     private void validEntityBeforeSave(DcimsCompetition entity){
-        //TODO 做一些数据校验,如唯一约束
+        // 为竞赛对象添加审核信息
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysDept::getParentId,100);
+        lqw.eq(SysDept::getOrderNum,entity.getCollege());
+        SysDept sysDept = sysDeptMapper.selectOne(lqw);
+        if (sysDept != null){
+            entity.setNextAuditId(sysDept.getLeaderTeacherId());
+        }else{
+            entity.setNextAuditId(-1L);
+        }
     }
 
     /**

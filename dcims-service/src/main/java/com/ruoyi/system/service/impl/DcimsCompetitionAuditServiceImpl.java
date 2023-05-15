@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
+import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
 
     private final DcimsCompetitionAuditMapper competitionAuditBaseMapper;
     private final DcimsCompetitionMapper competitionBaseMapper;
+    private final SysDeptMapper sysDeptMapper;
 
     /**
      * 查询竞赛审核
@@ -108,8 +111,14 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                 DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
                 DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
                 if(add2.getNextAuditId().equals(add1.getTeacherId())){
+                    // 获取校级管理员的工号
+                    LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+                    lqw.eq(SysDept::getParentId,0);
+                    lqw.eq(SysDept::getDeptName,"浙江科技学院");
+                    SysDept sysDept = sysDeptMapper.selectOne(lqw);
+                    add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     comAuditList.add(add1);
-                    add2.setNextAuditId(bo.getNextTeacherId());
+                    add2.setNextAuditId(sysDept.getLeaderTeacherId());
                     comList.add(add2);
                 }
             }

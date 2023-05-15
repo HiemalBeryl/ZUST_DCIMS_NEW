@@ -49,6 +49,11 @@ public class SysDept extends TreeEntity<SysDept> {
     private String leader;
 
     /**
+     * 工号
+     */
+    private Long leaderTeacherId;
+
+    /**
      * 联系电话
      */
     @Size(min = 0, max = 11, message = "联系电话长度不能超过{max}个字符")

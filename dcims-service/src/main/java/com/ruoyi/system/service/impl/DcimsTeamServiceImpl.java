@@ -1,13 +1,17 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.mapper.DcimsCompetitionMapper;
+import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +36,8 @@ import java.util.Collection;
 public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
     private final DcimsTeamMapper baseMapper;
+    private final DcimsCompetitionMapper dcimsCompetitionMapper;
+    private final SysDeptMapper sysDeptMapper;
 
     /**
      * 查询参赛团队
@@ -140,7 +146,22 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * 保存前的数据校验
      */
     private void validEntityBeforeSave(DcimsTeam entity){
-        //TODO 做一些数据校验,如唯一约束
+        // 为团队对象添加审核信息
+        DcimsCompetition competition = dcimsCompetitionMapper.selectById(entity.getCompetitionId());
+        if(competition != null){
+            LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(SysDept::getParentId,100);
+            lqw.eq(SysDept::getOrderNum,competition.getCollege());
+            SysDept sysDept = sysDeptMapper.selectOne(lqw);
+            if (sysDept != null){
+                entity.setNextAuditId(sysDept.getLeaderTeacherId());
+            }else{
+                entity.setNextAuditId(-1L);
+            }
+        }else{
+            entity.setNextAuditId(-1L);
+        }
+
     }
 
     /**
