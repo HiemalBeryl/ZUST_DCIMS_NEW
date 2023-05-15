@@ -5,6 +5,7 @@
       <el-table-column label="主键" align="center" prop="id" v-if="true"/>
       <el-table-column label="竞赛id" align="center" prop="competitionId" />
       <el-table-column label="队伍名称" align="center" prop="name" />
+      <el-table-column label="作品名称" align="center" prop="worksName" />
       <el-table-column label="比赛类型" align="center" prop="competitionType">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
@@ -61,6 +62,10 @@
           </el-form-item>
           <el-form-item label="队伍名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入队伍名称" />
+          </el-form-item>
+          <el-form-item label="作品名称" prop="name">
+            <el-input v-model="form.worksName" :disabled="worksNameIsNull" placeholder="请输入作品名称" />
+            <el-checkbox label="作品名称" @change="changeWorksName()">无</el-checkbox>
           </el-form-item>
           <el-form-item label="比赛类型" prop="competitionType">
             <el-select v-model="form.competitionType" placeholder="请选择比赛类型">
@@ -169,7 +174,9 @@ export default {
         supportMaterial: [
           { required: true, message: "佐证材料不能为空", trigger: "blur" }
         ],
-      }
+      },
+      // 是否不填写作品名称
+      worksNameIsNull: false,
     };
   },
   created() {
@@ -197,6 +204,7 @@ export default {
         orderNum: undefined,
         competitionId: undefined,
         name: undefined,
+        worksName: undefined,
         competitionType: undefined,
         awardLevel: undefined,
         teacherId: undefined,
@@ -297,7 +305,11 @@ export default {
       this.download('dcims/team/export', {
         ...this.queryParams
       }, `team_${new Date().getTime()}.xlsx`)
-    }
+    },
+    /** 是否填写作品名称 */
+    changeWorksName(){
+      this.worksNameIsNull = !this.worksNameIsNull;
+    },
   }
 };
 </script>

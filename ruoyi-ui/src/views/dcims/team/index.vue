@@ -136,6 +136,7 @@
       <el-table-column label="主键" align="center" prop="id" v-if="true"/>
       <el-table-column label="竞赛id" align="center" prop="competitionId" />
       <el-table-column label="队伍名称" align="center" prop="name" />
+      <el-table-column label="作品名称" align="center" prop="worksName" />
       <el-table-column label="比赛类型" align="center" prop="competitionType">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
@@ -193,6 +194,10 @@
         <el-form-item label="队伍名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入队伍名称" />
         </el-form-item>
+        <el-form-item label="作品名称" prop="name">
+            <el-input v-model="form.worksName" :disabled="worksNameIsNull" placeholder="请输入作品名称" />
+            <el-checkbox label="作品名称" @change="changeWorksName()">无</el-checkbox>
+          </el-form-item>
         <el-form-item label="比赛类型" prop="competitionType">
           <el-select v-model="form.competitionType" placeholder="请选择比赛类型">
             <el-option
@@ -281,6 +286,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否不填写作品名称
+      worksNameIsNull: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -406,6 +413,10 @@ export default {
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
+        // 是否填写作品名称
+        if (this.worksNameIsNull){
+          this.form.worksName = undefined;
+        }
         if (valid) {
           this.buttonLoading = true;
           if (this.form.id != null) {
@@ -448,7 +459,11 @@ export default {
       this.download('dcims/team/export', {
         ...this.queryParams
       }, `team_${new Date().getTime()}.xlsx`)
-    }
+    },
+    /** 是否填写作品名称 */
+    changeWorksName(){
+      this.worksNameIsNull = !this.worksNameIsNull;
+    },
   }
 };
 </script>

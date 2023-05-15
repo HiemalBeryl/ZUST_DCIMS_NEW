@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderNum" column="order_num"/>
         <result property="competitionId" column="competition_id"/>
         <result property="name" column="name"/>
+        <result property="worksName" column="works_name"/>
         <result property="competitionType" column="competition_type"/>
         <result property="awardLevel" column="award_level"/>
         <result property="teacherId" column="teacher_id"/>

@@ -41,6 +41,11 @@ public class DcimsTeamBo extends BaseEntity {
     private String name;
 
     /**
+     * 作品名称
+     */
+    private String worksName;
+
+    /**
      * 比赛类型
      */
     private String competitionType;

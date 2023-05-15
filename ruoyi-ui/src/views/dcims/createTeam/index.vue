@@ -19,6 +19,10 @@
           <el-form-item label="队伍名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入队伍名称" />
           </el-form-item>
+          <el-form-item label="作品名称" prop="name">
+            <el-input v-model="form.worksName" :disabled="worksNameIsNull" placeholder="请输入作品名称" />
+            <el-checkbox label="作品名称" @change="changeWorksName()">无</el-checkbox>
+          </el-form-item>
           <el-form-item label="比赛类型" prop="competitionType">
             <el-select v-model="form.competitionType" placeholder="请选择比赛类型">
               <el-option
@@ -103,7 +107,9 @@ export default {
               studentName: [
                 { required: true, message: "参赛学生姓名不能为空", trigger: "blur" }
               ],
-            }
+            },
+            // 是否不填写作品名称
+            worksNameIsNull: false,
         }
     },
     created(){
@@ -121,6 +127,7 @@ export default {
             orderNum: undefined,
             competitionId: undefined,
             name: undefined,
+            worksName: undefined,
             competitionType: undefined,
             awardLevel: undefined,
             teacherId: undefined,
@@ -144,6 +151,10 @@ export default {
         },
         /** 提交按钮 */
         submitForm() {
+          // 是否填写作品名称
+          if (this.worksNameIsNull){
+            this.form.worksName = undefined;
+          }
           // 数组对象预处理
           this.form.teacherId = this.form.teacherId.join(",");
           this.form.studentId = this.form.studentId.join(",");
@@ -184,7 +195,11 @@ export default {
         // 根据选中工号同步教师姓名
         syncTeacherName(){
           this.form.teacherId
-        }
+        },
+        // 是否填写作品名称
+        changeWorksName(){
+          this.worksNameIsNull = !this.worksNameIsNull;
+        },
     }
 }
 </script>

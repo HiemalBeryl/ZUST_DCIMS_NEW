@@ -42,6 +42,12 @@ public class DcimsTeamVo {
     private String name;
 
     /**
+     * 作品名称
+     */
+    @ExcelProperty(value = "作品名称")
+    private String worksName;
+
+    /**
      * 比赛类型
      */
     @ExcelProperty(value = "比赛类型", converter = ExcelDictConvert.class)
