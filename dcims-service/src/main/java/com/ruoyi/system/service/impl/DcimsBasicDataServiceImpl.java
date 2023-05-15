@@ -10,6 +10,7 @@ import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.DcimsStudentMapper;
 import com.ruoyi.system.mapper.DcimsTeacherMapper;
 import com.ruoyi.system.service.IDcimsBasicDataService;
+import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,5 +43,12 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
         lqw.like(DcimsTeacher::getName,name);
         List<DcimsTeacherVo> result = teacherBaseMapper.selectVoList(lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    public DcimsTeacherVo queryLoginTeacher() {
+        LambdaQueryWrapper<DcimsTeacher> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsTeacher::getTeacherId,AccountUtils.getAccount().getTeacherId());
+        return teacherBaseMapper.selectVoOne(lqw);
     }
 }

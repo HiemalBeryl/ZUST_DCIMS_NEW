@@ -13,82 +13,138 @@
   <!-- 添加或修改竞赛赛事基本信息对话框 -->
   <div>
     <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-      <el-form-item label="赛事名称" prop="name">
-        <el-input v-model="form.name" placeholder="请输入赛事名称" />
-      </el-form-item>
-      <el-form-item label="往届名称" prop="pastName">
-        <el-input v-model="form.pastName" placeholder="请输入往届名称" />
-      </el-form-item>
-      <el-form-item label="赛事官网" prop="website">
-        <el-input v-model="form.website" placeholder="请输入赛事官网" />
-      </el-form-item>
-      <el-form-item label="赛事届次" prop="term">
-        <el-input v-model="form.term" placeholder="请输入赛事届次" />
-      </el-form-item>
-      <el-form-item label="赛事年份" prop="annual">
-        <el-input v-model="form.annual" placeholder="请输入赛事年份" />
-      </el-form-item>
-      <el-form-item label="主办单位" prop="organizer">
-        <el-input v-model="form.organizer" placeholder="请输入主办单位" />
-      </el-form-item>
-      <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-        <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
-      </el-form-item>
-      <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-        <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
-      </el-form-item>
-      <el-form-item label="所属学院" prop="college">
-        <el-select v-model="form.college" placeholder="请选择所属学院" clearable>
-          <el-option
-            v-for="dict in dict.type.dcims_college"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="校内选拔时间" prop="innerTime">
-        <el-date-picker clearable
-          v-model="form.innerTime"
-          type="datetime"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          placeholder="请选择校内选拔时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="省赛时间" prop="provinceTime">
-        <el-date-picker clearable
-          v-model="form.provinceTime"
-          type="datetime"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          placeholder="请选择省赛时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="国赛时间" prop="nationalTime">
-        <el-date-picker clearable
-          v-model="form.nationalTime"
-          type="datetime"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          placeholder="请选择国赛时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="本年度申报经费" prop="budget">
-        <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
-      </el-form-item>
-      <el-form-item label="总学时" prop="teachingHours">
-        <el-input v-model="form.teachingHours" placeholder="请输入总学时" />
-      </el-form-item>
-      <el-form-item label="集中授课安排表附件" prop="teachingHoursAttachment">
-        <file-upload v-model="form.teachingHoursAttachment"/>
-      </el-form-item>
-      <el-form-item label="获奖目标" prop="goal">
-        <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
-      </el-form-item>
-      <el-form-item label="赛事简介" prop="introduction">
-        <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
-      </el-form-item>
-      <el-form-item label="竞赛申报书" prop="attachment">
-        <file-upload v-model="form.attachment"/>
-      </el-form-item>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="赛事名称" prop="name">
+            <el-input v-model="form.name" placeholder="请输入赛事名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="赛事届次" prop="term">
+           <el-input v-model="form.term" placeholder="请输入赛事届次" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="赛事年份" prop="annual">
+            <el-input v-model="form.annual" placeholder="请输入赛事年份" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="主办单位" prop="organizer">
+            <el-input v-model="form.organizer" placeholder="请输入主办单位" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="所属学院" prop="college">
+           <el-select v-model="form.college" placeholder="请选择所属学院" clearable>
+              <el-option
+                v-for="dict in dict.type.dcims_college"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
+            <el-input v-model="form.responsiblePersonId" :disabled="true" placeholder="请输入竞赛负责人工号" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="竞赛负责人" prop="responsiblePersonName">
+            <el-input v-model="form.responsiblePersonName" :disabled="true" placeholder="请输入竞赛负责人" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="往届名称" prop="pastName">
+           <el-input v-model="form.pastName" placeholder="请输入往届名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="赛事官网" prop="website">
+            <el-input v-model="form.website" placeholder="请输入赛事官网" />
+          </el-form-item>
+        </el-col>
+        
+        
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="校内选拔时间" prop="innerTime">
+            <el-date-picker clearable
+              v-model="form.innerTime"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="请选择校内选拔时间">
+            </el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="省赛时间" prop="provinceTime">
+            <el-date-picker clearable
+              v-model="form.provinceTime"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="请选择省赛时间">
+            </el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="国赛时间" prop="nationalTime">
+            <el-date-picker clearable
+              v-model="form.nationalTime"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="请选择国赛时间">
+            </el-date-picker>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="本年度申报经费" prop="budget">
+            <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="总学时" prop="teachingHours">
+            <el-input v-model="form.teachingHours" placeholder="请输入总学时" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8" :offset="4">
+          <el-form-item label="集中授课安排表附件" prop="teachingHoursAttachment">
+            <file-upload v-model="form.teachingHoursAttachment"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="10">
+          <el-form-item label="获奖目标" prop="goal">
+            <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="10" :offset="2">
+          <el-form-item label="赛事简介" prop="introduction">
+            <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item label="竞赛申报书" prop="attachment">
+            <file-upload v-model="form.attachment"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -99,6 +155,8 @@
 </template>
 <script>
 import {addCompetition} from "@/api/dcims/competition";
+import {queryLoginTeacher} from "@/api/dcims/basicData";
+
 export default {
   name: "Competition",
   dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher', 'dcims_college'],
@@ -155,7 +213,10 @@ export default {
     }
   },
   created(){
-
+    queryLoginTeacher().then(response => {
+      this.form.responsiblePersonId = response.data.teacherId;
+      this.form.responsiblePersonName = response.data.name;
+    });
   },
   methods: {
     /** 提交按钮 */

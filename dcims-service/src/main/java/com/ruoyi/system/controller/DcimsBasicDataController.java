@@ -3,7 +3,9 @@ package com.ruoyi.system.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsStudentVo;
@@ -41,5 +43,14 @@ public class DcimsBasicDataController {
     @GetMapping("/listTeacherDict")
     public TableDataInfo<DcimsTeacherVo> listTeacherDict(String name) {
         return iDcimsBasicDataService.listTeacherDict(name);
+    }
+
+    /**
+     * 查询用户的教师信息
+     */
+    @SaCheckPermission("dcims:basicData:queryLoginTeacher")
+    @GetMapping("/queryLoginTeacher")
+    public R<DcimsTeacherVo> queryLoginTeacher() {
+        return R.ok(iDcimsBasicDataService.queryLoginTeacher());
     }
 }

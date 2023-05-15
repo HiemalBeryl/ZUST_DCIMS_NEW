@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.vo.DcimsStudentVo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 
@@ -20,4 +21,9 @@ public interface IDcimsBasicDataService {
      * 查询教师姓名工号字典
      */
     TableDataInfo<DcimsTeacherVo> listTeacherDict(String name);
+
+    /**
+     * 查询登录用户所对应的教师信息
+     */
+    DcimsTeacherVo queryLoginTeacher();
 }
