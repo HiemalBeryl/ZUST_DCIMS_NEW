@@ -1,6 +1,9 @@
 <template>
 <el-form :model="form" :rules="rules" ref="form" label-width="100px" class="form">
-
+  <div>
+    <h2>获奖申报</h2>
+  </div>
+  <el-divider></el-divider>
   <el-form-item label="选择团队" prop="id">
     <el-select v-model="form.id" placeholder="请选择团队">
       <el-option
