@@ -243,9 +243,6 @@
           <el-form-item label="团队赛限项" prop="teamLimit">
             <el-input v-model="form.teamLimit" placeholder="请输入团队赛限项" />
           </el-form-item>
-          <el-form-item label="审核人工号" prop="nextAuditId">
-            <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
-          </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -463,7 +460,6 @@
           workloadAggregate: undefined,
           personLimit: undefined,
           teamLimit: undefined,
-          nextAuditId: undefined,
           state: undefined,
           version: undefined,
           createTime: undefined,

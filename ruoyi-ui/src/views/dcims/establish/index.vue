@@ -89,16 +89,6 @@
       <el-form-item label="竞赛申报书" prop="attachment">
         <file-upload v-model="form.attachment"/>
       </el-form-item>
-      <el-form-item label="审核人" prop="nextAuditId">
-        <el-select filterable v-model="form.nextAuditId" placeholder="请选择审核人">
-          <el-option
-            v-for="dict in dict.type.dcims_teacher"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -161,9 +151,6 @@ export default {
         attachment: [
           { required: true, message: "请上传竞赛申报书", trigger: "blur" }
         ],
-        nextAuditId: [
-          { required: true, message: "审核人工号不能为空", trigger: "blur"}
-        ],
       }
     }
   },
@@ -221,7 +208,6 @@ export default {
         workloadAggregate: undefined,
         personLimit: undefined,
         teamLimit: undefined,
-        nextAuditId: undefined,
         state: undefined,
         version: undefined,
         createTime: undefined,

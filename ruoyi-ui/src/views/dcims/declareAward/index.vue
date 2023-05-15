@@ -40,10 +40,6 @@
             <file-upload v-model="form.supportMaterial"/>
   </el-form-item>
 
-  <el-form-item label="审核人工号" prop="nextAuditId">
-            <el-input v-model="form.nextAuditId" placeholder="请输入审核人工号" />
-  </el-form-item>
-
 
 
   <el-form-item>
@@ -106,9 +102,6 @@ export default {
               supportMaterial: [
                 { required: true, message: "佐证材料不能为空", trigger: "blur" }
               ],
-              nextAuditId: [
-                { required: true, message: "审核人工号不能为空", trigger: "blur"}
-              ],
             }
         }
     },
@@ -138,7 +131,6 @@ export default {
             awardTime: undefined,
             supportMaterial: undefined,
             audit: undefined,
-            nextAuditId: undefined,
             version: undefined,
             createTime: undefined,
             createBy: undefined,
