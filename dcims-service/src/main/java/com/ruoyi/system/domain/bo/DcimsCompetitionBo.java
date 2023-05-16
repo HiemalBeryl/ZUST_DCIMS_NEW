@@ -118,7 +118,7 @@ public class DcimsCompetitionBo extends BaseEntity {
      * 总学时
      */
     @NotNull(message = "总学时不能为空", groups = { AddGroup.class, EditGroup.class })
-    private BigDecimal teachingHours;
+    private String teachingHours;
 
     /**
      * 集中授课安排表

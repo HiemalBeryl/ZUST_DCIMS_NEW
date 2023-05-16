@@ -257,9 +257,6 @@ export default {
         college: [
           { required: true, message: "所属学院不能为空", trigger: "blur"}
         ],
-        teachingHours: [
-          { required: true, message: "总学时不能为空", trigger: "blur"}
-        ],
         teachingHoursAttachment: [
           { required: true, message: "请上传集中授课安排表", trigger: "blur"}
         ],
@@ -286,6 +283,11 @@ export default {
   methods: {
     /** 提交按钮 */
     submitForm() {
+      // 将工时转化成键值对存入表单
+      const keyValuePairs = this.teacherIds.map((key, index) => key + '=' + this.teachingHour[index]);
+      const result = keyValuePairs.join(',');
+      this.form.teachingHours = result;
+      console.log(this.form.teachingHours);
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.buttonLoading = true;
@@ -342,7 +344,13 @@ export default {
         updateBy: undefined,
         delFlag: undefined
       };
+      this.teacherIds = [];
+      this.teachingHour = [];
       this.resetForm("form");
+      queryLoginTeacher().then(response => {
+      this.form.responsiblePersonId = response.data.teacherId;
+      this.form.responsiblePersonName = response.data.name;
+    });
     },
     // 添加教师工时输入框
     addlastitems(index, type) {

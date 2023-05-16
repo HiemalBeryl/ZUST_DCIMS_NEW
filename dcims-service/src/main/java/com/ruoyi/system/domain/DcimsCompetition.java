@@ -101,7 +101,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 总学时
      */
-    private BigDecimal teachingHours;
+    private String teachingHours;
     /**
      * 集中授课安排表
      */

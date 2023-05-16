@@ -91,9 +91,10 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
     public Boolean insertByBo(List<DcimsTeamAuditBo> boList) {
         List<DcimsTeam> teamList = new ArrayList<>();
         List<DcimsTeamAudit> teamAuditList = new ArrayList<>();
+        List<String> roleList = StpUtil.getRoleList();
         for (DcimsTeamAuditBo bo:boList) {
             //手动为Bo添加操作者等部分数据
-            if(bo.getNextTeacherId().equals(0L)){
+            if(roleList.contains("AcademicAffairsOffice")){
                 StpUtil.checkRole("AcademicAffairsOffice");
                 bo.setTeacherId(AccountUtils.getAccount(StpUtil.getLoginIdAsString()).getTeacherId());
                 bo.setResult(1L);
