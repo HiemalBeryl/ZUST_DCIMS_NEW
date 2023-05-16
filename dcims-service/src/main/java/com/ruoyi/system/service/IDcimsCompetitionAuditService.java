@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.system.domain.DcimsCompetitionAudit;
+import com.ruoyi.system.domain.bo.CompetitionPartialBo;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionAuditVo;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
@@ -43,4 +44,9 @@ public interface IDcimsCompetitionAuditService {
      * 校验并批量删除竞赛审核信息
      */
     Boolean deleteWithValidByIds(List<DcimsCompetitionAuditBo> boList);
+
+    /**
+     * 修改竞赛部分信息
+     */
+    Boolean updateByBoPartial(CompetitionPartialBo bo);
 }

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.bo.CompetitionPartialBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
@@ -158,5 +159,24 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
             flag = false;
         }
         return flag;
+    }
+
+    /**
+     * 修改竞赛部分信息
+     */
+    public Boolean updateByBoPartial(CompetitionPartialBo bo){
+        //对角色进行权限认证，权限不满足的角色不能更改如赛事类别、拨款等字段
+        DcimsCompetition competition = competitionBaseMapper.selectById(bo.getId());
+        if (!bo.getLevel().equals(competition.getLevel()) || !bo.getAppropriation().equals(competition.getAppropriation()) || !bo.getPersonLimit().equals(competition.getPersonLimit()) || !bo.getTeamLimit().equals(competition.getTeamLimit())){
+            System.out.println(StpUtil.getRoleList());
+            if(!StpUtil.hasRole("AcademicAffairsOffice")){
+                return false;
+            }
+        }
+        competition.setLevel(bo.getLevel());
+        competition.setAppropriation(bo.getAppropriation());
+        competition.setPersonLimit(bo.getPersonLimit());
+        competition.setTeamLimit(bo.getTeamLimit());
+        return competitionBaseMapper.updateById(competition) > 0;
     }
 }

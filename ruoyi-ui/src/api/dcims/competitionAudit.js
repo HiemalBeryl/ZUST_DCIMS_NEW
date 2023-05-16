@@ -26,3 +26,12 @@ export function refuseAudit(params) {
     data: params
   })
 }
+
+// 编辑竞赛类型等部分信息
+export function updateAuditCompetition(data){
+  return request({
+    url: '/dcims/competitionAudit/',
+    method: 'put',
+    data: data
+  })
+}

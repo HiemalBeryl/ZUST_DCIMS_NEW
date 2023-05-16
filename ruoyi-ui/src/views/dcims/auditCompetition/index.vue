@@ -229,8 +229,8 @@
 </template>
 
 <script>
-import {listCompetitionAudit, permitAudit, refuseAudit} from "@/api/dcims/competitionAudit";
-import {getCompetition, updateCompetition} from "@/api/dcims/competition"
+import {listCompetitionAudit, permitAudit, refuseAudit, updateAuditCompetition} from "@/api/dcims/competitionAudit";
+import {getCompetition} from "@/api/dcims/competition"
 
   export default {
     name:"liXiangShenHe",
@@ -448,7 +448,7 @@ import {getCompetition, updateCompetition} from "@/api/dcims/competition"
         if (valid) {
           this.buttonLoading = true;
           if (this.form.id != null) {
-            updateCompetition(this.form).then(response => {
+            updateAuditCompetition(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open1 = false;
               this.getList();
