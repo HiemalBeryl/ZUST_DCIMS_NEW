@@ -96,6 +96,5 @@ public class DcimsDeclareAwardBo extends BaseEntity {
     /**
      * 下一级审核人工号
      */
-    @NotNull(message = "审核人工号不能为空", groups = {EditGroup.class})
     private Integer nextAuditId;
 }

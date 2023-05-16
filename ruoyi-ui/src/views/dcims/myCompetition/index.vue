@@ -126,7 +126,7 @@
         <el-table-column label="本年度拨款" align="center" prop="appropriation" />
         <el-table-column label="个人赛限项" align="center" prop="personLimit" />
         <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center"  fixed="right" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -591,8 +591,9 @@
           setTimeout(() => {
             listTeacherDict(query).then(response => {
               this.options = response.rows;
+            }).finally(() => {
+              this.loadingTeacher = false;
             })
-            this.loadingTeacher = false;
           }, 200);
         } else {
           this.options = [];

@@ -115,12 +115,69 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="8">
-          <el-form-item label="总学时" prop="teachingHours">
-            <el-input v-model="form.teachingHours" placeholder="请输入总学时" />
+          <el-form-item label="工时">
+              <!-- 渲染教师列表 -->
+              <section v-for="(value, index) in teacherIds" :key="index">
+                <section v-if="index === 0">
+                  <el-row>
+                    <el-col :span="6">
+                        <el-select
+                        v-model="teacherIds[index]"
+                        filterable
+                        remote
+                        reserve-keyword
+                        placeholder="请输入教师姓名"
+                        :remote-method="queryTeacher"
+                        :loading="loadingTeacher">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.teacherId"
+                          :label="item.name"
+                          :value="item.teacherId">
+                        </el-option>
+                      </el-select>
+                    </el-col>
+                    <el-col :span="6">
+                      <el-input v-model="teachingHour[index]" placeholder="请输入授课工时" clearable @keyup.enter.native="addlastitems(index, '1')"/>
+                    </el-col>
+                    <el-col :span="4">
+                      <el-button type="primary" icon="el-icon-plus" plain style="margin-left:10px;" circle @click="addlastitems(index, '1')"/>
+                    </el-col>
+                  </el-row>
+                </section>
+                <section v-if="index > 0">
+                  <!-- 添加的子项目 -->
+                  <el-row style="margin-top:10px;">
+                    <el-col :span="6">
+                        <el-select
+                        v-model="teacherIds[index]"
+                        filterable
+                        remote
+                        reserve-keyword
+                        placeholder="请输入教师姓名"
+                        :remote-method="queryTeacher"
+                        :loading="loadingTeacher">
+                        <el-option
+                          v-for="item in options"
+                          :key="item.teacherId"
+                          :label="item.name"
+                          :value="item.teacherId">
+                        </el-option>
+                      </el-select>
+                    </el-col>
+                    <el-col :span="6">
+                      <el-input v-model="teachingHour[index]" placeholder="请输入授课工时" clearable @keyup.enter.native="addlastitems(index, '1')"/>
+                    </el-col>
+                    <el-col :span="4">
+                      <el-button type="danger" icon="el-icon-delete" plain style="margin-left:10px;" circle @click="rmlastitems(index, '1')"/>
+                    </el-col>
+                  </el-row>
+                </section>
+              </section>
           </el-form-item>
-        </el-col>
-        <el-col :span="8" :offset="4">
+      </el-row>
+      <el-row>
+        <el-col :span="8">
           <el-form-item label="集中授课安排表附件" prop="teachingHoursAttachment">
             <file-upload v-model="form.teachingHoursAttachment"/>
           </el-form-item>
@@ -155,7 +212,7 @@
 </template>
 <script>
 import {addCompetition} from "@/api/dcims/competition";
-import {queryLoginTeacher} from "@/api/dcims/basicData";
+import {queryLoginTeacher,listTeacherDict} from "@/api/dcims/basicData";
 
 export default {
   name: "Competition",
@@ -209,7 +266,15 @@ export default {
         attachment: [
           { required: true, message: "请上传竞赛申报书", trigger: "blur" }
         ],
-      }
+      },
+      // 教师工号
+      teacherIds: [''], 
+      // 对应时长
+      teachingHour: [''],
+      // 是否正在查找教师列表
+      loadingTeacher: undefined,
+      // 可选教师
+      options: [],
     }
   },
   created(){
@@ -278,7 +343,45 @@ export default {
         delFlag: undefined
       };
       this.resetForm("form");
-    }
+    },
+    // 添加教师工时输入框
+    addlastitems(index, type) {
+      if (type === '1') {
+        const lastitem1 = this.teacherIds[this.teacherIds.length - 1]
+        const lastitem2 = this.teachingHour[this.teachingHour.length - 1]
+        if (lastitem1 == null || lastitem2.trim() === '') {
+          this.$message.error('请您填写完一项后继续追加')
+        } else {
+          this.teacherIds.push('')
+          this.teachingHour.push('')
+        }
+      }
+    },
+    rmlastitems(index, type) {
+      switch (type) {
+        case '1':
+          this.teacherIds.splice(index, 1)
+          break
+        default:
+          break
+      }
+      this.$message.success('移除成功')
+    },
+    /** 查询教师列表 */
+    queryTeacher(query) {
+      if (query !== '') {
+        this.loadingTeacher = true;
+        setTimeout(() => {
+          listTeacherDict(query).then(response => {
+            this.options = response.rows;
+          }).finally(() => {
+            this.loadingTeacher = false;
+          })
+        }, 200);
+      } else {
+        this.options = [];
+      }
+    },
   }
 }
 </script>
