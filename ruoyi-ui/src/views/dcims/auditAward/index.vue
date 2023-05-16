@@ -132,9 +132,6 @@
     <!-- 提交和退回审核信息对话框-->
     <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
     <el-form ref="form2" :model="submitt" label-width="100px">
-      <el-form-item label="审核人工号" prop="nextTeacherId">
-        <el-input v-model="submitt.nextTeacherId" placeholder="请输入下一级审核人的工号" />
-      </el-form-item>
         <el-input v-model="submitt.reason" type="textArea" placeholder="备注原因" />
     </el-form>
     <div slot="footer" class="dialog-footer">
