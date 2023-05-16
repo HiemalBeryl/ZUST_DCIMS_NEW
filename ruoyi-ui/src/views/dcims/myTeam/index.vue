@@ -309,6 +309,9 @@ export default {
     /** 是否填写作品名称 */
     changeWorksName(){
       this.worksNameIsNull = !this.worksNameIsNull;
+      if(this.worksNameIsNull){
+        this.form.worksName = null;
+      }
     },
   }
 };
