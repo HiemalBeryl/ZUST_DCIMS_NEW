@@ -58,6 +58,8 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsTeam> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsTeam::getNextAuditId,teacherId);
+        // 获取审核状态为待审核的团队
+        lqw.eq(DcimsTeam::getAudit,1);
 
         Page<DcimsTeamVo> result = teamBaseMapper.selectVoPage(pageQuery.build(), lqw);
         System.out.println(result);

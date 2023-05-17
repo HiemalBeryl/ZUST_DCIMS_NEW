@@ -59,6 +59,8 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsCompetition::getNextAuditId,teacherId);
+        // 获取状态为待审核的竞赛
+        lqw.eq(DcimsCompetition::getState,0);
 
         Page<DcimsCompetitionVo> result = competitionBaseMapper.selectVoPage(pageQuery.build(), lqw);
         System.out.println(result);
