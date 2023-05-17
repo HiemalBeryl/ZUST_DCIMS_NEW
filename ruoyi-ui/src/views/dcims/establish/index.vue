@@ -121,7 +121,7 @@
                 <section v-if="index === 0">
                   <el-row>
                     <el-col :span="6">
-                        <el-select
+                      <el-select
                         v-model="teacherIds[index]"
                         filterable
                         remote
