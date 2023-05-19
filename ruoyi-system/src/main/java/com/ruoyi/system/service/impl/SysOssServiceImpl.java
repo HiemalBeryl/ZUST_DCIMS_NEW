@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -8,6 +9,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.constant.CacheNames;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.service.OssService;
 import com.ruoyi.common.exception.ServiceException;
@@ -23,6 +25,7 @@ import com.ruoyi.system.domain.SysOss;
 import com.ruoyi.system.domain.bo.SysOssBo;
 import com.ruoyi.system.domain.vo.SysOssVo;
 import com.ruoyi.system.mapper.SysOssMapper;
+import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.service.ISysOssService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -46,6 +49,7 @@ import java.util.stream.Collectors;
 public class SysOssServiceImpl implements ISysOssService, OssService {
 
     private final SysOssMapper baseMapper;
+    private final SysUserMapper userMapper;
 
     @Override
     public TableDataInfo<SysOssVo> queryPageList(SysOssBo bo, PageQuery pageQuery) {
@@ -144,15 +148,30 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
+        List<Long> idList = new ArrayList<>();
         if (isValid) {
-            // 做一些业务上的校验,判断是否需要校验
+            // 只允许上传者删除oss文件，其它用户只能查看不能删除，用户删除非自己上传的文件不会报错、不会影响其它自己上传的文件的删除
+            LambdaQueryWrapper<SysOss> lqw1 = new LambdaQueryWrapper<>();
+            lqw1.in(SysOss::getOssId,ids);
+            List<SysOss> ossList = baseMapper.selectList(lqw1);
+            SysUser user = userMapper.selectById(StpUtil.getLoginIdAsString().substring(9));
+            ossList.forEach(oss -> {
+                System.out.println(oss.toString());
+                if(oss.getCreateBy().equals(user.getUserName())){
+                    idList.add(oss.getOssId());
+                }
+            });
         }
-        List<SysOss> list = baseMapper.selectBatchIds(ids);
-        for (SysOss sysOss : list) {
-            OssClient storage = OssFactory.instance(sysOss.getService());
-            storage.delete(sysOss.getUrl());
+        if (!idList.isEmpty()){
+            List<SysOss> list = baseMapper.selectBatchIds(idList);
+            for (SysOss sysOss : list) {
+                OssClient storage = OssFactory.instance(sysOss.getService());
+                storage.delete(sysOss.getUrl());
+            }
+            return baseMapper.deleteBatchIds(idList) > 0;
+        }else{
+            return false;
         }
-        return baseMapper.deleteBatchIds(ids) > 0;
     }
 
     /**
