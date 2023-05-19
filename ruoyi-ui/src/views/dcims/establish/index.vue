@@ -177,7 +177,7 @@
           </el-form-item>
       </el-row>
       <el-row>
-        <el-col :span="8">
+        <el-col :span="18">
           <el-form-item label="集中授课安排表附件" prop="teachingHoursAttachment">
             <file-upload v-model="form.teachingHoursAttachment"/>
           </el-form-item>

@@ -40,7 +40,21 @@
 
 
   <el-form-item label="佐证材料" prop="supportMaterial">
-            <file-upload v-model="form.supportMaterial"/>
+    <el-row>
+      <el-col :span="8">
+        <template v-if="uploadType == 'image'">
+          <image-upload v-model="form.supportMaterial"/>
+        </template>
+      </el-col>
+      <el-col :span="8">
+        <template v-if="uploadType == 'file'">
+          <file-upload v-model="form.supportMaterial"/>
+        </template>
+      </el-col>
+      <el-col :span="4">
+        <el-button type="small" @click="switchType">切换文件类型</el-button>
+      </el-col>
+    </el-row>
   </el-form-item>
 
 
@@ -105,7 +119,9 @@ export default {
               supportMaterial: [
                 { required: true, message: "佐证材料不能为空", trigger: "blur" }
               ],
-            }
+            },
+            // 佐证材料类型
+            uploadType: "image",
         }
     },
     created(){
@@ -175,6 +191,11 @@ export default {
             this.loading = false;
           });
         },
+        /** 切换佐证材料类型 */
+        switchType() {
+          if (this.uploadType == "image") this.uploadType = "file";
+          else this.uploadType = "image";
+        }
 
     }
 }
