@@ -107,6 +107,11 @@ public class DcimsTeamVo {
     private String supportMaterial;
 
     /**
+     * 佐证材料地址
+     */
+    private String supportMaterialURL;
+
+    /**
      * 审核状态
      */
     @ExcelProperty(value = "审核状态", converter = ExcelDictConvert.class)
