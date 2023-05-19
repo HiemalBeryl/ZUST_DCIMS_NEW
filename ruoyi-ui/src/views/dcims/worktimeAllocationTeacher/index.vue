@@ -14,7 +14,7 @@
             </el-select>
         </el-col>
         <el-col :span="6">
-          <h3>您目前剩余<span style="color: red">{{ competitionList[0].remain }}</span>单位的工作量可以分配</h3>
+          <h3>您目前剩余<span style="color: red">{{ competitionList[activeCompetition].remain }}</span>单位的工作量可以分配</h3>
         </el-col>
       </el-row>
       
@@ -167,8 +167,8 @@ export default {
       competitionList: [],
       // 竞赛总数
       competitionTotal: undefined,
-      // 剩余工作量
-      workTimeRemain: undefined,
+      // 选中的竞赛
+      activeCompetition: 0,
     };
   },
   created() {
@@ -304,6 +304,9 @@ export default {
       obj = this.competitionList.find((item)=>{
           return item.id === key;
       });
+      this.competitionList.forEach(item => {
+        this.activeCompetition = this.competitionList.indexOf(obj);
+      })
       this.queryParams.worktimeCompetitionId = obj.id;
       this.getList();
     },
