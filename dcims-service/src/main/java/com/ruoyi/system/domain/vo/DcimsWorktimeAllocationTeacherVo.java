@@ -41,6 +41,12 @@ public class DcimsWorktimeAllocationTeacherVo {
     private Long teacherId;
 
     /**
+     * 教师姓名
+     */
+    @ExcelProperty(value = "教师姓名")
+    private String teacherName;
+
+    /**
      * 教师应得工作量
      */
     @ExcelProperty(value = "教师应得工作量")

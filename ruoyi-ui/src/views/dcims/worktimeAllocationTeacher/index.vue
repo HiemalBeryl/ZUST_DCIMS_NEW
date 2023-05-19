@@ -68,9 +68,8 @@
 
     <el-table v-loading="loading" :data="worktimeAllocationTeacherList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
-      <el-table-column label="工作量竞赛id" align="center" prop="worktimeCompetitionId" />
       <el-table-column label="教师工号" align="center" prop="teacherId" />
+      <el-table-column label="教师姓名" align="center" prop="teacherName" />
       <el-table-column label="教师应得工作量" align="center" prop="worktime" />
       <el-table-column label="审核状态" align="center" prop="status" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">

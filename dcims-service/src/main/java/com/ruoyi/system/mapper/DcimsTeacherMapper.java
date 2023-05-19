@@ -7,5 +7,5 @@ import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
-public interface DcimsTeacherMapper extends BaseMapperPlus<DcimsStudentMapper, DcimsTeacher, DcimsTeacherVo> {
+public interface DcimsTeacherMapper extends BaseMapperPlus<DcimsTeacherMapper, DcimsTeacher, DcimsTeacherVo> {
 }

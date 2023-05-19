@@ -8,10 +8,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.DcimsWorktimeAllocationCompetition;
 import com.ruoyi.system.domain.vo.AllocationCompetitionDictVo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
+import com.ruoyi.system.mapper.DcimsTeacherMapper;
 import com.ruoyi.system.mapper.DcimsWorktimeAllocationCompetitionMapper;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ public class DcimsWorktimeAllocationTeacherServiceImpl implements IDcimsWorktime
 
     private final DcimsWorktimeAllocationTeacherMapper baseMapper;
     private final DcimsCompetitionMapper competitionBaseMapper;
+    private final DcimsTeacherMapper teacherMapper;
     private final DcimsWorktimeAllocationCompetitionMapper worktimeAllocationCompetitionBaseMapper;
 
     /**
@@ -89,8 +92,23 @@ public class DcimsWorktimeAllocationTeacherServiceImpl implements IDcimsWorktime
     @Override
     public TableDataInfo<DcimsWorktimeAllocationTeacherVo> queryPageList(DcimsWorktimeAllocationTeacherBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsWorktimeAllocationTeacher> lqw = buildQueryWrapper(bo);
-        Page<DcimsWorktimeAllocationTeacherVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(result);
+        Page<DcimsWorktimeAllocationTeacherVo> resultPage = baseMapper.selectVoPage(pageQuery.build(),lqw);
+        LambdaQueryWrapper<DcimsTeacher> lqw2 = new LambdaQueryWrapper<>();
+        Collection<Long> teacherIds = new ArrayList<>();
+        resultPage.getRecords().forEach(entity -> {
+            teacherIds.add(entity.getTeacherId());
+        });
+        lqw2.in(DcimsTeacher::getTeacherId,teacherIds);
+        List<DcimsTeacher> teacherList = teacherMapper.selectList(lqw2);
+        System.out.println(teacherList);
+        resultPage.getRecords().forEach(entity -> {
+            teacherList.forEach(teacher -> {
+                if(entity.getTeacherId().equals(teacher.getTeacherId())){
+                    entity.setTeacherName(teacher.getName());
+                }
+            });
+        });
+        return TableDataInfo.build(resultPage);
     }
 
     /**
