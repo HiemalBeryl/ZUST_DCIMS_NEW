@@ -13,7 +13,9 @@
   <!-- 添加或修改竞赛赛事基本信息对话框 -->
   <div>
     <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-      <el-row>
+      <div>
+        <h3>基本信息</h3>
+        <el-row>
         <el-col :span="8">
           <el-form-item label="赛事名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入赛事名称" />
@@ -26,14 +28,14 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="赛事年份" prop="annual">
-            <el-input v-model="form.annual" placeholder="请输入赛事年份" />
+            <el-input v-model.number="form.annual" placeholder="请输入赛事年份" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
           <el-form-item label="主办单位" prop="organizer">
-            <el-input v-model="form.organizer" placeholder="请输入主办单位" />
+            <el-input v-model.number="form.organizer" placeholder="请输入主办单位" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -62,6 +64,19 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="24">
+          <el-form-item label="竞赛申报书" prop="attachment">
+            <file-upload v-model="form.attachment"/>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      </div>
+
+      <el-divider></el-divider>
+
+      <div>
+      <h3>额外信息</h3>
+      <el-row>
         <el-col :span="8">
           <el-form-item label="往届名称" prop="pastName">
            <el-input v-model="form.pastName" placeholder="请输入往届名称" />
@@ -72,8 +87,8 @@
             <el-input v-model="form.website" placeholder="请输入赛事官网" />
           </el-form-item>
         </el-col>
-        
-        
+
+
       </el-row>
       <el-row>
         <el-col :span="8">
@@ -114,6 +129,7 @@
           </el-form-item>
         </el-col>
       </el-row>
+      </div>
       <el-row>
           <el-form-item label="工时">
               <!-- 渲染教师列表 -->
@@ -195,13 +211,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-row>
-        <el-col :span="24">
-          <el-form-item label="竞赛申报书" prop="attachment">
-            <file-upload v-model="form.attachment"/>
-          </el-form-item>
-        </el-col>
-      </el-row>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -240,10 +249,12 @@ export default {
           { required: true, message: "赛事类别不能为空", trigger: "change" }
         ],
         term: [
-          { required: true, message: "赛事届次不能为空", trigger: "blur" }
+          { required: true, message: "赛事届次不能为空", trigger: "blur" },
+          { pattern:/^\d{1,5}$/, message: '请输入1~10000之间的数字', trigger: 'blur' }
         ],
         annual: [
-          { required: true, message: "赛事年份不能为空", trigger: "blur" }
+          { required: true, message: "赛事年份不能为空", trigger: "blur" },
+          { pattern:/^\d{4}$/, message: '请输入年份', trigger: 'blur' }
         ],
         organizer: [
           { required: true, message: "主办单位不能为空", trigger: "blur" }
@@ -257,15 +268,12 @@ export default {
         college: [
           { required: true, message: "所属学院不能为空", trigger: "blur"}
         ],
-        teachingHoursAttachment: [
-          { required: true, message: "请上传集中授课安排表", trigger: "blur"}
-        ],
         attachment: [
           { required: true, message: "请上传竞赛申报书", trigger: "blur" }
         ],
       },
       // 教师工号
-      teacherIds: [''], 
+      teacherIds: [''],
       // 对应时长
       teachingHour: [''],
       // 是否正在查找教师列表

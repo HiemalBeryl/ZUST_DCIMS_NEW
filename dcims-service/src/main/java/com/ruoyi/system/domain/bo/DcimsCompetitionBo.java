@@ -123,7 +123,7 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 集中授课安排表
      */
-    @NotBlank(message = "请上传集中授课安排表", groups = { AddGroup.class, EditGroup.class })
+    //@NotBlank(message = "请上传集中授课安排表", groups = { AddGroup.class, EditGroup.class })
     private String teachingHoursAttachment;
 
     /**
