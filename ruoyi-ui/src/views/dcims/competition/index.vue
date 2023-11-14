@@ -138,7 +138,7 @@
 
     <el-table v-loading="loading" :data="competitionList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
+      <el-table-column label="主键" align="center" prop="id" v-if="false"/>
       <el-table-column label="赛事名称" align="center" prop="name" />
       <el-table-column label="赛事类别" align="center" prop="level">
         <template slot-scope="scope">

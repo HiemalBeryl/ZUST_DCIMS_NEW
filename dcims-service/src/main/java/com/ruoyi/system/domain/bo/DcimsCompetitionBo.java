@@ -40,7 +40,7 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 赛事类别
      */
-    @NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
+    //@NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
     private String level;
 
     /**
@@ -117,7 +117,7 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 总学时
      */
-    @NotNull(message = "总学时不能为空", groups = { AddGroup.class, EditGroup.class })
+    //@NotNull(message = "总学时不能为空", groups = { AddGroup.class, EditGroup.class })
     private String teachingHours;
 
     /**

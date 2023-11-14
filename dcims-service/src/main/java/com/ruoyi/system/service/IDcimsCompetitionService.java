@@ -46,7 +46,7 @@ public interface IDcimsCompetitionService {
     /**
      * 修改竞赛赛事基本信息
      */
-    Boolean updateByBo(DcimsCompetitionBo bo);
+    Boolean updateByBo(DcimsCompetitionBo bo, Boolean resetAuditStatus);
 
     /**
      * 校验并批量删除竞赛赛事基本信息信息

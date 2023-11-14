@@ -114,7 +114,7 @@ public class DcimsCompetitionController extends BaseController {
     @RepeatSubmit()
     @PutMapping()
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsCompetitionBo bo) {
-        return toAjax(iDcimsCompetitionService.updateByBo(bo));
+        return toAjax(iDcimsCompetitionService.updateByBo(bo, false));
     }
 
     /**

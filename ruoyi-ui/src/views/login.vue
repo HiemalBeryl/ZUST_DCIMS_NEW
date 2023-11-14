@@ -1,6 +1,7 @@
 <template>
   <div class="login">
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+      <h3 class="title">浙江科技学院</h3>
       <h3 class="title">竞赛信息管理系统</h3>
       <el-form-item prop="username">
         <el-input

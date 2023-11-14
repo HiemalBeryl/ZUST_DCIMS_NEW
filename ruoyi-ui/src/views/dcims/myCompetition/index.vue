@@ -95,7 +95,7 @@
   
       <el-table v-loading="loading" :data="competitionList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column label="主键" align="center" prop="id" v-if="true"/>
+        <el-table-column label="主键" align="center" prop="id" v-if="false"/>
         <el-table-column label="赛事名称" align="center" prop="name" />
         <el-table-column label="赛事类别" align="center" prop="level">
           <template slot-scope="scope">
@@ -126,7 +126,12 @@
         <el-table-column label="本年度拨款" align="center" prop="appropriation" />
         <el-table-column label="个人赛限项" align="center" prop="personLimit" />
         <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
-        <el-table-column label="操作" align="center"  fixed="right" class-name="small-padding fixed-width">
+        <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.dcims_audit_result" :value="scope.row.state"/>
+        </template>
+      </el-table-column>
+        <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <el-button
               size="mini"
@@ -168,7 +173,7 @@
             <el-input v-model="form.name" placeholder="请输入赛事名称" />
           </el-form-item>
           <el-form-item label="赛事类别" prop="level">
-            <el-select v-model="form.level" placeholder="请选择赛事类别">
+            <el-select v-model="form.level" placeholder="请选择赛事类别" :disabled="true">
               <el-option
                 v-for="dict in dict.type.dcims_competition_type"
                 :key="dict.value"
@@ -226,7 +231,7 @@
             <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
           </el-form-item>
           <el-form-item label="本年度拨款" prop="appropriation">
-            <el-input v-model="form.appropriation" placeholder="请输入本年度拨款" />
+            <el-input v-model="form.appropriation" :disabled="true" placeholder="请输入本年度拨款" />
           </el-form-item>
           <el-form-item label="获奖目标" prop="goal">
             <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
@@ -238,16 +243,32 @@
             <file-upload v-model="form.attachment"/>
           </el-form-item>
           <el-form-item label="个人赛限项" prop="personLimit">
-            <el-input v-model="form.personLimit" placeholder="请输入个人赛限项" />
+            <el-input v-model="form.personLimit" :disabled="true" placeholder="请输入个人赛限项" />
           </el-form-item>
           <el-form-item label="团队赛限项" prop="teamLimit">
-            <el-input v-model="form.teamLimit" placeholder="请输入团队赛限项" />
+            <el-input v-model="form.teamLimit" :disabled="true" placeholder="请输入团队赛限项" />
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
+          <el-button :loading="buttonLoading" type="primary" @click="dialogVisible = true">确 定</el-button>
           <el-button @click="cancel">取 消</el-button>
         </div>
+
+
+
+        <!-- 二次确认是否修改竞赛信息 -->
+        <el-dialog
+        title="提示"
+        :visible.sync="dialogVisible"
+        width="30%"
+        :before-close="handleClose"
+        append-to-body>
+          <span>您确定要保存修改吗？这会导致竞赛需要被重新审核！</span>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="submitForm">确 定</el-button>
+          </span>
+        </el-dialog>
       </el-dialog>
 
       <!-- 添加指导教师对话框-->
@@ -295,7 +316,7 @@
       </el-dialog>
     </div>
   </template>
-  
+
   <script>
   import { listCompetitionByTeacherId, getCompetition, delCompetition, updateCompetition, addTutor, getTutor, deleteTutor } from "@/api/dcims/competition";
   import { listTeacherDict } from "@/api/dcims/basicData";
@@ -324,6 +345,8 @@
         title: "",
         // 是否显示弹出层
         open: false,
+        // 二次确认是否修改
+        dialogVisible: false,
         // 是否显示添加指导教师窗口
         openTutor: false,
         // 审核人工号时间范围
@@ -361,9 +384,6 @@
           ],
           name: [
             { required: true, message: "赛事名称不能为空", trigger: "blur" }
-          ],
-          level: [
-            { required: true, message: "赛事类别不能为空", trigger: "change" }
           ],
           term: [
             { required: true, message: "赛事届次不能为空", trigger: "blur" }
@@ -513,6 +533,7 @@
       },
       /** 提交按钮 */
       submitForm() {
+        this.dialogVisible = false;
         this.$refs["form"].validate(valid => {
           if (valid) {
             this.buttonLoading = true;
@@ -606,6 +627,14 @@
         }).finally(() => {
           this.queryTutor(this.activeCompetitionId);
         })
+      },
+      /** 关闭二次确认窗口 */
+      handleClose(done) {
+        this.$confirm('确认关闭？')
+          .then(_ => {
+            done();
+          })
+          .catch(_ => {});
       }
     }
   };

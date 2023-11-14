@@ -34,25 +34,25 @@ public class CompetitionPartialBo extends BaseEntity {
     /**
      * 赛事类别
      */
-    @NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
+    //@NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
     private String level;
 
     /**
      * 本年度拨款（万元）
      */
-    @NotNull(message = "本年度拨款不能为空", groups = { EditGroup.class })
+    //@NotNull(message = "本年度拨款不能为空", groups = { EditGroup.class })
     private BigDecimal appropriation;
 
     /**
      * 个人赛限项
      */
-    @NotNull(message = "个人赛限项不能为空", groups = { EditGroup.class })
+    //@NotNull(message = "个人赛限项不能为空", groups = { EditGroup.class })
     private Integer personLimit;
 
     /**
      * 团队赛限项
      */
-    @NotNull(message = "团队赛限项不能为空", groups = { EditGroup.class })
+    //@NotNull(message = "团队赛限项不能为空", groups = { EditGroup.class })
     private Integer teamLimit;
 
 }

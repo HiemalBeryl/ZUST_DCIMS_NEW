@@ -30,7 +30,7 @@ public class DcimsBasicDataController {
     /**
      * 查询学生姓名学号字典
      */
-    @SaCheckPermission("dcims:basicData:listStudentDict")
+    //@SaCheckPermission("dcims:basicData:listStudentDict")
     @GetMapping("/listStudentDict")
     public TableDataInfo<DcimsStudentVo> listStudentDict(String name) {
         return iDcimsBasicDataService.listStudentDict(name);
@@ -39,7 +39,7 @@ public class DcimsBasicDataController {
     /**
      * 查询教师姓名工号字典
      */
-    @SaCheckPermission("dcims:basicData:listTeacherDict")
+    //@SaCheckPermission("dcims:basicData:listTeacherDict")
     @GetMapping("/listTeacherDict")
     public TableDataInfo<DcimsTeacherVo> listTeacherDict(String name) {
         return iDcimsBasicDataService.listTeacherDict(name);

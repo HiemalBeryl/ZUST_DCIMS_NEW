@@ -12,13 +12,13 @@
             <el-row :gutter="20">
                 <el-col :span="2"><div class="grid-content "></div></el-col>
 
-                <!-- 用于存放等级的筛选框 -->
+                <!-- 用于存放类别的筛选框 -->
                 <el-col :span="5"><div class="grid-content ">
                     <div>
-                        赛事等级:
+                        赛事类别:
                     </div>
                     <div>
-                        <el-select v-model="value" placeholder="请选择赛事等级">
+                        <el-select v-model="value" placeholder="请选择赛事类别">
                             <el-option
                               v-for="item in levelOption"
                               :key="item.value"
@@ -79,7 +79,7 @@
                         </el-table-column>
                         <el-table-column prop="term" label="立项届次" width="150">
                         </el-table-column>
-                        <el-table-column prop="level" label="竞赛等级" width="150">
+                        <el-table-column prop="level" label="竞赛类别" width="150">
                         </el-table-column>
                         <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="150">
                         </el-table-column>
@@ -125,8 +125,10 @@
 
       <!-- 修改竞赛赛事基本信息对话框 -->
     <el-dialog title="修改竞赛赛事基本信息" :visible.sync="open1" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-      <h2>以下是校级管理员（教务处）需要填写的信息</h2>
+      <!--  教务处看到的 -->
+      <el-form v-if="userInfo == 'AcademicAffairsOffice' || userInfo == 'admin'" ref="form" :model="form" :rules="rules" label-width="80px">
+      <div>
+        <h2>以下是校级管理员（教务处）需要填写的信息</h2>
         <el-form-item label="赛事类别" prop="level">
           <el-select v-model="form.level" placeholder="请选择赛事类别">
             <el-option
@@ -147,6 +149,7 @@
           <el-input v-model="form.teamLimit" placeholder="请输入团队赛限项" />
         </el-form-item>
       <hr/>
+      </div>
       <h2>以下是竞赛基本信息</h2>
         <el-form-item label="赛事名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入赛事名称" />
@@ -209,6 +212,76 @@
           <file-upload v-model="form.attachment"/>
         </el-form-item>
       </el-form>
+
+
+
+      <!--  学院竞赛负责人看到的 -->
+      <el-form v-if="userInfo == 'AcademyCompetitionHead'" ref="form" :model="form" :rules="academyRules" label-width="80px">
+      <h2>以下是竞赛基本信息</h2>
+        <el-form-item label="赛事名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入赛事名称" />
+        </el-form-item>
+        <el-form-item label="往届名称" prop="pastName">
+          <el-input v-model="form.pastName" placeholder="请输入往届名称" />
+        </el-form-item>
+        <el-form-item label="赛事官网" prop="website">
+          <el-input v-model="form.website" placeholder="请输入赛事官网" />
+        </el-form-item>
+        <el-form-item label="赛事届次" prop="term">
+          <el-input v-model="form.term" placeholder="请输入赛事届次" />
+        </el-form-item>
+        <el-form-item label="赛事年份" prop="annual">
+          <el-input v-model="form.annual" placeholder="请输入赛事年份" />
+        </el-form-item>
+        <el-form-item label="主办单位" prop="organizer">
+          <el-input v-model="form.organizer" placeholder="请输入主办单位" />
+        </el-form-item>
+        <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
+          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
+        </el-form-item>
+        <el-form-item label="竞赛负责人" prop="responsiblePersonName">
+          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
+        </el-form-item>
+        <el-form-item label="校内选拔时间" prop="innerTime">
+          <el-date-picker clearable
+            v-model="form.innerTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择校内选拔时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="省赛时间" prop="provinceTime">
+          <el-date-picker clearable
+            v-model="form.provinceTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择省赛时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="国赛时间" prop="nationalTime">
+          <el-date-picker clearable
+            v-model="form.nationalTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择国赛时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="本年度申报经费" prop="budget">
+          <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+        </el-form-item>
+        <el-form-item label="获奖目标" prop="goal">
+          <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="赛事简介" prop="introduction">
+          <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="竞赛申报书" prop="attachment">
+          <file-upload v-model="form.attachment"/>
+        </el-form-item>
+      </el-form>
+
+
+
       <div slot="footer" class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -231,6 +304,7 @@
 <script>
 import {listCompetitionAudit, permitAudit, refuseAudit, updateAuditCompetition} from "@/api/dcims/competitionAudit";
 import {getCompetition} from "@/api/dcims/competition"
+import {getInfo} from "@/api/login"
 
   export default {
     name:"liXiangShenHe",
@@ -261,6 +335,8 @@ import {getCompetition} from "@/api/dcims/competition"
       open2: false,
       // 提交或退回标志
       flag: 0,
+      // 用户信息
+      userInfo: [],
         // 查询参数
         queryParams: {
           pageNum: 1,
@@ -276,6 +352,33 @@ import {getCompetition} from "@/api/dcims/competition"
         orderNum: [
           { required: true, message: "排序号不能为空", trigger: "blur" }
         ],
+        name: [
+          { required: true, message: "赛事名称不能为空", trigger: "blur" }
+        ],
+        level: [
+          { required: true, message: "赛事类别不能为空", trigger: "change" }
+        ],
+        term: [
+          { required: true, message: "赛事届次不能为空", trigger: "blur" }
+        ],
+        annual: [
+          { required: true, message: "赛事年份不能为空", trigger: "blur" }
+        ],
+        organizer: [
+          { required: true, message: "主办单位不能为空", trigger: "blur" }
+        ],
+        responsiblePersonId: [
+          { required: true, message: "竞赛负责人工号不能为空", trigger: "blur" }
+        ],
+        responsiblePersonName: [
+          { required: true, message: "竞赛负责人不能为空", trigger: "blur" }
+        ],
+        attachment: [
+          { required: true, message: "竞赛申报书不能为空", trigger: "blur" }
+        ],
+      },
+      // 表单校验2
+      academyRules: {
         name: [
           { required: true, message: "赛事名称不能为空", trigger: "blur" }
         ],
@@ -357,6 +460,7 @@ import {getCompetition} from "@/api/dcims/competition"
     },
     created() {
       this.getList();
+      this.getUserInfo();
       console.log(this.competitionList);
     },
     methods: {
@@ -472,6 +576,13 @@ import {getCompetition} from "@/api/dcims/competition"
             }
             console.log(this.submittForm);
             if(this.flag){
+              // 判断是否填写了竞赛类别
+              if(this.userInfo == "AcademicAffairsOffice" && this.validateLevel() == false){
+                console.log("不允许提交")
+                this.buttonLoading = false;
+                this.$modal.msgError("选中的竞赛中存在未确定类别的竞赛，不允许提交！");
+                return;
+              }
               // 执行通过审核逻辑
               permitAudit(this.submittForm).then(response => {
                 this.$modal.msgSuccess("通过选中竞赛成功");
@@ -505,6 +616,35 @@ import {getCompetition} from "@/api/dcims/competition"
       this.flag = flag;
       this.loading = false;
       this.open2 = true;
+    },
+    /** 获取角色权限 */
+    getUserInfo(){
+      getInfo().then(response =>{
+        this.userInfo = response.data.roles[0];
+        console.log(this.userInfo)
+      })
+    },
+    /** 判断审核通过竞赛是否添加了类别(ABC) */
+    validateLevel(){
+      let flag = true;
+      this.submittForm.forEach((item) =>{
+        this.competitionList.forEach((com) => {
+          if(com.id == item.competitionId){
+            // console.log("2:"+ com+ item)
+            // console.log("2:"+ com.id+ item.competitionId)
+            // console.log("2:"+ com.level)
+            if(com.level.trim() === '' || com.level == null){
+              console.log("出现空类型竞赛" + com.level)
+              flag = false
+            }
+          }
+        })
+      })
+      console.log(flag);
+      if (flag == false){
+        return flag;
+      }
+      return true;
     }
     }
   }

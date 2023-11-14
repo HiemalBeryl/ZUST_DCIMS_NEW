@@ -49,4 +49,9 @@ public interface IDcimsCompetitionAuditService {
      * 修改竞赛部分信息
      */
     Boolean updateByBoPartial(CompetitionPartialBo bo);
+
+    /**
+     * 修改竞赛信息
+     */
+    Boolean updateByBoPartial(DcimsCompetitionBo bo);
 }

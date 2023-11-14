@@ -24,10 +24,7 @@ import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * 竞赛赛事基本信息Service业务层处理
@@ -120,10 +117,14 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
      * 修改竞赛赛事基本信息
      */
     @Override
-    public Boolean updateByBo(DcimsCompetitionBo bo) {
+    public Boolean updateByBo(DcimsCompetitionBo bo, Boolean resetAuditStatus) {
         //对角色进行权限认证，权限不满足的角色不能更改如赛事类别、拨款等字段
         DcimsCompetition competition = baseMapper.selectById(bo.getId());
-        if (!bo.getLevel().equals(competition.getLevel()) || !bo.getAppropriation().equals(competition.getAppropriation()) || !bo.getPersonLimit().equals(competition.getPersonLimit()) || !bo.getTeamLimit().equals(competition.getTeamLimit())){
+        if (!Objects.equals(bo.getLevel(), competition.getLevel())||
+            !Objects.equals(bo.getAppropriation(), competition.getAppropriation())||
+            !Objects.equals(bo.getPersonLimit(), competition.getPersonLimit())||
+            !Objects.equals(bo.getTeamLimit(), competition.getTeamLimit()))
+        {
             System.out.println(StpUtil.getRoleList());
             if(!StpUtil.hasRole("AcademicAffairsOffice")){
                 return false;
@@ -134,7 +135,9 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         if (!bo.getNextAuditId().equals(competition.getNextAuditId())){
             update.setState("0");
         }
-        validEntityBeforeSave(update);
+        //是否需要重置审核状态
+        if (resetAuditStatus)
+            validEntityBeforeSave(update);
         return baseMapper.updateById(update) > 0;
     }
 
@@ -149,6 +152,7 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         SysDept sysDept = sysDeptMapper.selectOne(lqw);
         if (sysDept != null){
             entity.setNextAuditId(sysDept.getLeaderTeacherId());
+            entity.setState("0");
         }else{
             entity.setNextAuditId(-1L);
         }

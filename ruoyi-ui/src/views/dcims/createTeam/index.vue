@@ -99,7 +99,7 @@
               <el-option
                 v-for="item in optionsStudent"
                 :key="item.studentId"
-                :label="item.name"
+                :label="item.studentId + '  ' + item.name"
                 :value="item.studentId">
               </el-option>
             </el-select>

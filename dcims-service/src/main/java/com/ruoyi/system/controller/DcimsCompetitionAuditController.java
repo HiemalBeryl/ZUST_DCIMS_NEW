@@ -68,7 +68,7 @@ public class DcimsCompetitionAuditController extends BaseController {
     @Log(title = "团队获奖审核", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
-    public R<Void> edit(@Validated(EditGroup.class) @RequestBody CompetitionPartialBo bo) {
+    public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsCompetitionBo bo) {
         return toAjax(iDcimsCompetitionAuditService.updateByBoPartial(bo));
     }
 }

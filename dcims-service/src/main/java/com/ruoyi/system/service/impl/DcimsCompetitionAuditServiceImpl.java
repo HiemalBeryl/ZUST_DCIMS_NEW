@@ -11,9 +11,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.bo.CompetitionPartialBo;
+import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 竞赛审核Service业务层处理
@@ -40,6 +43,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     private final DcimsCompetitionAuditMapper competitionAuditBaseMapper;
     private final DcimsCompetitionMapper competitionBaseMapper;
     private final SysDeptMapper sysDeptMapper;
+    private final IDcimsCompetitionService competitionService;
 
     /**
      * 查询竞赛审核
@@ -118,12 +122,20 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                     // 获取校级管理员的工号
                     LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
                     lqw.eq(SysDept::getParentId,0);
-                    lqw.eq(SysDept::getDeptName,"浙江科技学院");
+                    lqw.eq(SysDept::getDeptName,"浙江科技学院教务处");
                     SysDept sysDept = sysDeptMapper.selectOne(lqw);
                     add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     comAuditList.add(add1);
                     add2.setNextAuditId(sysDept.getLeaderTeacherId());
                     comList.add(add2);
+                }
+            }
+        }
+        // 判断是否是最后一级审核，最后一级审核需要填写竞赛类别，否则不能通过
+        if (StpUtil.hasRole("AcademicAffairsOffice")){
+            for (DcimsCompetition com : comList){
+                if (!Objects.equals("A", com.getLevel()) && !Objects.equals("B", com.getLevel()) && !Objects.equals("C", com.getLevel())){
+                    return false;
                 }
             }
         }
@@ -146,10 +158,10 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
             if(add2 == null)   add2 = new DcimsCompetition();
             if(add1.getTeacherId().equals(add2.getNextAuditId())){
                 comAuditList.add(add1);
-                add2.setNextAuditId(bo.getNextTeacherId());
                 comList.add(add2);
-                add1.setNextTeacherId(add2.getResponsiblePersonId());
-                add2.setNextAuditId(add2.getResponsiblePersonId());
+                add1.setNextTeacherId(-1L);
+                add2.setNextAuditId(-1L);
+                add2.setState("2");
             }
         }
         boolean flag;
@@ -164,21 +176,38 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     }
 
     /**
-     * 修改竞赛部分信息
+     * 修改竞赛部分信息 - 弃用
      */
+    @Deprecated
     public Boolean updateByBoPartial(CompetitionPartialBo bo){
         //对角色进行权限认证，权限不满足的角色不能更改如赛事类别、拨款等字段
         DcimsCompetition competition = competitionBaseMapper.selectById(bo.getId());
-        if (!bo.getLevel().equals(competition.getLevel()) || !bo.getAppropriation().equals(competition.getAppropriation()) || !bo.getPersonLimit().equals(competition.getPersonLimit()) || !bo.getTeamLimit().equals(competition.getTeamLimit())){
-            System.out.println(StpUtil.getRoleList());
-            if(!StpUtil.hasRole("AcademicAffairsOffice")){
-                return false;
-            }
+        if(!StpUtil.hasRole("AcademicAffairsOffice")){
+            bo.setLevel(competition.getLevel());
+            bo.setAppropriation(competition.getAppropriation());
+            bo.setPersonLimit(competition.getPersonLimit());
+            bo.setTeamLimit(competition.getTeamLimit());
         }
         competition.setLevel(bo.getLevel());
         competition.setAppropriation(bo.getAppropriation());
         competition.setPersonLimit(bo.getPersonLimit());
         competition.setTeamLimit(bo.getTeamLimit());
         return competitionBaseMapper.updateById(competition) > 0;
+    }
+
+
+    /**
+     * 修改竞赛信息
+     */
+    public Boolean updateByBoPartial(DcimsCompetitionBo bo) {
+        // 判断用户角色，如果是负责人那么修改后重置审核状态。如果是学院或教务那么不重置
+        List<String> roleList = StpUtil.getRoleList();
+        Boolean flag = true;
+        if (roleList.contains("AcademicAffairsOffice") || roleList.contains("AcademyCompetitionHead")){
+            flag = false;
+        }
+        System.out.println(roleList);
+        System.out.println(flag);
+        return competitionService.updateByBo(bo, flag);
     }
 }
