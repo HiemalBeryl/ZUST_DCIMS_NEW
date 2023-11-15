@@ -112,7 +112,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="danger"
           plain
@@ -122,7 +122,7 @@
           @click="handleDelete"
           v-hasPermi="['dcims:competition:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -174,7 +174,7 @@
       <el-table-column label="本年度拨款" align="center" prop="appropriation" />
       <el-table-column label="个人赛限项" align="center" prop="personLimit" />
       <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -184,7 +184,7 @@
             v-hasPermi="['dcims:competition:remove']"
           >删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination

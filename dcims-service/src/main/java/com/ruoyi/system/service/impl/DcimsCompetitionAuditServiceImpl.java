@@ -25,10 +25,7 @@ import com.ruoyi.system.domain.DcimsCompetitionAudit;
 import com.ruoyi.system.mapper.DcimsCompetitionAuditMapper;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 竞赛审核Service业务层处理
@@ -65,9 +62,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         lqw.eq(teacherId != null&&teacherId != "", DcimsCompetition::getNextAuditId,teacherId);
         // 获取状态为待审核的竞赛
         lqw.eq(DcimsCompetition::getState,0);
-
         Page<DcimsCompetitionVo> result = competitionBaseMapper.selectVoPage(pageQuery.build(), lqw);
-        System.out.println(result);
         return TableDataInfo.build(result);
     }
 

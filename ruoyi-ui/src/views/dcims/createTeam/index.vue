@@ -72,7 +72,7 @@
               filterable
               remote
               multiple
-              reserve-keyword
+              :reserve-keyword="false"
               placeholder="请输入教师姓名"
               :remote-method="queryTeacher"
               :loading="loadingTeacher"
@@ -91,7 +91,7 @@
               filterable
               remote
               multiple
-              reserve-keyword
+              :reserve-keyword="false"
               placeholder="请输入学生姓名"
               :remote-method="queryStudent"
               :loading="loadingStudent"

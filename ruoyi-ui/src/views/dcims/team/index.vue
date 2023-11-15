@@ -86,7 +86,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="primary"
           plain
@@ -117,7 +117,7 @@
           @click="handleDelete"
           v-hasPermi="['dcims:team:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -152,12 +152,12 @@
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
       <el-table-column label="佐证材料" align="center" prop="supportMaterial" />
-      <el-table-column label="审核状态" align="center" prop="audit">
+      <!-- <el-table-column label="审核状态" align="center" prop="audit">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
         </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      </el-table-column> -->
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -174,7 +174,7 @@
             v-hasPermi="['dcims:team:remove']"
           >删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination

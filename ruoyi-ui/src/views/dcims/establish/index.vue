@@ -11,7 +11,7 @@
   </div>
 
   <!-- 添加或修改竞赛赛事基本信息对话框 -->
-  <div>
+  <div v-if="dict.type.dcims_years.length > 0">
     <el-form ref="form" :model="form" :rules="rules" label-width="80px">
       <div>
         <h3>基本信息</h3>
@@ -28,7 +28,14 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="赛事年份" prop="annual">
-            <el-input v-model.number="form.annual" placeholder="请输入赛事年份" />
+            <el-select v-model="form.annual"  placeholder="请选择竞赛所属年份">
+              <el-option
+                v-for="dict in dict.type.dcims_years"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-row>
@@ -217,6 +224,15 @@
       <el-button @click="cancel">取 消</el-button>
     </div>
   </div>
+
+
+  <!-- 当年未开启竞赛立项时显示的内容-->
+  <div v-if="dict.type.dcims_years.length == 0" style="border-bottom: 1px solid #dbdbdb;height:60px;width:600px ;">
+    <span slot="label">
+      <h1>本年度竞赛申报还未开启，请耐心等待！
+      </h1>
+    </span>
+  </div>
 </div>
 </template>
 <script>
@@ -225,7 +241,7 @@ import {queryLoginTeacher,listTeacherDict} from "@/api/dcims/basicData";
 
 export default {
   name: "Competition",
-  dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher', 'dcims_college'],
+  dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher', 'dcims_college', 'dcims_years'],
   data(){
     return{
       // 按钮loading

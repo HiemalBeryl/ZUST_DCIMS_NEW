@@ -6,6 +6,7 @@ import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface IDcimsTeamService {
     /**
      * 查询参赛团队
      */
-    DcimsTeamVo queryById(Long id);
+    DcimsTeamVoV2 queryById(Long id);
 
     /**
      * 查询参赛团队列表

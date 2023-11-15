@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
@@ -88,7 +89,7 @@ public class DcimsTeamController extends BaseController {
      */
     @SaCheckPermission("dcims:team:query")
     @GetMapping("/{id}")
-    public R<DcimsTeamVo> getInfo(@NotNull(message = "主键不能为空")
+    public R<DcimsTeamVoV2> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
         return R.ok(iDcimsTeamService.queryById(id));
     }

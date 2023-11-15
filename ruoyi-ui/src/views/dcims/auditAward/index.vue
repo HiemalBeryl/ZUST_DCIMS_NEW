@@ -10,10 +10,11 @@
 
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
-      <el-row :gutter="20">
+      <h2>待审核列表</h2>
+      <!-- <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content "></div></el-col>
 
-          <!-- 用于存放等级的筛选框 -->
+          
           <el-col :span="5"><div class="grid-content ">
               <div>
                   赛事等级:
@@ -27,7 +28,7 @@
               </div>
           </div></el-col>
 
-          <!-- 用于存放时间筛选框 -->
+          
           <el-col :span="10"><div class="grid-content ">
               <span>申请时间:</span>
                 <div class="block">
@@ -41,9 +42,9 @@
                     :picker-options="dateOptions">
                   </el-date-picker>
                 </div>
-          </div></el-col>
+          </div></el-col> 
 
-          <!-- 用于存放关键词的搜索 -->
+
           <el-col :span="5"><div class="grid-content">
               <div>关键词搜索:</div>
               <div>
@@ -53,7 +54,7 @@
           </div></el-col>
 
           <el-col :span="2"><div class="grid-content"></div></el-col>
-      </el-row>
+      </el-row>-->
 
       <!-- 用于存放勾选需要审核的获奖信息 -->
       <div>
@@ -425,7 +426,7 @@ import { listByIds } from "@/api/system/oss"
             }else{
               // 执行退回审核逻辑
               refuseAudit(this.submittForm).then(response => {
-                this.$modal.msgSuccess("退回选中竞赛成功");
+                this.$modal.msgError("退回选中竞赛成功");
                 this.submittForm = [];
                 this.open2 = false;
                 this.getList();

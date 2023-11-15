@@ -9,19 +9,18 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.ruoyi.system.domain.DcimsCompetitionAudit;
 import com.ruoyi.system.domain.DcimsCompetitionTeacher;
 import com.ruoyi.system.domain.DcimsTeacher;
+import com.ruoyi.system.domain.vo.DcimsCompetitionAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
-import com.ruoyi.system.mapper.DcimsCompetitionTeacherMapper;
-import com.ruoyi.system.mapper.DcimsTeacherMapper;
-import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.mapper.*;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.DcimsCompetition;
-import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 
 import java.util.*;
@@ -39,6 +38,7 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     private final DcimsCompetitionMapper baseMapper;
     private final DcimsTeacherMapper teacherMapper;
     private final DcimsCompetitionTeacherMapper competitionTeacherMapper;
+    private final DcimsCompetitionAuditMapper competitionAuditBaseMapper;
     private final SysDeptMapper sysDeptMapper;
 
     /**
@@ -67,6 +67,33 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
         lqw.eq(DcimsCompetition::getResponsiblePersonId, AccountUtils.getAccount().getTeacherId());
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        // 查询审核状态信息
+        List<Long> competitionIds = new ArrayList<>();
+        for(DcimsCompetitionVo vo : result.getRecords()){
+            competitionIds.add(vo.getId());
+        }
+        System.out.println(competitionIds);
+        LambdaQueryWrapper<DcimsCompetitionAudit> lqw2 = new LambdaQueryWrapper<>();
+        lqw2.in(competitionIds.size() > 0, DcimsCompetitionAudit::getCompetitionId, competitionIds);
+        List<DcimsCompetitionAuditVo> auditList = competitionAuditBaseMapper.selectVoList(lqw2);
+        Map<Long, DcimsCompetitionAuditVo> m = new HashMap<>();
+        for (DcimsCompetitionAuditVo audit : auditList){
+            DcimsCompetitionAuditVo audit1 = m.get(audit.getCompetitionId());
+            if (audit1 != null){
+                if (audit1.getId() < audit.getId()){
+                    m.put(audit.getCompetitionId(), audit);
+                }
+            }else {
+                m.put(audit.getCompetitionId(), audit);
+            }
+        }
+        for (DcimsCompetitionAuditVo audit : m.values()){
+            for (DcimsCompetitionVo vo : result.getRecords()){
+                if (Objects.equals(audit.getCompetitionId(), vo.getId())){
+                    vo.setAudit(audit);
+                }
+            }
+        }
         return TableDataInfo.build(result);
     }
 

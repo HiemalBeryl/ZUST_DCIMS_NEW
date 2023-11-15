@@ -128,7 +128,10 @@
         <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
         <el-table-column label="审核状态" align="center" fixed="right" prop="state">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.dcims_audit_result" :value="scope.row.state"/>
+          <el-tooltip v-if="scope.row.audit != null" class="item" effect="dark" :content="scope.row.audit.reason" placement="top-end">
+            <dict-tag :options="dict.type.dcims_audit_result" :value="scope.row.state"/>
+          </el-tooltip>
+          <dict-tag v-if="scope.row.audit == null" :options="dict.type.dcims_audit_result" :value="scope.row.state"/>
         </template>
       </el-table-column>
         <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">

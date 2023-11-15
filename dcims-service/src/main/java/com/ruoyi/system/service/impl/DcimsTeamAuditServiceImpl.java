@@ -117,7 +117,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                     // 获取校级管理员的工号
                     LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
                     lqw.eq(SysDept::getParentId,0);
-                    lqw.eq(SysDept::getDeptName,"浙江科技学院");
+                    lqw.eq(SysDept::getDeptName,"浙江科技学院教务处");
                     SysDept sysDept = sysDeptMapper.selectOne(lqw);
                     add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     teamAuditList.add(add1);
@@ -147,8 +147,9 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                 comAuditList.add(add1);
                 add2.setNextAuditId(bo.getNextTeacherId());
                 teamList.add(add2);
-                add1.setNextTeacherId(Long.parseLong(add2.getTeacherId().split(",")[0]));
-                add2.setNextAuditId(Long.parseLong(add2.getTeacherId().split(",")[0]));
+                add1.setNextTeacherId(-1L);
+                add2.setNextAuditId(-1L);
+                add2.setAudit(3);
             }
         }
         boolean flag;

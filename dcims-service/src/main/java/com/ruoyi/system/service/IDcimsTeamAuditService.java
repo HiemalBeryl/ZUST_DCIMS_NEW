@@ -40,4 +40,5 @@ public interface IDcimsTeamAuditService {
      * 校验并批量删除竞赛审核信息
      */
     Boolean deleteWithValidByIds(List<DcimsTeamAuditBo> boList);
+
 }

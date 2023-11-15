@@ -19,7 +19,7 @@ import java.util.Date;
  */
 @Data
 @ExcelIgnoreUnannotated
-public class DcimsTeamVo {
+public class DcimsTeamVoV2 {
 
     private static final long serialVersionUID = 1L;
 
@@ -65,25 +65,25 @@ public class DcimsTeamVo {
      * 指导教师工号
      */
     @ExcelProperty(value = "指导教师工号")
-    private String teacherId;
+    private String[] teacherId;
 
     /**
      * 指导教师姓名
      */
     @ExcelProperty(value = "指导教师姓名")
-    private String teacherName;
+    private String[] teacherName;
 
     /**
      * 参赛学生学号
      */
     @ExcelProperty(value = "参赛学生学号")
-    private String studentId;
+    private String[] studentId;
 
     /**
      * 参赛学生姓名
      */
     @ExcelProperty(value = "参赛学生姓名")
-    private String studentName;
+    private String[] studentName;
 
     /**
      * 更高级奖项id
@@ -123,8 +123,4 @@ public class DcimsTeamVo {
      */
     private Integer nextAuditId;
 
-    /**
-     * 审核状态详细
-     */
-    private DcimsTeamAuditVo auditDetail;
 }

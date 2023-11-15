@@ -9,21 +9,24 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsTeamAudit;
+import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
+import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
-import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.mapper.DcimsTeamMapper;
 import com.ruoyi.system.service.IDcimsTeamService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * 参赛团队Service业务层处理
@@ -37,14 +40,23 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
     private final DcimsTeamMapper baseMapper;
     private final DcimsCompetitionMapper dcimsCompetitionMapper;
+    private final DcimsTeamAuditMapper teamAuditBaseMapper;
     private final SysDeptMapper sysDeptMapper;
+    private final IDcimsCompetitionService competitionService;
 
     /**
      * 查询参赛团队
      */
     @Override
-    public DcimsTeamVo queryById(Long id){
-        return baseMapper.selectVoById(id);
+    public DcimsTeamVoV2 queryById(Long id){
+        DcimsTeamVo vo = baseMapper.selectVoById(id);
+        DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+        BeanUtils.copyProperties(vo, voV2);
+        voV2.setStudentId(vo.getStudentId().split(","));
+        voV2.setStudentName(vo.getStudentName().split(","));
+        voV2.setTeacherId(vo.getTeacherId().split(","));
+        voV2.setTeacherName(vo.getTeacherName().split(","));
+        return voV2;
     }
 
     /**
@@ -63,9 +75,52 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     @Override
     public TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        // 获取自己负责的竞赛
+        PageQuery query = new PageQuery();
+        query.setPageSize(100);
+        query.setPageNum(1);
+        TableDataInfo<DcimsCompetitionVo> myCompetition = competitionService.queryPageListByTeacherId(new DcimsCompetitionBo(), query);
+        List<Long> ids = new ArrayList<>();
+        for (DcimsCompetitionVo com : myCompetition.getRows()){
+            ids.add(com.getId());
+        }
         // 添加查询登录人工号的限制条件
         lqw.like(AccountUtils.getAccount().getTeacherId() != null, DcimsTeam::getTeacherId, AccountUtils.getAccount().getTeacherId());
+        lqw.or(AccountUtils.getAccount().getTeacherId() != null);
+        lqw.in( ids.size() > 0, DcimsTeam::getCompetitionId, ids);
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+
+        // 查询审核状态信息
+        List<Long> teamIds = new ArrayList<>();
+        for(DcimsTeamVo vo : result.getRecords()){
+            teamIds.add(vo.getId());
+        }
+        System.out.println(teamIds);
+        LambdaQueryWrapper<DcimsTeamAudit> lqw2 = new LambdaQueryWrapper<>();
+        lqw2.in(teamIds.size() > 0, DcimsTeamAudit::getTeamId, teamIds);
+        List<DcimsTeamAuditVo> auditList = teamAuditBaseMapper.selectVoList(lqw2);
+        Map<Long, DcimsTeamAuditVo> m = new HashMap<>();
+        for (DcimsTeamAuditVo audit : auditList){
+            DcimsTeamAuditVo audit1 = m.get(audit.getTeamId());
+            if (audit1 != null){
+                if (audit1.getId() < audit.getId()){
+                    m.put(audit.getTeamId(), audit);
+                }
+            }else {
+                m.put(audit.getTeamId(), audit);
+            }
+        }
+        System.out.println(m.values());
+        for (DcimsTeamAuditVo audit : m.values()){
+            for (DcimsTeamVo vo : result.getRecords()){
+                System.out.println(audit.getTeamId() + "   " + vo.getId());
+                if (Objects.equals(audit.getTeamId(), vo.getId())){
+                    vo.setAuditDetail(audit);
+                    System.out.println(vo.getId() + " " + audit.getReason());
+                }
+            }
+        }
+
         return TableDataInfo.build(result);
     }
 
@@ -114,6 +169,14 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     public Boolean updateByBo(DcimsTeamBo bo) {
         DcimsTeam update = BeanUtil.toBean(bo, DcimsTeam.class);
         validEntityBeforeSave(update);
+        // 重置审核信息
+        DcimsCompetition competition = dcimsCompetitionMapper.selectById(update.getCompetitionId());
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysDept::getParentId,100);
+        lqw.eq(SysDept::getOrderNum,competition.getCollege());
+        SysDept sysDept = sysDeptMapper.selectOne(lqw);
+        update.setAudit(1);
+        update.setNextAuditId(sysDept.getLeaderTeacherId());
         return baseMapper.updateById(update) > 0;
     }
 
@@ -161,6 +224,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }else{
             entity.setNextAuditId(-1L);
         }
+        // 只要是修改，那么就重置审核状态
 
     }
 

@@ -166,4 +166,9 @@ public class DcimsCompetitionVo {
      * 审核状态
      */
     private String state;
+
+    /**
+     * 审核状态详细
+     */
+    private DcimsCompetitionAuditVo audit;
 }
