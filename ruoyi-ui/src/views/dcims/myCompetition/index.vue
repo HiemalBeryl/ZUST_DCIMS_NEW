@@ -201,10 +201,10 @@
             <el-input v-model="form.organizer" placeholder="请输入主办单位" />
           </el-form-item>
           <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-            <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
+            <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="true"/>
           </el-form-item>
           <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-            <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
+            <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
           </el-form-item>
           <el-form-item label="校内选拔时间" prop="innerTime">
             <el-date-picker clearable

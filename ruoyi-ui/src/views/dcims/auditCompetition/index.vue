@@ -167,11 +167,11 @@
         <el-form-item label="主办单位" prop="organizer">
           <el-input v-model="form.organizer" placeholder="请输入主办单位" />
         </el-form-item>
-        <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
+        <el-form-item label="竞赛负责人工号" prop="responsiblePersonId" >
+          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="true"/>
         </el-form-item>
         <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
+          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
         </el-form-item>
         <el-form-item label="校内选拔时间" prop="innerTime">
           <el-date-picker clearable
@@ -235,10 +235,10 @@
           <el-input v-model="form.organizer" placeholder="请输入主办单位" />
         </el-form-item>
         <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
+          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="true"/>
         </el-form-item>
         <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
+          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
         </el-form-item>
         <el-form-item label="校内选拔时间" prop="innerTime">
           <el-date-picker clearable
@@ -579,6 +579,7 @@ import {getInfo} from "@/api/login"
                 console.log("不允许提交")
                 this.buttonLoading = false;
                 this.$modal.msgError("选中的竞赛中存在未确定类别的竞赛，不允许提交！");
+                this.submittForm = [];
                 return;
               }
               // 执行通过审核逻辑
@@ -631,7 +632,7 @@ import {getInfo} from "@/api/login"
             // console.log("2:"+ com+ item)
             // console.log("2:"+ com.id+ item.competitionId)
             // console.log("2:"+ com.level)
-            if(com.level.trim() === '' || com.level == null){
+            if(com.level == null || com.level.trim() === ''){
               console.log("出现空类型竞赛" + com.level)
               flag = false
             }
@@ -646,10 +647,10 @@ import {getInfo} from "@/api/login"
     }
     }
   }
-  
 
-     
-  
+
+
+
 </script>
 
 <style>
