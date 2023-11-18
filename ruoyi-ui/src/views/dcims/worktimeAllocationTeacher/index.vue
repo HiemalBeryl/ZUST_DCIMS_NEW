@@ -42,7 +42,7 @@
           v-hasPermi="['dcims:worktimeAllocationTeacher:edit']"
         >修改</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="danger"
           plain
@@ -52,7 +52,7 @@
           @click="handleDelete"
           v-hasPermi="['dcims:worktimeAllocationTeacher:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -71,7 +71,7 @@
       <el-table-column label="教师工号" align="center" prop="teacherId" />
       <el-table-column label="教师姓名" align="center" prop="teacherName" />
       <el-table-column label="教师应得工作量" align="center" prop="worktime" />
-      <el-table-column label="审核状态" align="center" prop="status" />
+      <!-- <el-table-column label="审核状态" align="center" prop="status" /> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -81,13 +81,13 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['dcims:worktimeAllocationTeacher:edit']"
           >修改</el-button>
-          <el-button
+          <!-- <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['dcims:worktimeAllocationTeacher:remove']"
-          >删除</el-button>
+          >删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>

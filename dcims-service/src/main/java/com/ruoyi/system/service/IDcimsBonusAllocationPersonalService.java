@@ -25,7 +25,7 @@ public interface IDcimsBonusAllocationPersonalService {
     /**
      * 查询奖金分配个人列表
      */
-    TableDataInfo<DcimsBonusAllocationPersonalVo> queryPageList(DcimsBonusAllocationPersonalBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsBonusAllocationPersonalVo> queryPageList(DcimsBonusAllocationPersonalBo bo, PageQuery pageQuery, Long id);
 
     /**
      * 查询奖金分配个人列表

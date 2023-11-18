@@ -2,12 +2,14 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="年份" prop="year">
-        <el-input
-          v-model="queryParams.year"
-          placeholder="请输入年份"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.year"  placeholder="请选择所属年份">
+          <el-option
+            v-for="dict in dict.type.dcims_years"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="核算开始时间" prop="startTime">
         <el-date-picker clearable
@@ -68,7 +70,7 @@
 
     <el-table v-loading="loading" :data="worktimeAllocationList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
+      <!-- <el-table-column label="主键" align="center" prop="id" v-if="true"/> -->
       <el-table-column label="年份" align="center" prop="year" />
       <el-table-column label="核算开始时间" align="center" prop="startTime" width="180">
         <template slot-scope="scope">
@@ -80,8 +82,8 @@
           <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="计算公式" align="center" prop="fomular" />
-      <el-table-column label="核算状态" align="center" prop="status" />
+      <!-- <el-table-column label="计算公式" align="center" prop="fomular" />
+      <el-table-column label="核算状态" align="center" prop="status" /> -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -114,7 +116,14 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="年份" prop="year">
-          <el-input v-model="form.year" placeholder="请输入年份" />
+          <el-select v-model="form.year"  placeholder="请选择所属年份">
+          <el-option
+            v-for="dict in dict.type.dcims_years"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
         </el-form-item>
         <el-form-item label="核算开始时间" prop="startTime">
           <el-date-picker clearable
@@ -132,12 +141,12 @@
             placeholder="请选择核算结束时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="计算公式" prop="fomular">
+        <!-- <el-form-item label="计算公式" prop="fomular">
           <el-input v-model="form.fomular" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="参数键值对" prop="parameter">
           <el-input v-model="form.parameter" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -152,6 +161,7 @@ import { listWorktimeAllocation, getWorktimeAllocation, delWorktimeAllocation, a
 
 export default {
   name: "WorktimeAllocation",
+  dicts: ['dcims_years'],
   data() {
     return {
       // 按钮loading

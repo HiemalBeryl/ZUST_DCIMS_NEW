@@ -48,6 +48,15 @@ public class DcimsBonusAllocationController extends BaseController {
     }
 
     /**
+     * 根据登录账号的工号查询奖金分配部分列表
+     */
+    @SaCheckPermission("dcims:bonusAllocationPersonal:list")
+    @GetMapping("/listByTeacherId")
+    public List<DcimsBonusAllocationVo> queryListByTeacherId(){
+        return iDcimsBonusAllocationService.queryListByTeacherId();
+    }
+
+    /**
      * 导出奖金分配总列表
      */
     @SaCheckPermission("dcims:bonusAllocation:export")
@@ -110,14 +119,18 @@ public class DcimsBonusAllocationController extends BaseController {
      */
     @SaCheckPermission("dcims:bonusAllocation:generate")
     @GetMapping("/generate")
-    public List<Object> generateBonusDataByTime(@NotNull(message = "起始时间不能为空") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime, @NotNull(message = "终止时间不能为空") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime){
-        return iDcimsBonusAllocationService.generateBonusDataByTime(startTime, endTime);
+    public List<Object> generateBonusDataByTime(
+        @NotNull(message = "起始时间不能为空") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
+        @NotNull(message = "终止时间不能为空") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
+        @NotNull(message = "年份不能为空") @RequestParam Integer year
+    ){
+        return iDcimsBonusAllocationService.generateBonusDataByTime(startTime, endTime, year);
     }
 
     /**
      * 保存竞赛奖金数据
      */
-    @SaCheckPermission("dcims:bonusAllocation:addList")
+    @SaCheckPermission("dcims:bonusAllocation:generate")
     @Log(title = "奖金分配总", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping("/saveList")

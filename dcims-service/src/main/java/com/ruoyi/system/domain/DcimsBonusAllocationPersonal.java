@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,6 +31,10 @@ public class DcimsBonusAllocationPersonal extends BaseEntity {
     @TableId(value = "id")
     private Long id;
     /**
+     * 父表的主键
+     */
+    private Long allocationId;
+    /**
      * 年份
      */
     private Integer years;
@@ -41,6 +46,10 @@ public class DcimsBonusAllocationPersonal extends BaseEntity {
      * 负责竞赛
      */
     private Long competition;
+    /**
+     * 学院
+     */
+    private Long college;
     /**
      * 获得奖金数
      */

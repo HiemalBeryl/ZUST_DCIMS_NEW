@@ -44,9 +44,9 @@ export function delBonusAllocationPersonal(id) {
 }
 
 // 查询奖金分配总金额
-export function getBonusAllocationCollegeTotal() {
+export function getBonusAllocationCollegeTotal(id) {
   return request({
-    url: '/dcims/bonusAllocationPersonal/getTotal',
+    url: '/dcims/bonusAllocationPersonal/getTotal?'+'id='+id,
     method: 'get'
   })
 }

@@ -8,22 +8,18 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetition;
-import com.ruoyi.system.domain.vo.AllocationCompetitionDictVo;
-import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
+import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
+import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsWorktimeAllocationCompetitionBo;
-import com.ruoyi.system.domain.vo.DcimsWorktimeAllocationCompetitionVo;
 import com.ruoyi.system.domain.DcimsWorktimeAllocationCompetition;
 import com.ruoyi.system.mapper.DcimsWorktimeAllocationCompetitionMapper;
 import com.ruoyi.system.service.IDcimsWorktimeAllocationCompetitionService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * 工作量分配竞赛Service业务层处理
@@ -37,6 +33,7 @@ public class DcimsWorktimeAllocationCompetitionServiceImpl implements IDcimsWork
 
     private final DcimsWorktimeAllocationCompetitionMapper baseMapper;
     private final DcimsCompetitionMapper competitionBaseMapper;
+    private final IDcimsCompetitionService competitionService;
 
     /**
      * 查询工作量分配竞赛
@@ -53,6 +50,21 @@ public class DcimsWorktimeAllocationCompetitionServiceImpl implements IDcimsWork
     public TableDataInfo<DcimsWorktimeAllocationCompetitionVo> queryPageList(DcimsWorktimeAllocationCompetitionBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsWorktimeAllocationCompetition> lqw = buildQueryWrapper(bo);
         Page<DcimsWorktimeAllocationCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        // 获取竞赛名称
+        List<Long> competitionIds = new ArrayList<>();
+        for (DcimsWorktimeAllocationCompetitionVo entity : result.getRecords()){
+            competitionIds.add(entity.getCompetitionId());
+        }
+        List<DcimsCompetitionVo> competitionList = competitionService.listById(competitionIds);
+        for (DcimsWorktimeAllocationCompetitionVo entity : result.getRecords()){
+            // 设置竞赛详情
+            for (DcimsCompetitionVo cvo: competitionList){
+                if (Objects.equals(cvo.getId(), entity.getCompetitionId())){
+                    entity.setCompetitionDetail(cvo);
+                    break;
+                }
+            }
+        }
         return TableDataInfo.build(result);
     }
 

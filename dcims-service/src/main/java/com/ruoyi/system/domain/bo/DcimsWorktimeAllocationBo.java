@@ -50,13 +50,13 @@ public class DcimsWorktimeAllocationBo extends BaseEntity {
     /**
      * 计算公式
      */
-    @NotBlank(message = "计算公式不能为空", groups = { AddGroup.class, EditGroup.class })
+    //@NotBlank(message = "计算公式不能为空", groups = { AddGroup.class, EditGroup.class })
     private String fomular;
 
     /**
      * 参数键值对
      */
-    @NotBlank(message = "参数键值对不能为空", groups = { AddGroup.class, EditGroup.class })
+    //@NotBlank(message = "参数键值对不能为空", groups = { AddGroup.class, EditGroup.class })
     private String parameter;
 
     /**

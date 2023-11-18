@@ -8,6 +8,18 @@
     </el-form>
  <!-- 用于显示共有多少钱需要分配，剩余多少钱可以分配，分配截至日期 -->
  <div>
+    <el-row>
+      <el-col :span="24">
+        <el-select v-model="allocationId" placeholder="请选择" @change="renew(allocationId)">
+          <el-option
+            v-for="item in allocationOption"
+            :key="item.id"
+            :label="item.years+'年奖金分配,学院序号'+item.college"
+            :value="item.id">
+          </el-option>
+        </el-select>
+      </el-col>
+    </el-row>
       <el-row type="flex" justify="space-center">
         <!-- <el-col :span="1"><div class="grid-content"></div></el-col> -->
 
@@ -114,15 +126,15 @@
       <!--<el-table-column type="selection" width="55" align="center" />
        <el-table-column label="主键" align="center" prop="id" v-if="true"/>
       <el-table-column label="年份" align="center" prop="years" /> -->
-      <el-table-column label="获得人" align="center" prop="gainer" />
-      <el-table-column label="负责竞赛" align="center" prop="competition" />
+      <el-table-column label="获得人" align="center" prop="gainerDetail.name" />
+      <el-table-column label="负责竞赛" align="center" prop="competitionDetail.name" />
       <el-table-column label="获得奖金数" align="center" prop="bonus" />
       <el-table-column label="分配时间" align="center" prop="allocateTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.allocateTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="分配者" align="center" prop="teacherInCharge" />
+      <el-table-column label="分配者" align="center" prop="teacherInChargeDetail.name" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -196,6 +208,10 @@ import {
   getBonusAllocationCollegeTotal,
 } from "@/api/dcims/bonusAllocationPersonal";
 
+import {
+  listByTeacherId,
+} from "@/api/dcims/bonusAllocation";
+
 export default {
   name: "BonusAllocationPersonal",
   data() {
@@ -224,7 +240,12 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        id: 0
       },
+      // 奖金分配选项
+      allocationOption: [],
+      // 选中的项目
+      allocationId: undefined,
       // 奖金总数，奖金剩余，留存比例
       jiangJinTotal: 0,
       jiangjinRemain: 0,
@@ -262,15 +283,15 @@ export default {
     };
   },
   created() {
-    this.getList();
-    // 初始化最上面的信息
-    this.renew();
+    this.initAllocationOptions();
   },
   methods: {
     /** 查询奖金分配个人列表 */
     getList() {
       this.loading = true;
+      this.queryParams.id = this.allocationId;
       listBonusAllocationPersonal(this.queryParams).then(response => {
+        console.log(response)
         this.bonusAllocationPersonalList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -278,13 +299,14 @@ export default {
     },
 
     // 更新数据
-    renew() {
-      getBonusAllocationCollegeTotal().then(response => {
+    renew(id) {
+      getBonusAllocationCollegeTotal(id).then(response => {
         this.jiangJinTotal = response.data.totalAmount;
         this.jiangjinRemain = response.data.unallocated;
         this.assignmentEndDate = response.data.endTime;
         this.retentionRatio = response.data.retentionRatio*100;
       })
+      this.getList();
     },
 
     // 取消按钮
@@ -354,7 +376,7 @@ export default {
             updateBonusAllocationPersonal(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               //更新上方数据
-              this.renew();
+              this.renew(this.allocationId);
 
               this.open = false;
               this.getList();
@@ -394,6 +416,18 @@ export default {
       this.download('dcims/bonusAllocationPersonal/export', {
         ...this.queryParams
       }, `bonusAllocationPersonal_${new Date().getTime()}.xlsx`)
+    },
+    // 初始化奖金分配选择
+    initAllocationOptions(){
+      listByTeacherId().then(response => {
+        this.allocationOption = response;
+        console.log(this.allocationOption);
+        // 初始化最上面的信息
+        if(this.allocationOption[0] != undefined){
+          this.allocationId = this.allocationOption[0].id;
+          this.renew(this.allocationOption[0].id);
+        }
+      });
     }
   }
 };

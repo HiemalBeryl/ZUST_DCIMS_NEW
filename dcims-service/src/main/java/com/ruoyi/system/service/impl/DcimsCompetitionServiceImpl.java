@@ -246,4 +246,16 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     public Boolean removeTutor(Long id){
         return competitionTeacherMapper.deleteById(id) > 0;
     }
+
+    /**
+     * 根据主键查竞赛vo
+     *
+     * @param id
+     */
+    @Override
+    public List<DcimsCompetitionVo> listById(List<Long> id) {
+        LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
+        lqw.in(id.size() > 0, DcimsCompetition::getId, id);
+        return baseMapper.selectVoList(lqw);
+    }
 }

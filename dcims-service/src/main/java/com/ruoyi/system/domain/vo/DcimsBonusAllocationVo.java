@@ -91,5 +91,9 @@ public class DcimsBonusAllocationVo {
     @ExcelProperty(value = "负责教师")
     private Long teacherInCharge;
 
-
+    /**
+     * 负责教师详情
+     */
+    @ExcelProperty(value = "负责教师详情")
+    private DcimsTeacherVo teacherDetail;
 }

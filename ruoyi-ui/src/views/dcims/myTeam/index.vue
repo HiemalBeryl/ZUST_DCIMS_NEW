@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-table v-loading="loading" :data="teamList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
+      <el-table-column label="序号" align="center" prop="id" v-if="true"/>
       <el-table-column label="竞赛id" align="center" prop="competitionId" />
       <el-table-column label="队伍名称" align="center" prop="name" />
       <el-table-column label="作品名称" align="center" prop="worksName" />

@@ -26,7 +26,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="primary"
           plain
@@ -67,6 +67,10 @@
           @click="handleExport"
           v-hasPermi="['dcims:bonusAllocation:export']"
         >导出</el-button>
+      </el-col> -->
+      <el-col :span="12">
+        <el-button  class="countButton" @click="setTime()" >计算 </el-button>
+        <el-button  type="warning" class="countButton" @click="upload()" v-show="!countButtonShow" :disabled="uploadDisabled">{{uploadButtonText}}</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -95,7 +99,7 @@
           <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="负责教师" align="center" prop="teacherInCharge" />
+      <el-table-column label="负责教师" align="center" prop="teacherDetail.name" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button 
@@ -129,12 +133,7 @@
     </el-table>
 
     <el-row>
-
-      <el-col :span="12">
-        <el-button  class="countButton" @click="setTime()" >计算 </el-button>
-        <el-button  type="warning" class="countButton" @click="upload()" v-show="!countButtonShow" :disabled="uploadDisabled">{{uploadButtonText}}</el-button>
-      </el-col>
-      <el-col :span="12">
+      <el-col :span="24">
         <pagination
           v-show="total>0"
           :total="total"
@@ -192,6 +191,7 @@
           <el-date-picker clearable
             v-model="form.startTime"
             type="datetime"
+            :disabled="true" 
             value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择开始时间">
           </el-date-picker>
@@ -200,18 +200,19 @@
           <el-date-picker clearable
             v-model="form.endTime"
             type="datetime"
+            :disabled="true" 
             value-format="yyyy-MM-dd HH:mm:ss"
             placeholder="请选择结束时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="负责教师" prop="teacherInCharge">
-          <el-input v-model="form.teacherInCharge" placeholder="请输入负责教师" />
+          <el-input v-model="form.teacherInCharge" :disabled="true" placeholder="请输入负责教师" />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <!-- <div slot="footer" class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm" >确 定</el-button>
         <el-button @click="cancel()">取 消</el-button>
-      </div>
+      </div> -->
     </el-dialog>
 
     <!-- 编辑待提交的年度奖金汇总对话框 -->
@@ -246,6 +247,16 @@
             placeholder="请选择结束时间">
           </el-date-picker>
         </el-form-item>
+        <el-form-item label="年份" prop="years">
+          <el-select v-model="form.year" placeholder="请选择竞赛所属年份">
+            <el-option
+              v-for="dict in dict.type.dcims_years"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
         <div class="dialog-footer">
           <el-button :loading="buttonLoading" type="primary" @click="setTimeSubmit()" >确 定</el-button>
           <el-button @click="cancel">取 消</el-button>
@@ -260,6 +271,7 @@
 <script>
 import {
   listBonusAllocation,
+  listByTeacherId,
   getBonusAllocation,
   delBonusAllocation,
   addBonusAllocation,
@@ -270,7 +282,7 @@ import {
 
 export default {
   name: "BonusAllocation",
-  dicts: ['dcims_college'],
+  dicts: ['dcims_college', 'dcims_years'],
   data() {
     return {
       // 按钮loading
@@ -324,6 +336,9 @@ export default {
           { required: true, message: "主键不能为空", trigger: "blur" }
         ],
         years: [
+          { required: true, message: "年份不能为空", trigger: "blur" }
+        ],
+        year: [
           { required: true, message: "年份不能为空", trigger: "blur" }
         ],
         college: [
@@ -388,6 +403,7 @@ export default {
       this.form = {
         id: undefined,
         years: undefined,
+        year: undefined,
         college: undefined,
         totalAmount: undefined,
         retentionRatio: undefined,
@@ -550,7 +566,7 @@ export default {
       this.bonusAllocationList[this.activeRow].unallocated = this.form.totalAmount
       this.openEditor = false;
       this.activeRow = undefined;
-    }
+    },
   }
 };
 </script>

@@ -11,17 +11,19 @@ import com.ruoyi.system.domain.bo.DcimsBonusAllocationBo;
 import com.ruoyi.system.domain.bo.DcimsBonusAllocationPersonalBo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationPersonalVo;
 import com.ruoyi.system.domain.vo.DcimsBonusAllocationVo;
+import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
+import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import com.ruoyi.system.mapper.DcimsBonusAllocationPersonalMapper;
+import com.ruoyi.system.service.IDcimsBasicDataService;
 import com.ruoyi.system.service.IDcimsBonusAllocationPersonalService;
 import com.ruoyi.system.service.IDcimsBonusAllocationService;
+import com.ruoyi.system.service.IDcimsCompetitionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 奖金分配个人Service业务层处理
@@ -34,6 +36,8 @@ import java.util.Map;
 public class DcimsBonusAllocationPersonalServiceImpl implements IDcimsBonusAllocationPersonalService {
 
     private final DcimsBonusAllocationPersonalMapper baseMapper;
+    private final IDcimsBasicDataService dataService;
+    private final IDcimsCompetitionService competitionService;
 
     @Autowired
     private IDcimsBonusAllocationService iDcimsBonusAllocationService;
@@ -50,9 +54,50 @@ public class DcimsBonusAllocationPersonalServiceImpl implements IDcimsBonusAlloc
      * 查询奖金分配个人列表
      */
     @Override
-    public TableDataInfo<DcimsBonusAllocationPersonalVo> queryPageList(DcimsBonusAllocationPersonalBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsBonusAllocationPersonalVo> queryPageList(DcimsBonusAllocationPersonalBo bo, PageQuery pageQuery, Long id) {
         LambdaQueryWrapper<DcimsBonusAllocationPersonal> lqw = buildQueryWrapper(bo);
+        lqw.eq(id != null, DcimsBonusAllocationPersonal::getAllocationId, id);
         Page<DcimsBonusAllocationPersonalVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        // 获取详情
+        List<Long> gainerIds = new ArrayList<>();
+        List<Long> competitionIds = new ArrayList<>();
+        List<Long> chargeIds = new ArrayList<>();
+        for (DcimsBonusAllocationPersonalVo entity : result.getRecords()){
+            gainerIds.add(entity.getGainer());
+            competitionIds.add(entity.getCompetition());
+            chargeIds.add(entity.getTeacherInCharge());
+        }
+        List<DcimsTeacherVo> gainerList = dataService.getTeacherNameByIds(gainerIds);
+        List<DcimsCompetitionVo> competitionList = competitionService.listById(competitionIds);
+        List<DcimsTeacherVo> chargeList = dataService.getTeacherNameByIds(chargeIds);
+        for (DcimsBonusAllocationPersonalVo entity : result.getRecords()){
+            // 设置获得人详情
+            for (DcimsTeacherVo gvo: gainerList){
+                System.out.println("前面:"+gvo.getTeacherId()+"前面:"+entity.getGainer());
+                if (Objects.equals(gvo.getTeacherId(), entity.getGainer())){
+                    System.out.println("前面:"+gvo.getTeacherId()+"前面:"+entity.getGainer());
+                    entity.setGainerDetail(gvo);
+                    break;
+                }
+            }
+
+            // 设置分配者详情
+            for (DcimsTeacherVo cvo: chargeList){
+                System.out.println("后面:"+cvo.getTeacherId()+"后面:"+entity.getGainer());
+                if (Objects.equals(cvo.getTeacherId(), entity.getTeacherInCharge())){
+                    entity.setTeacherInChargeDetail(cvo);
+                    break;
+                }
+            }
+
+            // 设置竞赛详情
+            for (DcimsCompetitionVo cvo: competitionList){
+                if (Objects.equals(cvo.getId(), entity.getCompetition())){
+                    entity.setCompetitionDetail(cvo);
+                    break;
+                }
+            }
+        }
         return TableDataInfo.build(result);
     }
 
@@ -91,7 +136,7 @@ public class DcimsBonusAllocationPersonalServiceImpl implements IDcimsBonusAlloc
     @Override
     public Boolean updateByBo(DcimsBonusAllocationPersonalBo bo) {
         //总余额
-        DcimsBonusAllocationVo totalAmount = iDcimsBonusAllocationService.getTotalAmount();
+        DcimsBonusAllocationVo totalAmount = iDcimsBonusAllocationService.getTotalAmount(bo.getAllocationId());
         Long oldUnallocated = totalAmount.getUnallocated();
         //个人修改前的金额
         DcimsBonusAllocationPersonalVo dcimsBonusAllocationPersonalVo = queryById(bo.getId());

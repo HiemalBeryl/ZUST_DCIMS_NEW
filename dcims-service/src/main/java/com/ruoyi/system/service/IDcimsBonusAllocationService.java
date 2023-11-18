@@ -36,6 +36,11 @@ public interface IDcimsBonusAllocationService {
     List<DcimsBonusAllocationVo> queryList(DcimsBonusAllocationBo bo);
 
     /**
+     * 根据登录账号的工号查询奖金分配部分列表
+     */
+    List<DcimsBonusAllocationVo> queryListByTeacherId();
+
+    /**
      * 新增奖金分配总
      */
     Boolean insertByBo(DcimsBonusAllocationBo bo);
@@ -53,12 +58,12 @@ public interface IDcimsBonusAllocationService {
     /**
      * 获取学院总金额
      */
-    DcimsBonusAllocationVo getTotalAmount();
+    DcimsBonusAllocationVo getTotalAmount(Long id);
 
     /**
      * 生成并查询某一段时间的竞赛奖金数据
      */
-    List<Object> generateBonusDataByTime(Date startTime, Date endTime);
+    List<Object> generateBonusDataByTime(Date startTime, Date endTime, Integer year);
 
     /**
      * 保存竞赛奖金数据

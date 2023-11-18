@@ -9,6 +9,14 @@ export function listBonusAllocation(query) {
   })
 }
 
+// 根据登录账号的工号查询奖金分配部分列表
+export function listByTeacherId() {
+  return request({
+    url: '/dcims/bonusAllocation//listByTeacherId',
+    method: 'get'
+  })
+}
+
 // 查询奖金分配总详细
 export function getBonusAllocation(id) {
   return request({
@@ -46,7 +54,7 @@ export function delBonusAllocation(id) {
 // 设置奖金计算起止时间
 export function setTimeOfBonus(data) {
   return request({
-    url: '/dcims/bonusAllocation/generate?' +"startTime="+ data.countStartTime +"&endTime="+ data.countEndTime,
+    url: '/dcims/bonusAllocation/generate?' +"startTime="+ data.countStartTime +"&endTime="+ data.countEndTime+"&year="+ data.year,
     method: 'get',
   })
 }

@@ -47,8 +47,12 @@ public class DcimsBonusAllocationPersonalController extends BaseController {
      */
     @SaCheckPermission("dcims:bonusAllocationPersonal:list")
     @GetMapping("/list")
-    public TableDataInfo<DcimsBonusAllocationPersonalVo> list(DcimsBonusAllocationPersonalBo bo, PageQuery pageQuery) {
-        return iDcimsBonusAllocationPersonalService.queryPageList(bo, pageQuery);
+    public TableDataInfo<DcimsBonusAllocationPersonalVo> list(
+        DcimsBonusAllocationPersonalBo bo,
+        Long id,
+        PageQuery pageQuery
+    ) {
+        return iDcimsBonusAllocationPersonalService.queryPageList(bo, pageQuery, id);
     }
 
     /**
@@ -116,8 +120,8 @@ public class DcimsBonusAllocationPersonalController extends BaseController {
      */
     @SaCheckPermission("dcims:bonusAllocation:query")
     @GetMapping("/getTotal")
-    public R<DcimsBonusAllocationVo> getTotalAmount() {
-        return R.ok(iDcimsBonusAllocationService.getTotalAmount());
+    public R<DcimsBonusAllocationVo> getTotalAmount(@RequestParam Long id) {
+        return R.ok(iDcimsBonusAllocationService.getTotalAmount(id));
     }
 
 }

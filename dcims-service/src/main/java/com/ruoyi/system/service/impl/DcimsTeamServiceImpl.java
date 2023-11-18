@@ -16,6 +16,7 @@ import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.service.IDcimsBasicDataService;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     private final DcimsTeamMapper baseMapper;
     private final DcimsCompetitionMapper dcimsCompetitionMapper;
     private final DcimsTeamAuditMapper teamAuditBaseMapper;
+    private final IDcimsBasicDataService basicDataService;
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
 
@@ -175,8 +177,43 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.eq(SysDept::getParentId,100);
         lqw.eq(SysDept::getOrderNum,competition.getCollege());
         SysDept sysDept = sysDeptMapper.selectOne(lqw);
-        update.setAudit(1);
+        // 判断状态，原来是未添加佐证材料的状态不变，否则变为待审核
+        DcimsTeam entity = baseMapper.selectById(update.getId());
+        if(entity.getAudit() == 0){
+            update.setAudit(0);
+        } else {
+            update.setAudit(1);
+        }
         update.setNextAuditId(sysDept.getLeaderTeacherId());
+        // 填写教师、学生姓名
+        String studentIds = bo.getStudentId();
+        String[] splitStudentIds = studentIds.split(",");
+        List<Long> studentIdsLong = new ArrayList<>();
+        for(String id : splitStudentIds){
+            studentIdsLong.add(Long.parseLong(id));
+        }
+        List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdsLong);
+        String studentName = "";
+        for(DcimsStudentVo student : students){
+            studentName = studentName.concat(student.getName() + ',');
+        }
+        studentName = studentName.substring(0,studentName.length() - 1);
+        update.setStudentName(studentName);
+
+        String teacherIds = bo.getTeacherId();
+        String[] splitTeacherIds = teacherIds.split(",");
+        List<Long> teacherIdsLong = new ArrayList<>();
+        for(String id : splitTeacherIds){
+            teacherIdsLong.add(Long.parseLong(id));
+        }
+        List<DcimsTeacherVo> teachers = basicDataService.getTeacherNameByIds(teacherIdsLong);
+        String teacherName = "";
+        for(DcimsTeacherVo teacher : teachers){
+            teacherName = teacherName.concat(teacher.getName() + ',');
+        }
+        teacherName = teacherName.substring(0,teacherName.length() - 1);
+        update.setTeacherName(teacherName);
+
         return baseMapper.updateById(update) > 0;
     }
 

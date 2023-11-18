@@ -5,6 +5,8 @@ import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.vo.DcimsStudentVo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 
+import java.util.List;
+
 /**
  * 基本数据Service接口
  *
@@ -21,6 +23,26 @@ public interface IDcimsBasicDataService {
      * 查询教师姓名工号字典
      */
     TableDataInfo<DcimsTeacherVo> listTeacherDict(String name);
+
+    /**
+     * 根据工号查教师姓名
+     */
+    DcimsTeacherVo getTeacherNameById(Long teacherId);
+
+    /**
+     * 根据工号查学生姓名
+     */
+    DcimsStudentVo getStudentNameById(Long studentId);
+
+    /**
+     * 根据工号查教师姓名
+     */
+    List<DcimsTeacherVo> getTeacherNameByIds(List<Long> teacherIds);
+
+    /**
+     * 根据工号查学生姓名
+     */
+    List<DcimsStudentVo> getStudentNameByIds(List<Long> studentIds);
 
     /**
      * 查询登录用户所对应的教师信息

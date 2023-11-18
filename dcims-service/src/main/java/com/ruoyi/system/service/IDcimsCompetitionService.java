@@ -67,4 +67,9 @@ public interface IDcimsCompetitionService {
      * 根据id删除指导教师
      */
     Boolean removeTutor(Long id);
+
+    /**
+     * 根据主键查竞赛vo
+     */
+    List<DcimsCompetitionVo> listById(List<Long> id);
 }

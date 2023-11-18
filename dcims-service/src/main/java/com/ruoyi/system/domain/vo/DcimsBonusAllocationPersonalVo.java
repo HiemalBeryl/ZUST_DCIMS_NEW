@@ -30,6 +30,11 @@ public class DcimsBonusAllocationPersonalVo {
     private Long id;
 
     /**
+     * 父表的主键
+     */
+    private Long allocationId;
+
+    /**
      * 年份
      */
     @ExcelProperty(value = "年份")
@@ -42,10 +47,28 @@ public class DcimsBonusAllocationPersonalVo {
     private Long gainer;
 
     /**
+     * 获得人详情
+     */
+    @ExcelProperty(value = "获得人详情")
+    private DcimsTeacherVo gainerDetail;
+
+    /**
      * 负责竞赛
      */
     @ExcelProperty(value = "负责竞赛")
     private Long competition;
+
+    /**
+     * 负责竞赛
+     */
+    @ExcelProperty(value = "负责竞赛详情")
+    private DcimsCompetitionVo competitionDetail;
+
+    /**
+     * 学院
+     */
+    @ExcelProperty(value = "学院")
+    private Long college;
 
     /**
      * 获得奖金数
@@ -64,6 +87,12 @@ public class DcimsBonusAllocationPersonalVo {
      */
     @ExcelProperty(value = "分配者")
     private Long teacherInCharge;
+
+    /**
+     * 分配者
+     */
+    @ExcelProperty(value = "分配者详情")
+    private DcimsTeacherVo teacherInChargeDetail;
 
 
 }

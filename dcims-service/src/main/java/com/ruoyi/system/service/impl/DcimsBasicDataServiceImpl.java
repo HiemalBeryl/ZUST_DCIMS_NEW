@@ -46,6 +46,34 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
     }
 
     @Override
+    public DcimsTeacherVo getTeacherNameById(Long teacherId) {
+        LambdaQueryWrapper<DcimsTeacher> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsTeacher::getTeacherId, teacherId);
+        return teacherBaseMapper.selectVoOne(lqw);
+    }
+
+    @Override
+    public DcimsStudentVo getStudentNameById(Long studentId) {
+        LambdaQueryWrapper<DcimsStudent> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsStudent::getStudentId, studentId);
+        return studentBaseMapper.selectVoOne(lqw);
+    }
+
+    @Override
+    public List<DcimsTeacherVo> getTeacherNameByIds(List<Long> teacherIds) {
+        LambdaQueryWrapper<DcimsTeacher> lqw = new LambdaQueryWrapper<>();
+        lqw.in(teacherIds.size() > 0, DcimsTeacher::getTeacherId, teacherIds);
+        return teacherBaseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public List<DcimsStudentVo> getStudentNameByIds(List<Long> studentIds) {
+        LambdaQueryWrapper<DcimsStudent> lqw = new LambdaQueryWrapper<>();
+        lqw.in(studentIds.size() > 0, DcimsStudent::getStudentId, studentIds);
+        return studentBaseMapper.selectVoList(lqw);
+    }
+
+    @Override
     public DcimsTeacherVo queryLoginTeacher() {
         LambdaQueryWrapper<DcimsTeacher> lqw = new LambdaQueryWrapper<>();
         lqw.eq(DcimsTeacher::getTeacherId,AccountUtils.getAccount().getTeacherId());

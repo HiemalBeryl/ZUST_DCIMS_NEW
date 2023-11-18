@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.core.domain.BaseEntity;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
@@ -27,6 +28,11 @@ public class DcimsBonusAllocationPersonalBo extends BaseEntity {
     private Long id;
 
     /**
+     * 父表的主键
+     */
+    private Long allocationId;
+
+    /**
      * 年份
      */
     @NotNull(message = "年份不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -43,6 +49,11 @@ public class DcimsBonusAllocationPersonalBo extends BaseEntity {
      */
     @NotNull(message = "负责竞赛不能为空", groups = { AddGroup.class, EditGroup.class })
     private Long competition;
+
+    /**
+     * 学院
+     */
+    private Long college;
 
     /**
      * 获得奖金数

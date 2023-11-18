@@ -42,7 +42,7 @@
           v-hasPermi="['system:worktimeAllocationCompetition:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -63,7 +63,7 @@
           @click="handleDelete"
           v-hasPermi="['system:worktimeAllocationCompetition:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -80,11 +80,11 @@
     <el-table v-loading="loading" :data="worktimeAllocationCompetitionList" @selection-change="handleSelectionChange" v-if="queryParams.worktimeId != undefined">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" v-if="true"/>
-      <el-table-column label="竞赛id" align="center" prop="competitionId" />
+      <el-table-column label="竞赛" align="center" prop="competitionDetail.name" />
       <el-table-column label="总计教学工作量" align="center" prop="total" />
       <el-table-column label="未分配教学工作量" align="center" prop="remain" />
-      <el-table-column label="审核状态" align="center" prop="status" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <!-- <el-table-column label="审核状态" align="center" prop="status" /> -->
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -101,7 +101,7 @@
             v-hasPermi="['system:worktimeAllocationCompetition:remove']"
           >删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination
