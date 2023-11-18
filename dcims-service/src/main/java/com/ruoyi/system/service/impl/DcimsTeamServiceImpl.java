@@ -227,6 +227,15 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         if (dcimsTeam == null) {
             return false;
         }
+        // 判断是更新还是插入
+        String flag;
+        if (dcimsTeam.getSupportMaterial() == null || Objects.equals(dcimsTeam.getSupportMaterial().trim(), "")){
+            // 更新
+            flag = "update";
+        }else {
+            // 插入
+            flag = "insert";
+        }
         bo.setCompetitionId(dcimsTeam.getCompetitionId());
         bo.setName(dcimsTeam.getName());
         bo.setCompetitionType(dcimsTeam.getCompetitionType());
@@ -237,9 +246,19 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         bo.setCompetitionTime(dcimsTeam.getCompetitionTime());
         bo.setAudit(dcimsTeam.getAudit() + 1);
         // 执行更新操作
-        DcimsTeam update = BeanUtil.toBean(bo, DcimsTeam.class);
-        validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        if (Objects.equals(flag, "update")){
+            DcimsTeam update = BeanUtil.toBean(bo, DcimsTeam.class);
+            validEntityBeforeSave(update);
+            return baseMapper.updateById(update) > 0;
+        }
+        // 执行插入操作
+        DcimsTeam insert = BeanUtil.toBean(bo, DcimsTeam.class);
+        insert.setAudit(1);
+        validEntityBeforeSave(insert);
+        // 设置父项目，同时清空主键
+        insert.setAdvancedAwardNumber(bo.getId());
+        insert.setId(null);
+        return baseMapper.insert(insert) > 0;
     }
 
     /**

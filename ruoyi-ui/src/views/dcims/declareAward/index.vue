@@ -11,7 +11,6 @@
         :key="team.name"
         :label="team.name"
         :value="team.id"
-        :disabled="team.audit"
       ></el-option>
     </el-select>
   </el-form-item>
@@ -186,7 +185,28 @@ export default {
             this.teamList = response.rows;
             this.total = response.total;
             // 过滤掉已经提交佐证材料或已通过审核的团队
-            const filtersList = this.teamList.filter(element => element.audit === 0);
+            // const filtersList = this.teamList.filter(element => element.audit === 0);
+            // this.teamList = filtersList;
+            // 过滤掉已经被作为父级的团队，选择没有材料的的||有材料但没被排除的，其它判断逻辑交给后端
+            const filtersList = [];
+            const excludeIds = [];
+            this.teamList.forEach(element => {
+              if(element.advancedAwardNumber != null){
+                excludeIds.push(element.advancedAwardNumber)
+              }
+            });
+            this.teamList.forEach(element => {
+              var flag = false;
+              excludeIds.forEach(e => {
+                if(element.id == e){
+                  console.log("找到了排除对象"+element);
+                  flag = true;
+                }
+              })
+              if(flag == false){
+                filtersList.push(element);
+              }
+            });
             this.teamList = filtersList;
             this.loading = false;
           });
