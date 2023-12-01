@@ -65,7 +65,7 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 指导教师姓名
      */
-    @NotBlank(message = "指导教师姓名不能为空", groups = { AddGroup.class })
+    //@NotBlank(message = "指导教师姓名不能为空", groups = { AddGroup.class })
     private String teacherName;
 
     /**
@@ -77,7 +77,7 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 参赛学生姓名
      */
-    @NotBlank(message = "参赛学生姓名不能为空", groups = { AddGroup.class })
+    //@NotBlank(message = "参赛学生姓名不能为空", groups = { AddGroup.class })
     private String studentName;
 
     /**
