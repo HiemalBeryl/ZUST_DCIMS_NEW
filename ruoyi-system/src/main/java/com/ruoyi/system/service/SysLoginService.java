@@ -8,10 +8,12 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.Constants;
+import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.event.LogininforEvent;
 import com.ruoyi.common.core.domain.dto.RoleDTO;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.core.domain.model.RegisterBody;
 import com.ruoyi.common.core.domain.model.XcxLoginUser;
 import com.ruoyi.common.enums.DeviceType;
 import com.ruoyi.common.enums.LoginType;
@@ -26,6 +28,7 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.redis.RedisUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
@@ -48,8 +54,11 @@ import java.util.function.Supplier;
 public class SysLoginService {
 
     private final SysUserMapper userMapper;
+    private final SysRoleMapper roleMapper;
     private final ISysConfigService configService;
     private final SysPermissionService permissionService;
+    private final SysRegisterService registerService;
+    private final ISysUserService userService;
 
     @Value("${user.password.maxRetryCount}")
     private Integer maxRetryCount;
@@ -290,5 +299,59 @@ public class SysLoginService {
 
         // 登录成功 清空错误次数
         RedisUtils.deleteObject(errorKey);
+    }
+
+
+    /**
+     * 统一身份认证
+     */
+    public String loginViaTicket(String userName, String nickName, String email, String phoneNumber, String sex){
+        if (userName.trim().equals("") || nickName.trim().equals(""))
+            throw new UserException("user.not.exists", userName);
+        // 判断用户是否第一次通过统一认证登录
+        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+            .select(SysUser::getUserName, SysUser::getStatus)
+            .eq(SysUser::getUserName, userName));
+        // 如果用户不存在，先注册用户
+        if (ObjectUtil.isNull(user)) {
+            log.info("登录用户：{} 是第一次登录本系统.", userName);
+            log.info("创建用户：{} .", userName);
+            RegisterBody registerBody = new RegisterBody();
+            registerBody.setUsername(userName);
+            registerBody.setPassword(phoneNumber);
+            registerBody.setUserType("sys_user");
+            registerService.register(registerBody);
+        }
+        // 获取注册后的用户对象
+        SysUser doUser = loadUserByUsername(userName);
+        // 填充必要数据，并将新用户设置为普通教师
+        if (ObjectUtil.isNull(user)) {
+            doUser.setNickName(nickName);
+            doUser.setEmail(email);
+            doUser.setPhonenumber(phoneNumber);
+            doUser.setSex(sex);
+            doUser.setTeacherId(userName);
+
+            LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(SysRole::getRoleName,"学科竞赛负责人");
+            SysRole role = roleMapper.selectOne(wrapper);
+            if(ObjectUtil.isNull(role)){
+                throw new UserException("system.internal.error", userName);
+            }
+            Long[] roleIds = new Long[1];
+            roleIds[0] = role.getRoleId();
+            doUser.setRoleIds(roleIds);
+            userService.updateUser(doUser);
+        }
+        doUser = loadUserByUsername(userName);
+
+        // 此处可根据登录用户的数据不同 自行创建 loginUser
+        LoginUser loginUser = buildLoginUser(doUser);
+        // 生成token
+        LoginHelper.loginByDevice(loginUser, DeviceType.PC);
+
+        recordLogininfor(userName, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));
+        recordLoginInfo(doUser.getUserId(), userName);
+        return StpUtil.getTokenValue();
     }
 }

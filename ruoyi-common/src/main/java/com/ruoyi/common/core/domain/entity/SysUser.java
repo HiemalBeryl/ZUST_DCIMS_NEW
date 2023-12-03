@@ -76,6 +76,11 @@ public class SysUser extends BaseEntity {
     private String phonenumber;
 
     /**
+     * 教师工号
+     */
+    private String teacherId;
+
+    /**
      * 用户性别
      */
     private String sex;

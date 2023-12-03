@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/login'
+import { login, logout, getInfo, loginViaTicket } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -37,6 +37,21 @@ const user = {
       const uuid = userInfo.uuid
       return new Promise((resolve, reject) => {
         login(username, password, code, uuid).then(res => {
+          window.localStorage.setItem("token",res.data.token)
+          console.log(window.localStorage.getItem('token'))
+          setToken(res.data.token)
+          commit('SET_TOKEN', res.data.token)
+          resolve()
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+
+    // 统一身份认证登录
+    LoginViaTicket({ commit }) {
+      return new Promise((resolve, reject) => {
+        loginViaTicket().then(res => {
           window.localStorage.setItem("token",res.data.token)
           console.log(window.localStorage.getItem('token'))
           setToken(res.data.token)

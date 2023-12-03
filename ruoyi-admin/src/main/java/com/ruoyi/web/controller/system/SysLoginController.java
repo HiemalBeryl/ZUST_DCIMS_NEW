@@ -15,12 +15,15 @@ import com.ruoyi.system.service.ISysUserService;
 import com.ruoyi.system.service.SysLoginService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotBlank;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +55,40 @@ public class SysLoginController {
         // 生成令牌
         String token = loginService.login(loginBody.getUsername(), loginBody.getPassword(), loginBody.getCode(),
             loginBody.getUuid());
+        ajax.put(Constants.TOKEN, token);
+        return R.ok(ajax);
+    }
+
+    /**
+     * 统一认证登录接口
+     *
+     * @return 结果
+     */
+    @SaIgnore
+    @PostMapping("/loginViaTicket")
+    public R<Map<String, Object>> loginViaTicket(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException {
+        Enumeration<String> names = request.getHeaderNames();
+        while (names.hasMoreElements()){
+            String element = names.nextElement();
+            System.out.println(element + ":  " + request.getHeader(element));
+        }
+
+
+
+        String userName = request.getHeader("cas_user");
+        String nickName = URLDecoder.decode(request.getHeader("cas_user_userName"), "utf-8");
+        //String gender = URLDecoder.decode(request.getHeader("cas_user_gender"), "utf-8");
+        String gender = "";
+        //String birthday = URLDecoder.decode(request.getHeader("cas_user_birthday"), "utf-8");
+        String birthday = "";
+        //String securityEmail = URLDecoder.decode(request.getHeader("cas_user_securityEmail"), "utf-8");
+        String securityEmail = "";
+        //String telephoneNumber = URLDecoder.decode(request.getHeader("cas_user_telephoneNumber"), "utf-8");
+        String telephoneNumber = "";
+        System.out.println("User:"+userName+"  "+nickName+"  "+gender+"  "+birthday+"  "+securityEmail+"  "+telephoneNumber+"  ");
+
+        Map<String, Object> ajax = new HashMap<>();
+        String token = loginService.loginViaTicket(userName, nickName, securityEmail, telephoneNumber, gender);
         ajax.put(Constants.TOKEN, token);
         return R.ok(ajax);
     }
