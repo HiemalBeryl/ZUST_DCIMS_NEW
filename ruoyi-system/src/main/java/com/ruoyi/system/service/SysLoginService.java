@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.Constants;
+import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.event.LogininforEvent;
 import com.ruoyi.common.core.domain.dto.RoleDTO;
@@ -28,6 +29,7 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.redis.RedisUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +61,7 @@ public class SysLoginService {
     private final SysPermissionService permissionService;
     private final SysRegisterService registerService;
     private final ISysUserService userService;
+    private final SysDeptMapper deptMapper;
 
     @Value("${user.password.maxRetryCount}")
     private Integer maxRetryCount;
@@ -332,15 +335,9 @@ public class SysLoginService {
             doUser.setSex(sex);
             doUser.setTeacherId(userName);
 
-            LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(SysRole::getRoleName,"学科竞赛负责人");
-            SysRole role = roleMapper.selectOne(wrapper);
-            if(ObjectUtil.isNull(role)){
-                throw new UserException("system.internal.error", userName);
-            }
-            Long[] roleIds = new Long[1];
-            roleIds[0] = role.getRoleId();
-            doUser.setRoleIds(roleIds);
+            // TODO: 判断系统中是否预先设置了该教师的职位。否则一律为学科竞赛负责人
+            doUser = getTeacherRole(doUser);
+
             userService.updateUser(doUser);
         }
         doUser = loadUserByUsername(userName);
@@ -353,5 +350,40 @@ public class SysLoginService {
         recordLogininfor(userName, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));
         recordLoginInfo(doUser.getUserId(), userName);
         return StpUtil.getTokenValue();
+    }
+
+    /**
+     * 教师角色判断
+     */
+    public SysUser getTeacherRole(SysUser user){
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysDept::getLeaderTeacherId, user.getTeacherId());
+        SysDept dept = deptMapper.selectOne(lqw);
+        if(!ObjectUtil.isNull(dept)){
+            // 判断是教务处还是学院竞赛协调人
+            LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+            if(dept.getDeptName().equals("浙江科技学院教务处")){
+                wrapper.eq(SysRole::getRoleName,"校级管理员");
+                user = getRoleMapper(user, wrapper, 1);
+            }else{
+                wrapper.eq(SysRole::getRoleName,"学院竞赛负责人");
+                user = getRoleMapper(user, wrapper, 1);
+            }
+        }
+        LambdaQueryWrapper<SysRole> wrapper1 = new LambdaQueryWrapper<>();
+        wrapper1.eq(SysRole::getRoleName,"学科竞赛负责人");
+        user = getRoleMapper(user, wrapper1, 0);
+        return user;
+    }
+
+    private SysUser getRoleMapper(SysUser user, LambdaQueryWrapper<SysRole> wrapper, int index) {
+        SysRole role = roleMapper.selectOne(wrapper);
+        if(ObjectUtil.isNull(role)){
+            throw new UserException("system.internal.error", user.getTeacherId());
+        }
+        Long[] roleIds = new Long[5];
+        roleIds[index] = role.getRoleId();
+        user.setRoleIds(roleIds);
+        return user;
     }
 }

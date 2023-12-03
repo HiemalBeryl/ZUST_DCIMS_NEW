@@ -48,6 +48,7 @@ import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
+import axios from 'axios'
 
 export default {
   components: {
@@ -94,6 +95,9 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$store.dispatch('LogOut').then(() => {
+          //TODO:同时退出统一身份认证
+          axios.get("https://authserver.zust.edu.cn/authserver/logout?service=http://kjjs.zust.edu.cn/").then(()=>{
+          }).catch(()=>{});
           location.href = process.env.VUE_APP_CONTEXT_PATH + "index.html";
         })
       }).catch(() => {});
