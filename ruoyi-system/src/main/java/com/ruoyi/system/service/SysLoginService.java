@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -340,15 +341,15 @@ public class SysLoginService {
 
             userService.updateUser(doUser);
         }
-        doUser = loadUserByUsername(userName);
+        SysUser afterUser = loadUserByUsername(userName);
 
         // 此处可根据登录用户的数据不同 自行创建 loginUser
-        LoginUser loginUser = buildLoginUser(doUser);
+        LoginUser loginUser = buildLoginUser(afterUser);
         // 生成token
         LoginHelper.loginByDevice(loginUser, DeviceType.PC);
 
         recordLogininfor(userName, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));
-        recordLoginInfo(doUser.getUserId(), userName);
+        recordLoginInfo(afterUser.getUserId(), userName);
         return StpUtil.getTokenValue();
     }
 
@@ -359,30 +360,38 @@ public class SysLoginService {
         LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
         lqw.eq(SysDept::getLeaderTeacherId, user.getTeacherId());
         SysDept dept = deptMapper.selectOne(lqw);
+        Long[] roleIds = new Long[2];
+        roleIds[0] = 6L;
+        roleIds[1] = 7L;
         if(!ObjectUtil.isNull(dept)){
             // 判断是教务处还是学院竞赛协调人
             LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
             if(dept.getDeptName().equals("浙江科技学院教务处")){
                 wrapper.eq(SysRole::getRoleName,"校级管理员");
-                user = getRoleMapper(user, wrapper, 1);
+                SysRole role = roleMapper.selectOne(wrapper);
+                if(ObjectUtil.isNull(role)){
+                    throw new UserException("system.internal.error", user.getTeacherId());
+                }
+                roleIds[1] = role.getRoleId();
+                user.setRoleIds(roleIds);
             }else{
                 wrapper.eq(SysRole::getRoleName,"学院竞赛负责人");
-                user = getRoleMapper(user, wrapper, 1);
+                SysRole role = roleMapper.selectOne(wrapper);
+                if(ObjectUtil.isNull(role)){
+                    throw new UserException("system.internal.error", user.getTeacherId());
+                }
+                roleIds[1] = role.getRoleId();
+                user.setRoleIds(roleIds);
             }
         }
         LambdaQueryWrapper<SysRole> wrapper1 = new LambdaQueryWrapper<>();
         wrapper1.eq(SysRole::getRoleName,"学科竞赛负责人");
-        user = getRoleMapper(user, wrapper1, 0);
-        return user;
-    }
-
-    private SysUser getRoleMapper(SysUser user, LambdaQueryWrapper<SysRole> wrapper, int index) {
-        SysRole role = roleMapper.selectOne(wrapper);
+        SysRole role = roleMapper.selectOne(wrapper1);
         if(ObjectUtil.isNull(role)){
             throw new UserException("system.internal.error", user.getTeacherId());
         }
-        Long[] roleIds = new Long[5];
-        roleIds[index] = role.getRoleId();
+        roleIds[0] = role.getRoleId();
+        System.out.println(Arrays.toString(roleIds));
         user.setRoleIds(roleIds);
         return user;
     }
