@@ -81,6 +81,9 @@ public class DcimsWorktimeAllocationCompetitionServiceImpl implements IDcimsWork
             ids.add(element.getId());
         });
 
+        // 判断id是否为空，为空直接返回空值
+        if(ids.size() == 0)
+            return new TableDataInfo<>();
         LambdaQueryWrapper<DcimsWorktimeAllocationCompetition> lqw = new LambdaQueryWrapper<>();
         lqw.in(DcimsWorktimeAllocationCompetition::getCompetitionId, ids);
         lqw.eq(DcimsWorktimeAllocationCompetition::getStatus, 0);
