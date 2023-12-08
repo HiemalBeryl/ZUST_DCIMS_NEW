@@ -64,7 +64,7 @@
                 <el-checkbox label="作品名称" @change="changeWorksName()">无</el-checkbox>
               </el-form-item>
             </el-col>
-              
+
           </el-row>
           <el-form-item label="指导教师" prop="teacherId">
             <el-select
@@ -80,7 +80,7 @@
               <el-option
                 v-for="item in optionsTeacher"
                 :key="item.teacherId"
-                :label="item.name"
+                :label="item.teacherId + '  ' + item.name"
                 :value="item.teacherId">
               </el-option>
             </el-select>
