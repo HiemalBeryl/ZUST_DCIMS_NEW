@@ -188,11 +188,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 填写教师、学生姓名
         String studentIds = bo.getStudentId();
         String[] splitStudentIds = studentIds.split(",");
-        List<Long> studentIdsLong = new ArrayList<>();
-        for(String id : splitStudentIds){
-            studentIdsLong.add(Long.parseLong(id));
-        }
-        List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdsLong);
+        List<String> studentIdsString = new ArrayList<>(Arrays.asList(splitStudentIds));
+        List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdsString);
         String studentName = "";
         for(DcimsStudentVo student : students){
             studentName = studentName.concat(student.getName() + ',');

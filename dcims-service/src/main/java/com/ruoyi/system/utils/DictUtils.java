@@ -89,7 +89,7 @@ public class DictUtils {
         int index = 0;
         boolean flag;
         for(DcimsStudent student:students){
-            allData = allData + '('+Math.toIntExact(student.getStudentId())+','+'\"'+student.getName()+'\"'+','+student.getStudentId()+','+'\"'+"dcims_student"+'\"'+','+'\"'+"default"+'\"'+','+'\''+"N"+'\''+','+"0"+')'+",";
+            allData = allData + '('+student.getStudentId()+','+'\"'+student.getName()+'\"'+','+student.getStudentId()+','+'\"'+"dcims_student"+'\"'+','+'\"'+"default"+'\"'+','+'\''+"N"+'\''+','+"0"+')'+",";
             index++;
             if (index % 5000 == 0){
                 allData = allData.substring(0, allData.length() - 1);

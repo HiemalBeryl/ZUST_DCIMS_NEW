@@ -22,7 +22,7 @@ public class DcimsStudentVo {
     /**
      * 学号
      */
-    private Long studentId;
+    private String studentId;
     /**
      * 姓名
      */

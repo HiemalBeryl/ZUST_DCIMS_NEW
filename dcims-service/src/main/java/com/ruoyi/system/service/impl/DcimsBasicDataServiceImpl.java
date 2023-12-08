@@ -53,7 +53,7 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
     }
 
     @Override
-    public DcimsStudentVo getStudentNameById(Long studentId) {
+    public DcimsStudentVo getStudentNameById(String studentId) {
         LambdaQueryWrapper<DcimsStudent> lqw = new LambdaQueryWrapper<>();
         lqw.eq(DcimsStudent::getStudentId, studentId);
         return studentBaseMapper.selectVoOne(lqw);
@@ -67,7 +67,7 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
     }
 
     @Override
-    public List<DcimsStudentVo> getStudentNameByIds(List<Long> studentIds) {
+    public List<DcimsStudentVo> getStudentNameByIds(List<String> studentIds) {
         LambdaQueryWrapper<DcimsStudent> lqw = new LambdaQueryWrapper<>();
         lqw.in(studentIds.size() > 0, DcimsStudent::getStudentId, studentIds);
         return studentBaseMapper.selectVoList(lqw);

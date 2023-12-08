@@ -32,7 +32,7 @@ public interface IDcimsBasicDataService {
     /**
      * 根据工号查学生姓名
      */
-    DcimsStudentVo getStudentNameById(Long studentId);
+    DcimsStudentVo getStudentNameById(String studentId);
 
     /**
      * 根据工号查教师姓名
@@ -42,7 +42,7 @@ public interface IDcimsBasicDataService {
     /**
      * 根据工号查学生姓名
      */
-    List<DcimsStudentVo> getStudentNameByIds(List<Long> studentIds);
+    List<DcimsStudentVo> getStudentNameByIds(List<String> studentIds);
 
     /**
      * 查询登录用户所对应的教师信息
