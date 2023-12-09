@@ -77,6 +77,7 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
     public DcimsTeacherVo queryLoginTeacher() {
         LambdaQueryWrapper<DcimsTeacher> lqw = new LambdaQueryWrapper<>();
         lqw.eq(DcimsTeacher::getTeacherId,AccountUtils.getAccount().getTeacherId());
-        return teacherBaseMapper.selectVoOne(lqw);
+        List<DcimsTeacherVo> list = teacherBaseMapper.selectVoList(lqw);
+        return list.get(0);
     }
 }
