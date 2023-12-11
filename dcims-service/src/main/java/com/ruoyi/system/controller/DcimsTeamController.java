@@ -111,7 +111,7 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:edit")
     @Log(title = "参赛团队", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsTeamBo bo) {
         return toAjax(iDcimsTeamService.updateByBo(bo));
     }
@@ -122,7 +122,7 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:edit")
     @Log(title = "参赛团队", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping("/award")
+    @PostMapping("/award/put")
     public R<Void> addAward(@Validated(EditGroup.class) @RequestBody DcimsDeclareAwardBo bo) {
         return toAjax(iDcimsTeamService.declareAwardByBo(bo));
     }
@@ -134,7 +134,7 @@ public class DcimsTeamController extends BaseController {
      */
     @SaCheckPermission("dcims:team:remove")
     @Log(title = "参赛团队", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/delete/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsTeamService.deleteWithValidByIds(Arrays.asList(ids), true));

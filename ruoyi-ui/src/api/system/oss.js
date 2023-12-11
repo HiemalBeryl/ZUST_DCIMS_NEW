@@ -20,8 +20,8 @@ export function listByIds(ossId) {
 // 删除OSS对象存储
 export function delOss(ossId) {
   return request({
-    url: '/system/oss/' + ossId,
-    method: 'delete'
+    url: '/system/oss/delete/' + ossId,
+    method: 'post'
   })
 }
 

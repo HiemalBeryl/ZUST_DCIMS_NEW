@@ -38,8 +38,8 @@ export function addCompetition(data) {
 // 修改竞赛赛事基本信息
 export function updateCompetition(data) {
   return request({
-    url: '/dcims/competition',
-    method: 'put',
+    url: '/dcims/competition/put',
+    method: 'post',
     data: data
   })
 }
@@ -47,8 +47,8 @@ export function updateCompetition(data) {
 // 删除竞赛赛事基本信息
 export function delCompetition(id) {
   return request({
-    url: '/dcims/competition/' + id,
-    method: 'delete'
+    url: '/dcims/competition/delete/' + id,
+    method: 'post'
   })
 }
 
@@ -71,7 +71,7 @@ export function addTutor(competitionId, teacherIds) {
 // 删除竞赛赛事基本信息
 export function deleteTutor(id) {
   return request({
-    url: '/dcims/competition/tutor/' + id,
-    method: 'delete'
+    url: '/dcims/competition/tutor/delete/' + id,
+    method: 'post'
   })
 }

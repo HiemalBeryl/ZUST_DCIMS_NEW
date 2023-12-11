@@ -29,8 +29,8 @@ export function addBonusAllocationPersonal(data) {
 // 修改奖金分配个人
 export function updateBonusAllocationPersonal(data) {
   return request({
-    url: '/dcims/bonusAllocationPersonal',
-    method: 'put',
+    url: '/dcims/bonusAllocationPersonal/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,8 +38,8 @@ export function updateBonusAllocationPersonal(data) {
 // 删除奖金分配个人
 export function delBonusAllocationPersonal(id) {
   return request({
-    url: '/dcims/bonusAllocationPersonal/' + id,
-    method: 'delete'
+    url: '/dcims/bonusAllocationPersonal/delete/' + id,
+    method: 'post'
   })
 }
 

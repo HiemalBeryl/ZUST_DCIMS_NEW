@@ -37,8 +37,8 @@ export function addWorktimeAllocationTeacher(data) {
 // 修改工作量分配
 export function updateWorktimeAllocationTeacher(data) {
   return request({
-    url: '/dcims/worktimeAllocationTeacher',
-    method: 'put',
+    url: '/dcims/worktimeAllocationTeacher/put',
+    method: 'post',
     data: data
   })
 }
@@ -46,7 +46,7 @@ export function updateWorktimeAllocationTeacher(data) {
 // 删除工作量分配
 export function delWorktimeAllocationTeacher(id) {
   return request({
-    url: '/dcims/worktimeAllocationTeacher/' + id,
-    method: 'delete'
+    url: '/dcims/worktimeAllocationTeacher/delete/' + id,
+    method: 'post'
   })
 }

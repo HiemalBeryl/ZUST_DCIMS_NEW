@@ -37,8 +37,8 @@ export function addWorktimeAllocationCompetition(data) {
 // 修改工作量分配竞赛
 export function updateWorktimeAllocationCompetition(data) {
   return request({
-    url: '/dcims/worktimeAllocationCompetition',
-    method: 'put',
+    url: '/dcims/worktimeAllocationCompetition/put',
+    method: 'post',
     data: data
   })
 }
@@ -46,7 +46,7 @@ export function updateWorktimeAllocationCompetition(data) {
 // 删除工作量分配竞赛
 export function delWorktimeAllocationCompetition(id) {
   return request({
-    url: '/dcims/worktimeAllocationCompetition/' + id,
-    method: 'delete'
+    url: '/dcims/worktimeAllocationCompetition/delete/' + id,
+    method: 'post'
   })
 }

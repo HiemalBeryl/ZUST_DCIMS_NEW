@@ -30,8 +30,8 @@ export function addUser(data) {
 // 修改用户
 export function updateUser(data) {
   return request({
-    url: '/system/user',
-    method: 'put',
+    url: '/system/user/put',
+    method: 'post',
     data: data
   })
 }
@@ -39,8 +39,8 @@ export function updateUser(data) {
 // 删除用户
 export function delUser(userId) {
   return request({
-    url: '/system/user/' + userId,
-    method: 'delete'
+    url: '/system/user/delete/' + userId,
+    method: 'post'
   })
 }
 
@@ -51,8 +51,8 @@ export function resetUserPwd(userId, password) {
     password
   }
   return request({
-    url: '/system/user/resetPwd',
-    method: 'put',
+    url: '/system/user/resetPwd/put',
+    method: 'post',
     data: data
   })
 }
@@ -64,8 +64,8 @@ export function changeUserStatus(userId, status) {
     status
   }
   return request({
-    url: '/system/user/changeStatus',
-    method: 'put',
+    url: '/system/user/changeStatus/put',
+    method: 'post',
     data: data
   })
 }
@@ -81,8 +81,8 @@ export function getUserProfile() {
 // 修改用户个人信息
 export function updateUserProfile(data) {
   return request({
-    url: '/system/user/profile',
-    method: 'put',
+    url: '/system/user/profile/put',
+    method: 'post',
     data: data
   })
 }
@@ -94,8 +94,8 @@ export function updateUserPwd(oldPassword, newPassword) {
     newPassword
   }
   return request({
-    url: '/system/user/profile/updatePwd',
-    method: 'put',
+    url: '/system/user/profile/updatePwd/put',
+    method: 'post',
     params: data
   })
 }
@@ -120,8 +120,8 @@ export function getAuthRole(userId) {
 // 保存授权角色
 export function updateAuthRole(data) {
   return request({
-    url: '/system/user/authRole',
-    method: 'put',
+    url: '/system/user/authRole/put',
+    method: 'post',
     params: data
   })
 }

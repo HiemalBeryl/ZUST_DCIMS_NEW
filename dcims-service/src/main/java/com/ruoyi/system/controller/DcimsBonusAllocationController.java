@@ -96,7 +96,7 @@ public class DcimsBonusAllocationController extends BaseController {
     @SaCheckPermission("dcims:bonusAllocation:edit")
     @Log(title = "奖金分配总", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsBonusAllocationBo bo) {
         return toAjax(iDcimsBonusAllocationService.updateByBo(bo));
     }
@@ -108,7 +108,7 @@ public class DcimsBonusAllocationController extends BaseController {
      */
     @SaCheckPermission("dcims:bonusAllocation:remove")
     @Log(title = "奖金分配总", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/delete/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsBonusAllocationService.deleteWithValidByIds(Arrays.asList(ids), true));

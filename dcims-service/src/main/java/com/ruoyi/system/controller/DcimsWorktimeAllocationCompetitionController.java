@@ -98,7 +98,7 @@ public class DcimsWorktimeAllocationCompetitionController extends BaseController
     @SaCheckPermission("dcims:worktimeAllocationCompetition:edit")
     @Log(title = "工作量分配竞赛", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsWorktimeAllocationCompetitionBo bo) {
         return toAjax(iDcimsWorktimeAllocationCompetitionService.updateByBo(bo));
     }
@@ -110,7 +110,7 @@ public class DcimsWorktimeAllocationCompetitionController extends BaseController
      */
     @SaCheckPermission("dcims:worktimeAllocationCompetition:remove")
     @Log(title = "工作量分配竞赛", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/delete/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsWorktimeAllocationCompetitionService.deleteWithValidByIds(Arrays.asList(ids), true));

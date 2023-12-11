@@ -112,7 +112,7 @@ public class DcimsCompetitionController extends BaseController {
     @SaCheckPermission("dcims:competition:edit")
     @Log(title = "竞赛赛事基本信息", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsCompetitionBo bo) {
         return toAjax(iDcimsCompetitionService.updateByBo(bo, true));
     }
@@ -124,7 +124,7 @@ public class DcimsCompetitionController extends BaseController {
      */
     @SaCheckPermission("dcims:competition:remove")
     @Log(title = "竞赛赛事基本信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/delete/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsCompetitionService.deleteWithValidByIds(Arrays.asList(ids), true));
@@ -163,7 +163,7 @@ public class DcimsCompetitionController extends BaseController {
      */
     @SaCheckPermission("dcims:competition:removeTutor")
     @Log(title = "竞赛赛事基本信息", businessType = BusinessType.DELETE)
-    @DeleteMapping("/tutor/{id}")
+    @PostMapping("/tutor/delete/{id}")
     public R<Void> removeTutor(@NotNull(message = "主键不能为空")
                                @PathVariable Long id){
         return toAjax(iDcimsCompetitionService.removeTutor(id));

@@ -101,7 +101,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/put")
     public R<Void> edit(@Validated @RequestBody SysRole role) {
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
@@ -141,7 +141,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
-    @PutMapping("/dataScope")
+    @PostMapping("/dataScope/put")
     public R<Void> dataScope(@RequestBody SysRole role) {
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
@@ -153,7 +153,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
-    @PutMapping("/changeStatus")
+    @PostMapping("/changeStatus/put")
     public R<Void> changeStatus(@RequestBody SysRole role) {
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
@@ -167,7 +167,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:remove")
     @Log(title = "角色管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{roleIds}")
+    @PostMapping("/delete/{roleIds}")
     public R<Void> remove(@PathVariable Long[] roleIds) {
         return toAjax(roleService.deleteRoleByIds(roleIds));
     }
@@ -204,7 +204,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authUser/cancel")
+    @PostMapping("/authUser/cancel/put")
     public R<Void> cancelAuthUser(@RequestBody SysUserRole userRole) {
         return toAjax(roleService.deleteAuthUser(userRole));
     }
@@ -217,7 +217,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authUser/cancelAll")
+    @PostMapping("/authUser/cancelAll/put")
     public R<Void> cancelAuthUserAll(Long roleId, Long[] userIds) {
         return toAjax(roleService.deleteAuthUsers(roleId, userIds));
     }
@@ -230,7 +230,7 @@ public class SysRoleController extends BaseController {
      */
     @SaCheckPermission("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authUser/selectAll")
+    @PostMapping("/authUser/selectAll/put")
     public R<Void> selectAuthUserAll(Long roleId, Long[] userIds) {
         roleService.checkRoleDataScope(roleId);
         return toAjax(roleService.insertAuthUsers(roleId, userIds));

@@ -127,7 +127,7 @@ public class CacheController {
      * @param cacheName 缓存名
      */
     @SaCheckPermission("monitor:cache:list")
-    @DeleteMapping("/clearCacheName/{cacheName}")
+    @PostMapping("/clearCacheName/delete/{cacheName}")
     public R<Void> clearCacheName(@PathVariable String cacheName) {
         if (isCacheNames(cacheName)) {
             CacheUtils.clear(cacheName);
@@ -143,7 +143,7 @@ public class CacheController {
      * @param cacheKey key名
      */
     @SaCheckPermission("monitor:cache:list")
-    @DeleteMapping("/clearCacheKey/{cacheName}/{cacheKey}")
+    @PostMapping("/clearCacheKey/delete/{cacheName}/{cacheKey}")
     public R<Void> clearCacheKey(@PathVariable String cacheName, @PathVariable String cacheKey) {
         if (isCacheNames(cacheName)) {
             CacheUtils.evict(cacheName, cacheKey);
@@ -157,7 +157,7 @@ public class CacheController {
      * 清理全部缓存监控
      */
     @SaCheckPermission("monitor:cache:list")
-    @DeleteMapping("/clearCacheAll")
+    @PostMapping("/clearCacheAll/delete")
     public R<Void> clearCacheAll() {
         RedisUtils.deleteKeys("*");
         return R.ok();

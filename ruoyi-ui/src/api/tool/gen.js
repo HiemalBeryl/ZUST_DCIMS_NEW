@@ -33,8 +33,8 @@ export function getGenTable(tableId) {
 export function updateGenTable(data) {
   return request({
     headers: { 'datasource': localStorage.getItem("dataName") },
-    url: '/tool/gen',
-    method: 'put',
+    url: '/tool/gen/put',
+    method: 'post',
     data: data
   })
 }
@@ -62,8 +62,8 @@ export function previewTable(tableId) {
 export function delTable(tableId) {
   return request({
     headers: { 'datasource': localStorage.getItem("dataName") },
-    url: '/tool/gen/' + tableId,
-    method: 'delete'
+    url: '/tool/gen/delete/' + tableId,
+    method: 'post'
   })
 }
 

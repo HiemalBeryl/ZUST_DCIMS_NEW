@@ -75,7 +75,7 @@ public class SysOssConfigController extends BaseController {
     @SaCheckPermission("system:oss:edit")
     @Log(title = "对象存储配置", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody SysOssConfigBo bo) {
         return toAjax(iSysOssConfigService.updateByBo(bo));
     }
@@ -87,7 +87,7 @@ public class SysOssConfigController extends BaseController {
      */
     @SaCheckPermission("system:oss:remove")
     @Log(title = "对象存储配置", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ossConfigIds}")
+    @PostMapping("/delete/{ossConfigIds}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ossConfigIds) {
         return toAjax(iSysOssConfigService.deleteWithValidByIds(Arrays.asList(ossConfigIds), true));
@@ -98,7 +98,7 @@ public class SysOssConfigController extends BaseController {
      */
     @SaCheckPermission("system:oss:edit")
     @Log(title = "对象存储状态修改", businessType = BusinessType.UPDATE)
-    @PutMapping("/changeStatus")
+    @PostMapping("/changeStatus/put")
     public R<Void> changeStatus(@RequestBody SysOssConfigBo bo) {
         return toAjax(iSysOssConfigService.updateOssConfigStatus(bo));
     }

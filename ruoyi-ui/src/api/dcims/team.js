@@ -38,8 +38,8 @@ export function addTeam(data) {
 // 修改参赛团队
 export function updateTeam(data) {
   return request({
-    url: '/dcims/team',
-    method: 'put',
+    url: '/dcims/team/put',
+    method: 'post',
     data: data
   })
 }
@@ -47,8 +47,8 @@ export function updateTeam(data) {
 // 为团队申报huojiangxinxi
 export function declareAward(data) {
   return request({
-    url: '/dcims/team/award',
-    method: 'put',
+    url: '/dcims/team/award/put',
+    method: 'post',
     data: data
   })
 }
@@ -56,7 +56,7 @@ export function declareAward(data) {
 // 删除参赛团队
 export function delTeam(id) {
   return request({
-    url: '/dcims/team/' + id,
-    method: 'delete'
+    url: '/dcims/team/delete/' + id,
+    method: 'post'
   })
 }

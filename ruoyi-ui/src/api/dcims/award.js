@@ -29,8 +29,8 @@ export function addAward(data) {
 // 修改获奖基本信息
 export function updateAward(data) {
   return request({
-    url: '/dcims/award',
-    method: 'put',
+    url: '/dcims/award/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,7 +38,7 @@ export function updateAward(data) {
 // 删除获奖基本信息
 export function delAward(id) {
   return request({
-    url: '/dcims/award/' + id,
-    method: 'delete'
+    url: '/dcims/award/delete/' + id,
+    method: 'post'
   })
 }

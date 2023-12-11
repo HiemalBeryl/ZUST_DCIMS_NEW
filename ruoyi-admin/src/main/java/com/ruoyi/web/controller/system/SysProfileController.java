@@ -56,7 +56,7 @@ public class SysProfileController extends BaseController {
      * 修改用户
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/put")
     public R<Void> updateProfile(@RequestBody SysUser user) {
         if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user)) {
             return R.fail("修改用户'" + user.getUserName() + "'失败，手机号码已存在");
@@ -82,7 +82,7 @@ public class SysProfileController extends BaseController {
      * @param oldPassword 新密码
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping("/updatePwd")
+    @PostMapping("/updatePwd/put")
     public R<Void> updatePwd(String oldPassword, String newPassword) {
         SysUser user = userService.selectUserById(LoginHelper.getUserId());
         String userName = user.getUserName();

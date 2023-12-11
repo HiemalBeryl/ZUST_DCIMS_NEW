@@ -58,7 +58,7 @@ public class SysLogininforController extends BaseController {
      */
     @SaCheckPermission("monitor:logininfor:remove")
     @Log(title = "登录日志", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{infoIds}")
+    @PostMapping("/delete/{infoIds}")
     public R<Void> remove(@PathVariable Long[] infoIds) {
         return toAjax(logininforService.deleteLogininforByIds(infoIds));
     }
@@ -68,7 +68,7 @@ public class SysLogininforController extends BaseController {
      */
     @SaCheckPermission("monitor:logininfor:remove")
     @Log(title = "登录日志", businessType = BusinessType.CLEAN)
-    @DeleteMapping("/clean")
+    @PostMapping("/clean/delete")
     public R<Void> clean() {
         logininforService.cleanLogininfor();
         return R.ok();

@@ -152,7 +152,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:edit")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/put")
     public R<Void> edit(@Validated @RequestBody SysUser user) {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
@@ -173,7 +173,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:remove")
     @Log(title = "用户管理", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{userIds}")
+    @PostMapping("/delete/{userIds}")
     public R<Void> remove(@PathVariable Long[] userIds) {
         if (ArrayUtil.contains(userIds, getUserId())) {
             return R.fail("当前用户不能删除");
@@ -186,7 +186,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:resetPwd")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
-    @PutMapping("/resetPwd")
+    @PostMapping("/resetPwd/put")
     public R<Void> resetPwd(@RequestBody SysUser user) {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
@@ -199,7 +199,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:edit")
     @Log(title = "用户管理", businessType = BusinessType.UPDATE)
-    @PutMapping("/changeStatus")
+    @PostMapping("/changeStatus/put")
     public R<Void> changeStatus(@RequestBody SysUser user) {
         userService.checkUserAllowed(user);
         userService.checkUserDataScope(user.getUserId());
@@ -230,7 +230,7 @@ public class SysUserController extends BaseController {
      */
     @SaCheckPermission("system:user:edit")
     @Log(title = "用户管理", businessType = BusinessType.GRANT)
-    @PutMapping("/authRole")
+    @PostMapping("/authRole/put")
     public R<Void> insertAuthRole(Long userId, Long[] roleIds) {
         userService.checkUserDataScope(userId);
         userService.insertUserAuth(userId, roleIds);

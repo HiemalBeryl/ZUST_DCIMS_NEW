@@ -38,8 +38,8 @@ export function addDemo(data) {
 // 修改测试单表
 export function updateDemo(data) {
   return request({
-    url: '/demo/demo',
-    method: 'put',
+    url: '/demo/demo/put',
+    method: 'post',
     data: data
   })
 }
@@ -47,8 +47,8 @@ export function updateDemo(data) {
 // 删除测试单表
 export function delDemo(id) {
   return request({
-    url: '/demo/demo/' + id,
-    method: 'delete'
+    url: '/demo/demo/delete/' + id,
+    method: 'post'
   })
 }
 

@@ -12,15 +12,15 @@ export function list(query) {
 // 删除操作日志
 export function delOperlog(operId) {
   return request({
-    url: '/monitor/operlog/' + operId,
-    method: 'delete'
+    url: '/monitor/operlog/delete/' + operId,
+    method: 'post'
   })
 }
 
 // 清空操作日志
 export function cleanOperlog() {
   return request({
-    url: '/monitor/operlog/clean',
-    method: 'delete'
+    url: '/monitor/operlog/clean/delete',
+    method: 'post'
   })
 }

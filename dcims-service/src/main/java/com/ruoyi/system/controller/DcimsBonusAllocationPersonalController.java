@@ -95,7 +95,7 @@ public class DcimsBonusAllocationPersonalController extends BaseController {
     @SaCheckPermission("dcims:bonusAllocationPersonal:edit")
     @Log(title = "奖金分配个人", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsBonusAllocationPersonalBo bo) {
         return toAjax(iDcimsBonusAllocationPersonalService.updateByBo(bo));
     }
@@ -107,7 +107,7 @@ public class DcimsBonusAllocationPersonalController extends BaseController {
      */
     @SaCheckPermission("dcims:bonusAllocationPersonal:remove")
     @Log(title = "奖金分配个人", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/delete/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsBonusAllocationPersonalService.deleteWithValidByIds(Arrays.asList(ids), true));

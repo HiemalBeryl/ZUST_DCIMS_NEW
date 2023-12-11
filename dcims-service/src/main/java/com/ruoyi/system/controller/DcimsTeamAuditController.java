@@ -47,7 +47,7 @@ public class DcimsTeamAuditController extends BaseController {
      */
     @SaCheckPermission("dcims:teamAudit:remove")
     @Log(title = "团队获奖审核", businessType = BusinessType.DELETE)
-    @DeleteMapping()
+    @PostMapping("/delete")
     public R<Void> remove(@Validated(RefuseGroup.class) @RequestBody List<DcimsTeamAuditBo> boList) {
         return toAjax(iDcimsTeamAuditService.deleteWithValidByIds(boList));
     }

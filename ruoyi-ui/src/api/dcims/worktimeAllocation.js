@@ -29,8 +29,8 @@ export function addWorktimeAllocation(data) {
 // 修改工作量分配
 export function updateWorktimeAllocation(data) {
   return request({
-    url: '/dcims/worktimeAllocation',
-    method: 'put',
+    url: '/dcims/worktimeAllocation/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,7 +38,7 @@ export function updateWorktimeAllocation(data) {
 // 删除工作量分配
 export function delWorktimeAllocation(id) {
   return request({
-    url: '/dcims/worktimeAllocation/' + id,
-    method: 'delete'
+    url: '/dcims/worktimeAllocation/delete/' + id,
+    method: 'post'
   })
 }

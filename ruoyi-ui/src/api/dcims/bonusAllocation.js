@@ -37,8 +37,8 @@ export function addBonusAllocation(data) {
 // 修改奖金分配总
 export function updateBonusAllocation(data) {
   return request({
-    url: '/dcims/bonusAllocation',
-    method: 'put',
+    url: '/dcims/bonusAllocation/put',
+    method: 'post',
     data: data
   })
 }
@@ -46,8 +46,8 @@ export function updateBonusAllocation(data) {
 // 删除奖金分配总
 export function delBonusAllocation(id) {
   return request({
-    url: '/dcims/bonusAllocation/' + id,
-    method: 'delete'
+    url: '/dcims/bonusAllocation/delete/' + id,
+    method: 'post'
   })
 }
 

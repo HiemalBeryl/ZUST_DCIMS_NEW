@@ -21,8 +21,8 @@ export function permitAudit(params) {
 // 退回团队审核
 export function refuseAudit(params) {
   return request({
-    url: '/dcims/teamAudit/',
-    method: 'delete',
+    url: '/dcims/teamAudit/delete/',
+    method: 'post',
     data: params
   })
 }

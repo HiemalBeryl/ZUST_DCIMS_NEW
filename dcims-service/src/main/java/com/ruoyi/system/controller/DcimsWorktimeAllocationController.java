@@ -88,7 +88,7 @@ public class DcimsWorktimeAllocationController extends BaseController {
     @SaCheckPermission("dcims:worktimeAllocation:edit")
     @Log(title = "工作量分配", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PutMapping()
+    @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsWorktimeAllocationBo bo) {
         return toAjax(iDcimsWorktimeAllocationService.updateByBo(bo));
     }
@@ -100,7 +100,7 @@ public class DcimsWorktimeAllocationController extends BaseController {
      */
     @SaCheckPermission("dcims:worktimeAllocation:remove")
     @Log(title = "工作量分配", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ids}")
+    @PostMapping("/delete/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsWorktimeAllocationService.deleteWithValidByIds(Arrays.asList(ids), true));

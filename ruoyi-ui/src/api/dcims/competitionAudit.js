@@ -21,8 +21,8 @@ export function permitAudit(params) {
 // 退回竞赛审核
 export function refuseAudit(params) {
   return request({
-    url: '/dcims/competitionAudit/',
-    method: 'delete',
+    url: '/dcims/competitionAudit/delete/',
+    method: 'post',
     data: params
   })
 }
@@ -30,8 +30,8 @@ export function refuseAudit(params) {
 // 编辑竞赛类型等部分信息
 export function updateAuditCompetition(data){
   return request({
-    url: '/dcims/competitionAudit/',
-    method: 'put',
+    url: '/dcims/competitionAudit/put',
+    method: 'post',
     data: data
   })
 }
