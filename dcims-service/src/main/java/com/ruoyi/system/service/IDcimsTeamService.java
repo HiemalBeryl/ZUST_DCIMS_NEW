@@ -27,12 +27,12 @@ public interface IDcimsTeamService {
     /**
      * 查询参赛团队列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery);
 
     /**
      * 根据教师工号查询参赛团队列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVoV2> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery);
 
     /**
      * 查询参赛团队列表

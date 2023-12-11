@@ -1,6 +1,7 @@
 package com.ruoyi.system.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.ruoyi.common.core.validate.AddGroup;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.io.Serializable;
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * 竞赛赛事基本信息对象 dcims_competition
@@ -74,6 +77,10 @@ public class DcimsCompetition extends BaseEntity {
      * 所属学院
      */
     private Long college;
+    /**
+     * 负责人手机号
+     */
+    private Long phone;
     /**
      * 校内选拔时间
      */

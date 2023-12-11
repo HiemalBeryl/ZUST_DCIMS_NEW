@@ -36,6 +36,11 @@ public class DcimsTeamVoV2 {
     private Long competitionId;
 
     /**
+     * 竞赛详情
+     */
+    private DcimsCompetitionVo competition;
+
+    /**
      * 队伍名称
      */
     @ExcelProperty(value = "队伍名称")

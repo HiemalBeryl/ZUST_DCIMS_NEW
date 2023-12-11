@@ -28,6 +28,7 @@ import com.ruoyi.system.mapper.DcimsTeamMapper;
 import com.ruoyi.system.service.IDcimsTeamService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 参赛团队Service业务层处理
@@ -65,17 +66,33 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * 查询参赛团队列表
      */
     @Override
-    public TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(result);
+        TableDataInfo<DcimsTeamVo> voList = TableDataInfo.build(result);
+        Set<Long> competitionIds = new HashSet<>();
+        voList.getRows().forEach(e -> {
+            competitionIds.add(e.getCompetitionId());
+        });
+        List<DcimsCompetitionVo> competitionVoList = competitionService.listById(new ArrayList<>(competitionIds));
+        List<DcimsTeamVoV2> VoV2List = voList.getRows().stream().map(e -> {
+            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+            BeanUtils.copyProperties(e, voV2);
+            competitionVoList.forEach(c -> {
+                if (c.getId().equals(voV2.getCompetitionId())){
+                    voV2.setCompetition(c);
+                }
+            });
+            return voV2;
+        }).collect(Collectors.toList());
+        return TableDataInfo.build(VoV2List);
     }
 
     /**
      * 根据教师工号查询参赛团队列表
      */
     @Override
-    public TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVoV2> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
         // 获取自己负责的竞赛
         PageQuery query = new PageQuery();
@@ -123,7 +140,24 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             }
         }
 
-        return TableDataInfo.build(result);
+        //添加竞赛名称
+        Set<Long> competitionIds = new HashSet<>();
+        result.getRecords().forEach(e -> {
+            competitionIds.add(e.getCompetitionId());
+        });
+        List<DcimsCompetitionVo> competitionVoList = competitionService.listById(new ArrayList<>(competitionIds));
+        List<DcimsTeamVoV2> VoV2List = result.getRecords().stream().map(e -> {
+            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+            BeanUtils.copyProperties(e, voV2);
+            competitionVoList.forEach(c -> {
+                if (c.getId().equals(voV2.getCompetitionId())){
+                    voV2.setCompetition(c);
+                }
+            });
+            return voV2;
+        }).collect(Collectors.toList());
+
+        return TableDataInfo.build(VoV2List);
     }
 
     /**
