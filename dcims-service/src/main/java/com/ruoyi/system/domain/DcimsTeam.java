@@ -84,7 +84,7 @@ public class DcimsTeam extends BaseEntity {
     /**
      * 佐证材料
      */
-    private String supportMaterial;
+    private Long supportMaterial;
     /**
      * 审核状态
      */

@@ -109,12 +109,17 @@ public class DcimsTeamVoV2 {
      * 佐证材料
      */
     @ExcelProperty(value = "佐证材料")
-    private String supportMaterial;
+    private Long supportMaterial;
 
     /**
      * 佐证材料地址
      */
     private String supportMaterialURL;
+
+    /**
+     * 佐证材料实体类
+     */
+    private SysOssVo oss;
 
     /**
      * 审核状态

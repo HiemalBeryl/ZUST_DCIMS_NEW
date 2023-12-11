@@ -18,6 +18,7 @@ import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.IDcimsBasicDataService;
 import com.ruoyi.system.service.IDcimsCompetitionService;
+import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -46,6 +47,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     private final IDcimsBasicDataService basicDataService;
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
+    private final ISysOssService ossService;
 
     /**
      * 查询参赛团队
@@ -70,6 +72,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         TableDataInfo<DcimsTeamVo> voList = TableDataInfo.build(result);
+        // 获取团队对应竞赛信息
         Set<Long> competitionIds = new HashSet<>();
         voList.getRows().forEach(e -> {
             competitionIds.add(e.getCompetitionId());
@@ -85,7 +88,24 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             });
             return voV2;
         }).collect(Collectors.toList());
-        return TableDataInfo.build(VoV2List);
+        // 获取团队对应oss信息
+        Set<Long> OSSIds = new HashSet<>();
+        voList.getRows().forEach(e -> {
+            OSSIds.add(e.getSupportMaterial());
+        });
+        List<SysOssVo> OssVoList = ossService.listByIds(OSSIds);
+        List<DcimsTeamVoV2> VoV2List2 = VoV2List.stream().map(e -> {
+            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+            BeanUtils.copyProperties(e, voV2);
+            OssVoList.forEach(oss -> {
+                if (oss.getOssId().equals(voV2.getSupportMaterial())){
+                    voV2.setSupportMaterialURL(oss.getUrl());
+                    voV2.setOss(oss);
+                }
+            });
+            return voV2;
+        }).collect(Collectors.toList());
+        return TableDataInfo.build(VoV2List2);
     }
 
     /**
@@ -260,7 +280,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
         // 判断是更新还是插入
         String flag;
-        if (dcimsTeam.getSupportMaterial() == null || Objects.equals(dcimsTeam.getSupportMaterial().trim(), "")){
+        if (dcimsTeam.getSupportMaterial() == null){
             // 更新
             flag = "update";
         }else {

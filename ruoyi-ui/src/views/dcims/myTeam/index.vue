@@ -19,7 +19,17 @@
       <el-table-column label="指导教师姓名" align="center" prop="teacherName" />
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
-      <el-table-column label="佐证材料" align="center" prop="supportMaterial" />
+      <el-table-column label="佐证材料" align="center" prop="supportMaterialURL" >
+        <template slot-scope="scope">
+          <ImagePreview
+            v-if="previewListResource && checkFileSuffix(scope.row.fileSuffix)"
+            :width=100 :height=100
+            :src="scope.row.url"
+            :preview-src-list="[scope.row.url]"/>
+          <span v-text="scope.row.url"
+                v-if="!checkFileSuffix(scope.row.fileSuffix) || !previewListResource"/>
+        </template>
+      </el-table-column>
       <el-table-column label="审核状态" align="center" fixed="right" prop="audit">
         <template slot-scope="scope">
           <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
@@ -238,6 +248,8 @@ export default {
       optionsTeacher: [],
       // 可选学生
       optionsStudent: [],
+      // 预览列表图片
+      previewListResource: true,
     };
   },
   created() {
@@ -472,6 +484,12 @@ export default {
       } else {
         this.optionsStudent = [];
       }
+    },
+    checkFileSuffix(fileSuffix) {
+      let arr = ["png", "jpg", "jpeg"];
+      return arr.some(type => {
+        return fileSuffix.indexOf(type) > -1;
+      });
     },
     
   }

@@ -104,7 +104,7 @@ public class DcimsTeamVo {
      * 佐证材料
      */
     @ExcelProperty(value = "佐证材料")
-    private String supportMaterial;
+    private Long supportMaterial;
 
     /**
      * 佐证材料地址

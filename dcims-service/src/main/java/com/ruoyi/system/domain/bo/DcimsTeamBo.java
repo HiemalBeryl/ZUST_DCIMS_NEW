@@ -95,7 +95,7 @@ public class DcimsTeamBo extends BaseEntity {
      * 佐证材料
      */
     @Null(message = "创建队伍时不能上传佐证材料，如需上传，请进入获奖申报页面", groups = { AddGroup.class })
-    private String supportMaterial;
+    private Long supportMaterial;
 
     /**
      * 审核状态

@@ -150,7 +150,17 @@
       <el-table-column label="指导教师姓名" align="center" prop="teacherName" />
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
-      <el-table-column label="佐证材料" align="center" prop="supportMaterial" />
+      <el-table-column label="佐证材料" align="center" prop="oss.url">
+        <template slot-scope="scope">
+          <ImagePreview
+            v-if="previewListResource && checkFileSuffix(scope.row.oss.fileSuffix)"
+            :width=100 :height=100
+            :src="scope.row.oss.url"
+            :preview-src-list="[scope.row.oss.url]"/>
+          <span v-text="scope.row.oss.url"
+                v-if="!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource"/>
+        </template>
+      </el-table-column>
       <!-- <el-table-column label="审核状态" align="center" prop="audit">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
@@ -326,7 +336,9 @@ export default {
         supportMaterial: [
           { required: true, message: "佐证材料不能为空", trigger: "blur" }
         ],
-      }
+      },
+      // 预览列表图片
+      previewListResource: true,
     };
   },
   created() {
@@ -462,6 +474,12 @@ export default {
     /** 是否填写作品名称 */
     changeWorksName(){
       this.worksNameIsNull = !this.worksNameIsNull;
+    },
+    checkFileSuffix(fileSuffix) {
+      let arr = ["png", "jpg", "jpeg"];
+      return arr.some(type => {
+        return fileSuffix.indexOf(type) > -1;
+      });
     },
   }
 };
