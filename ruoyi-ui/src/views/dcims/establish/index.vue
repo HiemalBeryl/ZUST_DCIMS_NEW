@@ -71,7 +71,7 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="24">
+        <el-col :span="8">
           <el-form-item label="负责人手机号" prop="phone">
             <el-input v-model="form.phone" placeholder="请输入手机号" />
           </el-form-item>
@@ -167,7 +167,7 @@
                         </el-option>
                       </el-select>
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="4">
                       <el-input v-model="teachingHour[index]" placeholder="请输入集中授课时数" clearable @keyup.enter.native="addlastitems(index, '1')"/>
                     </el-col>
                     <el-col :span="4">
@@ -195,7 +195,7 @@
                         </el-option>
                       </el-select>
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="4">
                       <el-input v-model="teachingHour[index]" placeholder="请输入授课工时" clearable @keyup.enter.native="addlastitems(index, '1')"/>
                     </el-col>
                     <el-col :span="4">
@@ -219,7 +219,7 @@
             <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
           </el-form-item>
         </el-col>
-        <el-col :span="10" :offset="2">
+        <el-col :span="10">
           <el-form-item label="赛事简介" prop="introduction">
             <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
           </el-form-item>
