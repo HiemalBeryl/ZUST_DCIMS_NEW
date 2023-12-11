@@ -72,6 +72,13 @@
       </el-row>
       <el-row>
         <el-col :span="24">
+          <el-form-item label="负责人手机号" prop="phone">
+            <el-input v-model="form.phone" placeholder="请输入手机号" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
           <el-form-item label="竞赛申报书" prop="attachment">
             <file-upload v-model="form.attachment"/>
           </el-form-item>
@@ -138,12 +145,12 @@
       </el-row>
       </div>
       <el-row>
-          <el-form-item label="工时">
+          <el-form-item label="集中授课教师">
               <!-- 渲染教师列表 -->
               <section v-for="(value, index) in teacherIds" :key="index">
                 <section v-if="index === 0">
                   <el-row>
-                    <el-col :span="6">
+                    <el-col :span="3">
                       <el-select
                         v-model="teacherIds[index]"
                         filterable
@@ -161,7 +168,7 @@
                       </el-select>
                     </el-col>
                     <el-col :span="6">
-                      <el-input v-model="teachingHour[index]" placeholder="请输入授课工时" clearable @keyup.enter.native="addlastitems(index, '1')"/>
+                      <el-input v-model="teachingHour[index]" placeholder="请输入集中授课时数" clearable @keyup.enter.native="addlastitems(index, '1')"/>
                     </el-col>
                     <el-col :span="4">
                       <el-button type="primary" icon="el-icon-plus" plain style="margin-left:10px;" circle @click="addlastitems(index, '1')"/>
@@ -170,8 +177,8 @@
                 </section>
                 <section v-if="index > 0">
                   <!-- 添加的子项目 -->
-                  <el-row style="margin-top:10px;">
-                    <el-col :span="6">
+                  <el-row>
+                    <el-col :span="3">
                         <el-select
                         v-model="teacherIds[index]"
                         filterable
@@ -283,6 +290,9 @@ export default {
         ],
         college: [
           { required: true, message: "所属学院不能为空", trigger: "blur"}
+        ],
+        phone: [
+          { required: true, message: "手机号不能为空", trigger: "blur"}
         ],
         attachment: [
           { required: true, message: "请上传竞赛申报书", trigger: "blur" }

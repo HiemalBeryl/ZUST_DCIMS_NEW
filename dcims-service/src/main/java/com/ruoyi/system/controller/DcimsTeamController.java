@@ -49,7 +49,7 @@ public class DcimsTeamController extends BaseController {
      */
     @SaCheckPermission("dcims:team:list")
     @GetMapping("/list")
-    public TableDataInfo<DcimsTeamVo> list(DcimsTeamBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVoV2> list(DcimsTeamBo bo, PageQuery pageQuery) {
         return iDcimsTeamService.queryPageList(bo, pageQuery);
     }
 
@@ -58,7 +58,7 @@ public class DcimsTeamController extends BaseController {
      */
     @SaCheckPermission("dcims:team:list")
     @GetMapping("/listTeamByTeacherId")
-    public TableDataInfo<DcimsTeamVo> listTeamByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVoV2> listTeamByTeacherId(DcimsTeamBo bo, PageQuery pageQuery) {
         return iDcimsTeamService.queryPageListByTeacherId(bo, pageQuery);
     }
 

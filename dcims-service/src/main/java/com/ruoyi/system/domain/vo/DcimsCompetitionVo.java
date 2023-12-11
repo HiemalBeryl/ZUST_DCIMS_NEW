@@ -91,6 +91,12 @@ public class DcimsCompetitionVo {
     private Long college;
 
     /**
+     * 负责人手机号
+     */
+    @ExcelProperty(value = "负责人手机号")
+    private Long phone;
+
+    /**
      * 校内选拔时间
      */
     @ExcelProperty(value = "校内选拔时间")

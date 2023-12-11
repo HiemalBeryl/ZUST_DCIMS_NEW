@@ -90,6 +90,12 @@ public class DcimsCompetitionBo extends BaseEntity {
     private Long college;
 
     /**
+     * 负责人手机号
+     */
+    @NotNull(message = "手机号不能为空", groups = { AddGroup.class})
+    private Long phone;
+
+    /**
      * 校内选拔时间
      */
     private Date innerTime;
