@@ -19,15 +19,17 @@
       <el-table-column label="指导教师姓名" align="center" prop="teacherName" />
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
-      <el-table-column label="佐证材料" align="center" prop="supportMaterialURL" >
+      <el-table-column label="佐证材料" align="center" prop="oss.url" >
         <template slot-scope="scope">
           <ImagePreview
-            v-if="previewListResource && checkFileSuffix(scope.row.fileSuffix)"
+            v-if="previewListResource && scope.row.oss != null && checkFileSuffix(scope.row.oss.fileSuffix)"
             :width=100 :height=100
-            :src="scope.row.url"
-            :preview-src-list="[scope.row.url]"/>
-          <span v-text="scope.row.url"
-                v-if="!checkFileSuffix(scope.row.fileSuffix) || !previewListResource"/>
+            :src="scope.row.oss.url"
+            :preview-src-list="[scope.row.oss.url]"/>
+          <span v-text="scope.row.oss.url"
+                v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)"/>
+          <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
+
         </template>
       </el-table-column>
       <el-table-column label="审核状态" align="center" fixed="right" prop="audit">
@@ -262,6 +264,14 @@ export default {
       listTeamByTeacherId(this.queryParams).then(response => {
         this.teamList = response.rows;
         this.total = response.total;
+
+        this.teamList.forEach(element => {
+        element.teacherId = element.teacherId.join();
+        element.studentId = element.studentId.join();
+        element.teacherName = element.teacherName.join();
+        element.studentName = element.studentName.join();
+        });
+
         this.loading = false;
       });
     },
@@ -491,7 +501,11 @@ export default {
         return fileSuffix.indexOf(type) > -1;
       });
     },
-    
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
+    },
+
   }
 };
 </script>

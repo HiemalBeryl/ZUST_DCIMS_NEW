@@ -153,12 +153,13 @@
       <el-table-column label="佐证材料" align="center" prop="oss.url">
         <template slot-scope="scope">
           <ImagePreview
-            v-if="previewListResource && checkFileSuffix(scope.row.oss.fileSuffix)"
+            v-if="previewListResource && scope.row.oss != null && checkFileSuffix(scope.row.oss.fileSuffix)"
             :width=100 :height=100
             :src="scope.row.oss.url"
             :preview-src-list="[scope.row.oss.url]"/>
           <span v-text="scope.row.oss.url"
-                v-if="!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource"/>
+                v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)"/>
+          <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
         </template>
       </el-table-column>
       <!-- <el-table-column label="审核状态" align="center" prop="audit">
@@ -351,6 +352,15 @@ export default {
       listTeam(this.queryParams).then(response => {
         this.teamList = response.rows;
         this.total = response.total;
+        console.log(this.teamList);
+
+        this.teamList.forEach(element => {
+        element.teacherId = element.teacherId.join();
+        element.studentId = element.studentId.join();
+        element.teacherName = element.teacherName.join();
+        element.studentName = element.studentName.join();
+        });
+
         this.loading = false;
       });
     },
@@ -480,6 +490,10 @@ export default {
       return arr.some(type => {
         return fileSuffix.indexOf(type) > -1;
       });
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
     },
   }
 };

@@ -73,19 +73,19 @@
                         @selection-change="handleSelectionChange"
                       >
                         <el-table-column type="selection" width="55"> </el-table-column>
-                        <el-table-column prop="name" label="赛事名称" width="150">
+                        <el-table-column prop="name" label="赛事名称" width="200">
                         </el-table-column>
-                        <el-table-column prop="term" label="立项届次" width="150">
+                        <el-table-column prop="term" label="立项届次" width="200">
                         </el-table-column>
-                        <el-table-column prop="level" label="竞赛类别" width="150">
+                        <el-table-column prop="level" label="竞赛类别" width="200">
                         </el-table-column>
-                        <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="150">
+                        <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="200">
                         </el-table-column>
                         <el-table-column prop="budget" label="申报经费（万元）" width="120">
                         </el-table-column>
                         <el-table-column prop="shenQingShiJian" label="申请时间" width="120">
                         </el-table-column>
-                        <el-table-column fixed="right" label="查看详情" width="120">
+                        <el-table-column fixed="right" label="查看详情" min-width="200">
                           <template slot-scope="scope">
                             <el-button type="text" @click="handleUpdate(scope.row)">编辑</el-button>
                           </template>
@@ -99,11 +99,11 @@
                         </div>
 
                         <div style="float: right">
-                          <el-button type="primary" @click="submitOrRefuse(1)">提交</el-button>
+                          <el-button type="primary" @click="submitOrRefuse(1)">通过审核</el-button>
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">
-                          <el-button type="warning" @click="submitOrRefuse(0)">退回</el-button>
+                          <el-button type="warning" @click="submitOrRefuse(0)">不通过审核</el-button>
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">

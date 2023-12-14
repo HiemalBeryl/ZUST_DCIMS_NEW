@@ -78,6 +78,44 @@
         </el-col>
       </el-row>
       <el-row>
+        <el-col :span="8">
+          <el-form-item label="校内选拔时间" prop="innerTime">
+            <el-date-picker clearable
+              v-model="form.innerTime"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              :disabled="innerTimeIsNull"
+              placeholder="请选择校内选拔时间">
+            </el-date-picker>
+            <el-checkbox label="校内选拔时间" @change="changeInnerTime()">无校赛</el-checkbox>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="省赛时间" prop="provinceTime">
+            <el-date-picker clearable
+              v-model="form.provinceTime"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              :disabled="provinceTimeIsNull"
+              placeholder="请选择省赛时间">
+            </el-date-picker>
+            <el-checkbox label="省赛时间" @change="changeProvinceTime()">无省赛</el-checkbox>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="国赛时间" prop="nationalTime">
+            <el-date-picker clearable
+              v-model="form.nationalTime"
+              type="datetime"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              :disabled="nationalTimeIsNull"
+              placeholder="请选择国赛时间">
+            </el-date-picker>
+            <el-checkbox label="国赛时间" @change="changeNationalTime()">无国赛</el-checkbox>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="24">
           <el-form-item label="竞赛申报书" prop="attachment">
             <file-upload v-model="form.attachment"/>
@@ -103,38 +141,6 @@
         </el-col>
 
 
-      </el-row>
-      <el-row>
-        <el-col :span="8">
-          <el-form-item label="校内选拔时间" prop="innerTime">
-            <el-date-picker clearable
-              v-model="form.innerTime"
-              type="datetime"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              placeholder="请选择校内选拔时间">
-            </el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="省赛时间" prop="provinceTime">
-            <el-date-picker clearable
-              v-model="form.provinceTime"
-              type="datetime"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              placeholder="请选择省赛时间">
-            </el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="国赛时间" prop="nationalTime">
-            <el-date-picker clearable
-              v-model="form.nationalTime"
-              type="datetime"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              placeholder="请选择国赛时间">
-            </el-date-picker>
-          </el-form-item>
-        </el-col>
       </el-row>
       <el-row>
         <el-col :span="8">
@@ -294,6 +300,15 @@ export default {
         phone: [
           { required: true, message: "手机号不能为空", trigger: "blur"}
         ],
+        // innerTime: [
+        //   { required: true, message: "校内选拔时间不能为空", trigger: "blur" }
+        // ],
+        // provinceTime: [
+        //   { required: true, message: "省赛时间不能为空", trigger: "blur" }
+        // ],
+        // nationalTime: [
+        //   { required: true, message: "国赛时间不能为空", trigger: "blur" }
+        // ],
         attachment: [
           { required: true, message: "请上传竞赛申报书", trigger: "blur" }
         ],
@@ -306,6 +321,12 @@ export default {
       loadingTeacher: undefined,
       // 可选教师
       options: [],
+      // 是否不填写校赛时间
+      innerTimeIsNull: false,
+      // 是否不填写省赛时间
+      provinceTimeIsNull: false,
+      // 是否不填写国赛时间
+      nationalTimeIsNull: false,
     }
   },
   created(){
@@ -423,6 +444,19 @@ export default {
       } else {
         this.options = [];
       }
+    },
+    changeInnerTime(){
+      this.innerTimeIsNull = !this.innerTimeIsNull
+      this.form.innerTime = undefined
+        
+    },
+    changeProvinceTime(){
+      this.provinceTimeIsNull = !this.provinceTimeIsNull
+      this.form.provinceTime = undefined
+    },
+    changeNationalTime(){
+      this.nationalTimeIsNull = !this.nationalTimeIsNull
+      this.form.nationalTime = undefined
     },
   }
 }

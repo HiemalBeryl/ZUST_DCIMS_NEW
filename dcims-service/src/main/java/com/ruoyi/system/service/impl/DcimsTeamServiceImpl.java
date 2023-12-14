@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -81,6 +82,11 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         List<DcimsTeamVoV2> VoV2List = voList.getRows().stream().map(e -> {
             DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
             BeanUtils.copyProperties(e, voV2);
+            // 添加教师和学生信息数组
+            voV2.setStudentId(e.getStudentId().split(","));
+            voV2.setStudentName(e.getStudentName().split(","));
+            voV2.setTeacherId(e.getTeacherId().split(","));
+            voV2.setTeacherName(e.getTeacherName().split(","));
             competitionVoList.forEach(c -> {
                 if (c.getId().equals(voV2.getCompetitionId())){
                     voV2.setCompetition(c);
@@ -93,18 +99,30 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         voList.getRows().forEach(e -> {
             OSSIds.add(e.getSupportMaterial());
         });
-        List<SysOssVo> OssVoList = ossService.listByIds(OSSIds);
-        List<DcimsTeamVoV2> VoV2List2 = VoV2List.stream().map(e -> {
-            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
-            BeanUtils.copyProperties(e, voV2);
-            OssVoList.forEach(oss -> {
-                if (oss.getOssId().equals(voV2.getSupportMaterial())){
-                    voV2.setSupportMaterialURL(oss.getUrl());
-                    voV2.setOss(oss);
-                }
-            });
-            return voV2;
-        }).collect(Collectors.toList());
+        OSSIds.removeAll(Collections.singleton(null));
+        System.out.println(OSSIds);
+        List<SysOssVo> ossVoList = ossService.listByIds(OSSIds);
+        List<DcimsTeamVoV2> VoV2List2 = VoV2List;
+        if(ossVoList.size() > 0){
+            VoV2List2 = VoV2List.stream().map(e -> {
+                DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+                BeanUtils.copyProperties(e, voV2);
+                ossVoList.forEach(oss -> {
+                    if (oss.getOssId().equals(voV2.getSupportMaterial())){
+                        voV2.setSupportMaterialURL(oss.getUrl());
+                        voV2.setOss(oss);
+                    }
+                });
+                if (ObjectUtil.isNull(voV2.getOss()))
+                    voV2.setOss(new SysOssVo());
+                return voV2;
+            }).collect(Collectors.toList());
+        }
+        VoV2List2.forEach(e -> {
+            if (ObjectUtil.isNull(e.getSupportMaterial())){
+                e.setOss(null);
+            }
+        });
         return TableDataInfo.build(VoV2List2);
     }
 
@@ -169,6 +187,11 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         List<DcimsTeamVoV2> VoV2List = result.getRecords().stream().map(e -> {
             DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
             BeanUtils.copyProperties(e, voV2);
+            // 添加教师和学生信息数组
+            voV2.setStudentId(e.getStudentId().split(","));
+            voV2.setStudentName(e.getStudentName().split(","));
+            voV2.setTeacherId(e.getTeacherId().split(","));
+            voV2.setTeacherName(e.getTeacherName().split(","));
             competitionVoList.forEach(c -> {
                 if (c.getId().equals(voV2.getCompetitionId())){
                     voV2.setCompetition(c);
@@ -177,7 +200,35 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             return voV2;
         }).collect(Collectors.toList());
 
-        return TableDataInfo.build(VoV2List);
+        // 获取团队对应oss信息
+        Set<Long> OSSIds = new HashSet<>();
+        result.getRecords().forEach(e -> {
+            OSSIds.add(e.getSupportMaterial());
+        });
+        OSSIds.removeAll(Collections.singleton(null));
+        List<SysOssVo> ossVoList = ossService.listByIds(OSSIds);
+        List<DcimsTeamVoV2> VoV2List2 = VoV2List;
+        if(ossVoList.size() > 0){
+            VoV2List2 = VoV2List.stream().map(e -> {
+                DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+                BeanUtils.copyProperties(e, voV2);
+                ossVoList.forEach(oss -> {
+                    if (oss.getOssId().equals(voV2.getSupportMaterial())){
+                        voV2.setSupportMaterialURL(oss.getUrl());
+                        voV2.setOss(oss);
+                    }
+                });
+                if (ObjectUtil.isNull(voV2.getOss()))
+                    voV2.setOss(new SysOssVo());
+                return voV2;
+            }).collect(Collectors.toList());
+        }
+        VoV2List2.forEach(e -> {
+            if (ObjectUtil.isNull(e.getSupportMaterial())){
+                e.setOss(null);
+            }
+        });
+        return TableDataInfo.build(VoV2List2);
     }
 
     /**
@@ -209,6 +260,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      */
     @Override
     public Boolean insertByBo(DcimsTeamBo bo) {
+        // 添加教师名称和学生名称，前端不可靠
+        List<String> studentIdSplit = Arrays.stream(bo.getStudentId().split(",")).collect(Collectors.toList());
+        List<Long> teacherIdSplit = Arrays.stream(bo.getTeacherId().split(",")).map(Long::parseLong).collect(Collectors.toList());
+        List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdSplit);
+        List<DcimsTeacherVo> teachers = basicDataService.getTeacherNameByIds(teacherIdSplit);
+        String studentName = students.stream().map(DcimsStudentVo::getName).collect(Collectors.joining(","));
+        String teacherName = teachers.stream().map(DcimsTeacherVo::getName).collect(Collectors.joining(","));
+        bo.setTeacherName(teacherName);
+        bo.setStudentName(studentName);
+
+
         DcimsTeam add = BeanUtil.toBean(bo, DcimsTeam.class);
         validEntityBeforeSave(add);
         boolean flag = baseMapper.insert(add) > 0;

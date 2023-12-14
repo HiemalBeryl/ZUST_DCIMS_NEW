@@ -158,17 +158,17 @@
       </el-table-column>
       <el-table-column label="校内选拔时间" align="center" prop="innerTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.innerTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ "无" || parseTime(scope.row.innerTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="省赛时间" align="center" prop="provinceTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.provinceTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ "无" || parseTime(scope.row.provinceTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="国赛时间" align="center" prop="nationalTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.nationalTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ "无" || parseTime(scope.row.nationalTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="本年度拨款" align="center" prop="appropriation" />

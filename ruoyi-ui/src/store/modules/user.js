@@ -17,6 +17,9 @@ const user = {
     SET_NAME: (state, name) => {
       state.name = name
     },
+    SET_NICK: (state, nick) => {
+      state.nick = nick
+    },
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar
     },
@@ -29,7 +32,7 @@ const user = {
   },
 
   actions: {
-    // 登录   
+    // 登录
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
       const password = userInfo.password
@@ -76,6 +79,7 @@ const user = {
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
           commit('SET_NAME', user.userName)
+          commit('SET_NICK', user.nickName)
           commit('SET_AVATAR', avatar)
           resolve(res)
         }).catch(error => {

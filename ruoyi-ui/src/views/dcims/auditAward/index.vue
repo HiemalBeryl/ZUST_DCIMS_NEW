@@ -74,33 +74,33 @@
                   @selection-change="handleSelectionChange"
                 >
                   <el-table-column type="selection" width="55"> </el-table-column>
-                  <el-table-column prop="competitionId" label="赛事id" width="150">
+                  <el-table-column prop="competitionId" label="赛事id" width="200">
                   </el-table-column>
-                  <el-table-column prop="name" label="团队名称" width="150">
+                  <el-table-column prop="name" label="团队名称" width="200">
                   </el-table-column>
-                  <el-table-column prop="competitionType" label="比赛类型" width="150">
+                  <el-table-column prop="competitionType" label="比赛类型" width="200">
                     <template slot-scope="scope">
                      <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="awardLevel" label="获奖等级" width="150">
+                  <el-table-column prop="awardLevel" label="获奖等级" width="200">
                     <template slot-scope="scope">
                      <dict-tag :options="dict.type.dcims_award_level" :value="scope.row.awardLevel"/>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="studentName" label="参赛学生" width="120">
+                  <el-table-column prop="studentName" label="参赛学生" width="250">
                   </el-table-column>
-                  <el-table-column prop="teacherName" label="指导教师" width="120">
+                  <el-table-column prop="teacherName" label="指导教师" width="250">
                   </el-table-column>
                   <el-table-column prop="awardTime" label="获奖时间" width="120">
                   </el-table-column>
-                  <el-table-column prop="supportMaterial" label="佐证材料" width="120">
+                  <el-table-column prop="supportMaterial" label="佐证材料" width="200">
                     <template slot-scope="scope">
                       <el-tag type="primary" v-if="scope.row.supportMaterial != null">有</el-tag>
                       <el-tag type="error" v-else>无</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column fixed="right" label="查看详情" width="120">
+                  <el-table-column fixed="right" label="查看详情" min-width="200" align="center">
                     <template slot-scope="scope">
                       <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
                     </template>
@@ -114,11 +114,11 @@
                   </div>
 
                   <div style="float: right">
-                    <el-button type="primary" @click="submitOrRefuse(1)">提交</el-button>
+                    <el-button type="primary" @click="submitOrRefuse(1)">通过审核</el-button>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                    <el-button type="warning" @click="submitOrRefuse(0)">退回</el-button>
+                    <el-button type="warning" @click="submitOrRefuse(0)">不通过审核</el-button>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
@@ -184,6 +184,7 @@
 	            </a>
             </el-button>
           </span>
+          <el-button v-if="(detailForm.supportMaterialURL[0] != null)" type="text" @click.native="openNewTab(detailForm.supportMaterialURL[0])">在新窗口打开</el-button>
     </el-descriptions-item>
     </el-descriptions>
   </el-dialog>
@@ -468,6 +469,10 @@ import { listByIds } from "@/api/system/oss"
       return arr.some(type => {
         return fileSuffix.indexOf(type) > -1;
       });
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
     },
      returnWarn() {
 const h = this.$createElement;
