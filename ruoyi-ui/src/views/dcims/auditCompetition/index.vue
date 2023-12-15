@@ -85,9 +85,18 @@
                         </el-table-column>
                         <el-table-column prop="shenQingShiJian" label="申请时间" width="120">
                         </el-table-column>
+                        <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="160">
+                          <template slot-scope="scope">
+                            <el-button v-if="(scope.row.oss != null)" 
+                            type="text" 
+                            @click.native="openNewTab(scope.row.oss.url)"
+                            >在新窗口打开
+                            </el-button>
+                          </template>
+                        </el-table-column>
                         <el-table-column fixed="right" label="查看详情" min-width="200">
                           <template slot-scope="scope">
-                            <el-button type="text" @click="handleUpdate(scope.row)">编辑</el-button>
+                            <el-button type="text" @click="handleUpdate(scope.row)">查看详情</el-button>
                           </template>
                         </el-table-column>
                       </el-table>
@@ -644,7 +653,11 @@ import {getInfo} from "@/api/login"
         return flag;
       }
       return true;
-    }
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
+    },
     }
   }
 

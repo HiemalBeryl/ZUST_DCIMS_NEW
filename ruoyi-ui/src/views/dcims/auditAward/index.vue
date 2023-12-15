@@ -74,7 +74,7 @@
                   @selection-change="handleSelectionChange"
                 >
                   <el-table-column type="selection" width="55"> </el-table-column>
-                  <el-table-column prop="competitionId" label="赛事id" width="200">
+                  <el-table-column prop="competition.name" label="赛事名称" width="200">
                   </el-table-column>
                   <el-table-column prop="name" label="团队名称" width="200">
                   </el-table-column>
@@ -158,8 +158,12 @@
         无
       </span>
     </el-descriptions-item>
-    <el-descriptions-item label="比赛类型">{{ this.detailForm.competitionType }}</el-descriptions-item>
-    <el-descriptions-item label="奖项等级">{{ this.detailForm.awardLevel }}</el-descriptions-item>
+    <el-descriptions-item label="比赛类型">
+      <dict-tag :options="dict.type.dcims_award_type" :value="detailForm.competitionType"/>
+    </el-descriptions-item>
+    <el-descriptions-item label="奖项等级">
+      <dict-tag :options="dict.type.dcims_award_level" :value="detailForm.awardLevel"/>
+    </el-descriptions-item>
     <el-descriptions-item label="指导教师">{{ this.detailForm.teacherName }}</el-descriptions-item>
     <el-descriptions-item label="参赛学生">{{ this.detailForm.studentName }}</el-descriptions-item>
     <el-descriptions-item label="是否存在更高级奖项" :span="2">
@@ -200,7 +204,7 @@ import { listByIds } from "@/api/system/oss"
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
-    dicts: ['dcims_award_type'],
+    dicts: ['dcims_award_type', 'dcims_award_level'],
     data() {
       return {
       // 按钮loading

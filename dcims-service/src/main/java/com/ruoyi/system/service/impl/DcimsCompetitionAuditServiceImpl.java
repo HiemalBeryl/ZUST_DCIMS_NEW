@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -13,11 +14,14 @@ import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.bo.CompetitionPartialBo;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
+import com.ruoyi.system.domain.vo.SysOssVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.IDcimsCompetitionService;
+import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionAuditVo;
@@ -26,6 +30,7 @@ import com.ruoyi.system.mapper.DcimsCompetitionAuditMapper;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 竞赛审核Service业务层处理
@@ -41,6 +46,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     private final DcimsCompetitionMapper competitionBaseMapper;
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
+    private final ISysOssService ossService;
 
     /**
      * 查询竞赛审核
@@ -63,7 +69,37 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         // 获取状态为待审核的竞赛
         lqw.eq(DcimsCompetition::getState,0);
         Page<DcimsCompetitionVo> result = competitionBaseMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(result);
+
+        // 获取团队对应oss信息
+        Set<Long> OSSIds = new HashSet<>();
+        result.getRecords().forEach(e -> {
+            OSSIds.add(Long.valueOf(e.getAttachment()));
+        });
+        OSSIds.removeAll(Collections.singleton(null));
+        System.out.println(OSSIds);
+        List<SysOssVo> ossVoList = ossService.listByIds(OSSIds);
+        List<DcimsCompetitionVo> voList = result.getRecords();
+        if(ossVoList.size() > 0){
+            voList = voList.stream().map(e -> {
+                DcimsCompetitionVo vo = new DcimsCompetitionVo();
+                BeanUtils.copyProperties(e, vo);
+                ossVoList.forEach(oss -> {
+                    if (oss.getOssId().equals(vo.getAttachment())){
+                        vo.setOss(oss);
+                    }
+                });
+                if (ObjectUtil.isNull(vo.getOss()))
+                    vo.setOss(new SysOssVo());
+                return vo;
+            }).collect(Collectors.toList());
+        }
+        voList.forEach(e -> {
+            if (ObjectUtil.isNull(e.getAttachment())){
+                e.setOss(null);
+            }
+        });
+
+        return TableDataInfo.build(voList);
     }
 
     /**

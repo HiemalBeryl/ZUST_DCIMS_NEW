@@ -67,7 +67,7 @@ public class DcimsTeamController extends BaseController {
      */
     @SaCheckPermission("dcims:team:list")
     @GetMapping("/audit/list")
-    public TableDataInfo<DcimsTeamVo> listByTeacherId(DcimsTeamAuditBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVoV2> listByTeacherId(DcimsTeamAuditBo bo, PageQuery pageQuery) {
         return iDcimsTeamAuditService.queryPageListAudit(bo, pageQuery);
     }
 

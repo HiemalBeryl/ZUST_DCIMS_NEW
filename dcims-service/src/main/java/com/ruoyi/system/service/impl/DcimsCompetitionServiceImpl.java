@@ -2,7 +2,9 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -12,18 +14,20 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetitionAudit;
 import com.ruoyi.system.domain.DcimsCompetitionTeacher;
 import com.ruoyi.system.domain.DcimsTeacher;
-import com.ruoyi.system.domain.vo.DcimsCompetitionAuditVo;
-import com.ruoyi.system.domain.vo.DcimsTeacherVo;
+import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.*;
+import com.ruoyi.system.service.ISysDictDataService;
+import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
-import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 竞赛赛事基本信息Service业务层处理
@@ -40,6 +44,8 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     private final DcimsCompetitionTeacherMapper competitionTeacherMapper;
     private final DcimsCompetitionAuditMapper competitionAuditBaseMapper;
     private final SysDeptMapper sysDeptMapper;
+    private final ISysOssService ossService;
+    private final ISysDictDataService dictDataService;
 
     /**
      * 查询竞赛赛事基本信息
@@ -55,8 +61,42 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     @Override
     public TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
+        // 只能查询出通过审核的竞赛
+        // lqw.eq(DcimsCompetition::getState, 1);
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        return TableDataInfo.build(result);
+        TableDataInfo<DcimsCompetitionVo> build = TableDataInfo.build(result);
+        // 获取团队对应oss信息
+        Set<Long> OSSIds = new HashSet<>();
+        result.getRecords().forEach(e -> {
+            OSSIds.add(Long.valueOf(e.getAttachment()));
+        });
+        OSSIds.removeAll(Collections.singleton(null));
+        System.out.println(OSSIds);
+        List<SysOssVo> ossVoList = ossService.listByIds(OSSIds);
+        List<DcimsCompetitionVo> voList = result.getRecords();
+        if(ossVoList.size() > 0){
+            voList = voList.stream().map(e -> {
+                DcimsCompetitionVo vo = new DcimsCompetitionVo();
+                BeanUtils.copyProperties(e, vo);
+                ossVoList.forEach(oss -> {
+                    if (oss.getOssId().equals(vo.getAttachment())){
+                        vo.setOss(oss);
+                    }
+                });
+                if (ObjectUtil.isNull(vo.getOss()))
+                    vo.setOss(new SysOssVo());
+                return vo;
+            }).collect(Collectors.toList());
+        }
+        voList.forEach(e -> {
+            if (ObjectUtil.isNull(e.getAttachment())){
+                e.setOss(null);
+            }
+        });
+        TableDataInfo<DcimsCompetitionVo> build1 = TableDataInfo.build(voList);
+        BeanUtils.copyProperties(build ,build1);
+        build1.setRows(voList);
+        return build1;
     }
 
     /**
@@ -67,9 +107,10 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
         lqw.eq(DcimsCompetition::getResponsiblePersonId, AccountUtils.getAccount().getTeacherId());
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        TableDataInfo<DcimsCompetitionVo> build = TableDataInfo.build(result);
         // 查询审核状态信息
         List<Long> competitionIds = new ArrayList<>();
-        for(DcimsCompetitionVo vo : result.getRecords()){
+        for(DcimsCompetitionVo vo : build.getRows()){
             competitionIds.add(vo.getId());
         }
         System.out.println(competitionIds);
@@ -88,13 +129,13 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
             }
         }
         for (DcimsCompetitionAuditVo audit : m.values()){
-            for (DcimsCompetitionVo vo : result.getRecords()){
+            for (DcimsCompetitionVo vo : build.getRows()){
                 if (Objects.equals(audit.getCompetitionId(), vo.getId())){
                     vo.setAudit(audit);
                 }
             }
         }
-        return TableDataInfo.build(result);
+        return build;
     }
 
     /**
@@ -103,7 +144,18 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     @Override
     public List<DcimsCompetitionVo> queryList(DcimsCompetitionBo bo) {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
-        return baseMapper.selectVoList(lqw);
+        List<DcimsCompetitionVo> dcimsCompetitionVos = baseMapper.selectVoList(lqw);
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        dcimsCompetitionVos.forEach(com -> {
+            for (SysDictData d : dictData){
+                if(com.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    com.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
+        return dcimsCompetitionVos;
     }
 
     private LambdaQueryWrapper<DcimsCompetition> buildQueryWrapper(DcimsCompetitionBo bo) {

@@ -2,7 +2,7 @@
   <div class="app-container home">
     <el-row :gutter="20">
       <el-col :sm="24" :lg="12" style="padding-left: 20px">
-        <h2>欢迎{{ this.$store.state.user.nick }}进入竞赛信息管理系统</h2>
+        <h2>{{ this.$store.state.user.nick }}，欢迎进入竞赛信息管理系统</h2>
         <!-- <p>
           RuoYi-Vue-Plus 是基于 RuoYi-Vue 针对 分布式集群 场景升级(不兼容原框架)
           <br/>

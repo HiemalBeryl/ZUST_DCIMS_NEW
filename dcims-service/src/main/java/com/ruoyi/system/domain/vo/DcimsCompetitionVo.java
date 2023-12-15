@@ -27,7 +27,6 @@ public class DcimsCompetitionVo {
     /**
      * 主键
      */
-    @ExcelProperty(value = "主键")
     private Long id;
 
     /**
@@ -87,8 +86,13 @@ public class DcimsCompetitionVo {
     /**
      * 所属学院
      */
-    @ExcelProperty(value = "所属学院")
     private Long college;
+
+    /**
+     * 所属学院
+     */
+    @ExcelProperty(value = "所属学院")
+    private String collegeName;
 
     /**
      * 负责人手机号
@@ -139,7 +143,12 @@ public class DcimsCompetitionVo {
     /**
      * 竞赛申报书
      */
-    private String attachment;
+    private Long attachment;
+
+    /**
+     * 竞赛申报书详情
+     */
+    private SysOssVo oss;
 
     /**
      * 奖金核算状态

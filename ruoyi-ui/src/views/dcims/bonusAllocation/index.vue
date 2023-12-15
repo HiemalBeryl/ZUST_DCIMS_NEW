@@ -69,7 +69,7 @@
         >导出</el-button>
       </el-col> -->
       <el-col :span="12">
-        <el-button  class="countButton" @click="setTime()" >计算 </el-button>
+        <el-button  class="countButton" @click="setTime()" >新增计算 </el-button>
         <el-button  type="warning" class="countButton" @click="upload()" v-show="!countButtonShow" :disabled="uploadDisabled">{{uploadButtonText}}</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -316,7 +316,7 @@ export default {
       // 上传是否不可用
       uploadDisabled: false,
       // 上传按钮上显示的文字
-      uploadButtonText: "上传",
+      uploadButtonText: "保存计算结果",
       // 是否进行过奖金计算
       isCounted: false,
       // 查询参数

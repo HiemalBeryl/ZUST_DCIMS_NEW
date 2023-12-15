@@ -12,19 +12,22 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.domain.DcimsTeamAudit;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
+import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.DcimsTeamMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 团队获奖审核Service业务层处理
@@ -39,6 +42,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
     private final DcimsTeamAuditMapper teamAuditBaseMapper;
     private final DcimsTeamMapper teamBaseMapper;
     private final SysDeptMapper sysDeptMapper;
+    private final IDcimsCompetitionService competitionService;
 
     /**
      * 查询团队获奖审核
@@ -52,7 +56,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
      * 查询团队获奖审核列表
      */
     @Override
-    public TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsTeamVoV2> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery) {
         // 自定义业务，获取当前登录账号对应的教师工号
         String id = StpUtil.getLoginIdAsString();
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
@@ -63,7 +67,31 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
 
         Page<DcimsTeamVo> result = teamBaseMapper.selectVoPage(pageQuery.build(), lqw);
         System.out.println(result);
-        return TableDataInfo.build(result);
+
+        //添加竞赛名称
+        Set<Long> competitionIds = new HashSet<>();
+        result.getRecords().forEach(e -> {
+            competitionIds.add(e.getCompetitionId());
+        });
+        List<DcimsCompetitionVo> competitionVoList = competitionService.listById(new ArrayList<>(competitionIds));
+        List<DcimsTeamVoV2> VoV2List = result.getRecords().stream().map(e -> {
+            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+            BeanUtils.copyProperties(e, voV2);
+            // 添加教师和学生信息数组
+            voV2.setStudentId(e.getStudentId().split(","));
+            voV2.setStudentName(e.getStudentName().split(","));
+            voV2.setTeacherId(e.getTeacherId().split(","));
+            voV2.setTeacherName(e.getTeacherName().split(","));
+            competitionVoList.forEach(c -> {
+                if (c.getId().equals(voV2.getCompetitionId())){
+                    voV2.setCompetition(c);
+                }
+            });
+            return voV2;
+        }).collect(Collectors.toList());
+
+        // 添加团队对应竞赛信息
+        return TableDataInfo.build(VoV2List);
     }
 
     /**

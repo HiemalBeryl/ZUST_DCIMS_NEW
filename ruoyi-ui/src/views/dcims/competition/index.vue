@@ -174,6 +174,15 @@
       <el-table-column label="本年度拨款" align="center" prop="appropriation" />
       <el-table-column label="个人赛限项" align="center" prop="personLimit" />
       <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
+      <el-table-column v-if="(this.$store.state.user.roles.includes('AcademicAffairsOffice'))" label="竞赛申报书" align="center" prop="oss.url">
+        <template slot-scope="scope">
+          <el-button v-if="(scope.row.oss != null)" 
+          type="text" 
+          @click.native="openNewTab(scope.row.oss.url)"
+          >在新窗口打开
+          </el-button>
+        </template>
+      </el-table-column>
       <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -330,7 +339,11 @@ export default {
       this.download('dcims/competition/export', {
         ...this.queryParams
       }, `competition_${new Date().getTime()}.xlsx`)
-    }
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
+    },
   }
 };
 </script>

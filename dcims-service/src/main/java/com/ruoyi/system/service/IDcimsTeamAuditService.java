@@ -5,6 +5,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
+import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public interface IDcimsTeamAuditService {
     /**
      * 查询竞赛审核列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVoV2> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery);
 
     /**
      * 查询竞赛审核列表

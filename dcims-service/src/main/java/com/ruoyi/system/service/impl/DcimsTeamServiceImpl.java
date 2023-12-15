@@ -1,5 +1,7 @@
 package com.ruoyi.system.service.impl;
 
+import cn.dev33.satoken.config.SaTokenConfig;
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -17,9 +19,7 @@ import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
-import com.ruoyi.system.service.IDcimsBasicDataService;
-import com.ruoyi.system.service.IDcimsCompetitionService;
-import com.ruoyi.system.service.ISysOssService;
+import com.ruoyi.system.service.*;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.mapper.DcimsTeamMapper;
-import com.ruoyi.system.service.IDcimsTeamService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,6 +48,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
     private final ISysOssService ossService;
+    private final ISysDeptService deptService;
 
     /**
      * 查询参赛团队
@@ -71,15 +71,42 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     @Override
     public TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        // 教务处可以查看全校，学院管理员可以查看学院，普通教师查看自己
+//        List<String> roleList = StpUtil.getRoleList();
+//        if(roleList.contains("AcademyCompetitionHead")){
+//            List<SysDept> depts = deptService.selectDeptList(new SysDept());
+//            Integer teacherCollege = -1;
+//            for (SysDept dept : depts){
+//                if (dept.getLeaderTeacherId() == StpUtil.getLoginId()){
+//                    teacherCollege = dept.getOrderNum();
+//                }
+//            }
+//            DcimsCompetitionBo competitionBo = new DcimsCompetitionBo();
+//            competitionBo.setCollege(Long.valueOf(teacherCollege));
+//            List<DcimsCompetitionVo> competitionList = competitionService.queryList(competitionBo);
+//            List<Long> competitionIds = competitionList.stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+//            if (competitionIds.size() > 0) {
+//                lqw.in(DcimsTeam::getCompetitionId, competitionIds);
+//            }
+//        }else if(roleList.contains("AcademyCompetitionTeacher")){
+//            PageQuery pq = new PageQuery();
+//            pq.setPageNum(0);
+//            pq.setPageSize(1000);
+//            TableDataInfo<DcimsCompetitionVo> c = competitionService.queryPageListByTeacherId(new DcimsCompetitionBo(), pq);
+//            List<Long> competitionIds = c.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+//            if (competitionIds.size() > 0){
+//                lqw.in(DcimsTeam::getCompetitionId, competitionIds);
+//            }
+//        }
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        TableDataInfo<DcimsTeamVo> voList = TableDataInfo.build(result);
+        TableDataInfo<DcimsTeamVo> build = TableDataInfo.build(result);
         // 获取团队对应竞赛信息
         Set<Long> competitionIds = new HashSet<>();
-        voList.getRows().forEach(e -> {
+        build.getRows().forEach(e -> {
             competitionIds.add(e.getCompetitionId());
         });
         List<DcimsCompetitionVo> competitionVoList = competitionService.listById(new ArrayList<>(competitionIds));
-        List<DcimsTeamVoV2> VoV2List = voList.getRows().stream().map(e -> {
+        List<DcimsTeamVoV2> VoV2List = build.getRows().stream().map(e -> {
             DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
             BeanUtils.copyProperties(e, voV2);
             // 添加教师和学生信息数组
@@ -96,7 +123,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }).collect(Collectors.toList());
         // 获取团队对应oss信息
         Set<Long> OSSIds = new HashSet<>();
-        voList.getRows().forEach(e -> {
+        build.getRows().forEach(e -> {
             OSSIds.add(e.getSupportMaterial());
         });
         OSSIds.removeAll(Collections.singleton(null));
@@ -123,7 +150,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 e.setOss(null);
             }
         });
-        return TableDataInfo.build(VoV2List2);
+        TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
+        BeanUtils.copyProperties(build, build1);
+        build1.setRows(VoV2List2);
+        return build1;
     }
 
     /**
@@ -146,6 +176,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.or(AccountUtils.getAccount().getTeacherId() != null);
         lqw.in( ids.size() > 0, DcimsTeam::getCompetitionId, ids);
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        TableDataInfo<DcimsTeamVo> build = TableDataInfo.build(result);
 
         // 查询审核状态信息
         List<Long> teamIds = new ArrayList<>();
@@ -228,7 +259,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 e.setOss(null);
             }
         });
-        return TableDataInfo.build(VoV2List2);
+        TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
+        BeanUtils.copyProperties(build, build1);
+        build1.setRows(VoV2List2);
+        return build1;
     }
 
     /**

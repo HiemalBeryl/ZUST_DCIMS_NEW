@@ -124,7 +124,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 竞赛申报书
      */
-    private String attachment;
+    private Long attachment;
     /**
      * 奖金核算状态
      */

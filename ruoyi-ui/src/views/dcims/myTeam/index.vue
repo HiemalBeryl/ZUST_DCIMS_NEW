@@ -26,7 +26,7 @@
             :width=100 :height=100
             :src="scope.row.oss.url"
             :preview-src-list="[scope.row.oss.url]"/>
-          <span v-text="scope.row.oss.url"
+          <span v-text="scope.row.oss.originalName"
                 v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)"/>
           <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
 
