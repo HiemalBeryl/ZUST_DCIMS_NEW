@@ -27,7 +27,7 @@ public class DcimsWorktimeAllocation extends BaseEntity {
     /**
      * 主键
      */
-    @TableId(value = "id")
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 年份

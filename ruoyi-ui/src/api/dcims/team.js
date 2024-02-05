@@ -60,3 +60,11 @@ export function delTeam(id) {
     method: 'post'
   })
 }
+
+// 退回已经通过审核的团队
+export function removeOne(id) {
+  return request({
+    url: '/dcims/teamAudit/deleteOne/' + id,
+    method: 'post'
+  })
+}

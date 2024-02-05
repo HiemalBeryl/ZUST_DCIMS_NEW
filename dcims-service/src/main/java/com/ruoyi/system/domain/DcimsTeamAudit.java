@@ -21,7 +21,7 @@ public class DcimsTeamAudit extends BaseEntity {
     /**
      * 主键
      */
-    @TableId(value = "id", type=IdType.AUTO)
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     /**
      * 竞赛id

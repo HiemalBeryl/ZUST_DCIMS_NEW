@@ -6,6 +6,12 @@
     <top-nav id="topmenu-container" class="topmenu-container" v-if="topNav"/>
 
     <div class="right-menu">
+      <template>
+        <span class="right-menu-item">
+          {{ this.$store.state.user.nick }}
+        </span>
+      </template>
+
       <template v-if="device!=='mobile'">
         <search id="header-search" class="right-menu-item" />
 

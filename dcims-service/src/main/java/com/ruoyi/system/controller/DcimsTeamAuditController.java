@@ -32,7 +32,7 @@ public class DcimsTeamAuditController extends BaseController {
     private final IDcimsTeamAuditService iDcimsTeamAuditService;
 
     /**
-     * 通过竞赛审核
+     * 通过获奖审核
      */
     @SaCheckPermission("dcims:teamAudit:add")
     @Log(title = "团队获奖审核", businessType = BusinessType.INSERT)
@@ -43,12 +43,22 @@ public class DcimsTeamAuditController extends BaseController {
     }
 
     /**
-     * 驳回竞赛审核
+     * 驳回获奖审核
      */
     @SaCheckPermission("dcims:teamAudit:remove")
     @Log(title = "团队获奖审核", businessType = BusinessType.DELETE)
     @PostMapping("/delete")
     public R<Void> remove(@Validated(RefuseGroup.class) @RequestBody List<DcimsTeamAuditBo> boList) {
         return toAjax(iDcimsTeamAuditService.deleteWithValidByIds(boList));
+    }
+
+    /**
+     * 对已经归档的获奖信息进行退回操作
+     */
+    @SaCheckPermission("dcims:teamAudit:removeOne")
+    @Log(title = "团队获奖审核退回已归档", businessType = BusinessType.DELETE)
+    @PostMapping("/deleteOne/{id}")
+    public R<Void> remove(@PathVariable Long id) {
+        return toAjax(iDcimsTeamAuditService.deleteOneById(id));
     }
 }

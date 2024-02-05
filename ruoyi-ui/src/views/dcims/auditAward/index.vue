@@ -70,37 +70,37 @@
                   :data="teamList"
                   tooltip-effect="dark"
                   style="width: 100%"
-                  max-height="500px"
+                  max-height="600px"
                   @selection-change="handleSelectionChange"
                 >
                   <el-table-column type="selection" width="55"> </el-table-column>
                   <el-table-column prop="competition.name" label="赛事名称" width="200">
                   </el-table-column>
-                  <el-table-column prop="name" label="团队名称" width="200">
+                  <el-table-column prop="name" label="团队名称" width="100">
                   </el-table-column>
-                  <el-table-column prop="competitionType" label="比赛类型" width="200">
+                  <el-table-column prop="competitionType" label="比赛类型" width="80">
                     <template slot-scope="scope">
                      <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="awardLevel" label="获奖等级" width="200">
+                  <el-table-column prop="awardLevel" label="获奖等级" width="110">
                     <template slot-scope="scope">
                      <dict-tag :options="dict.type.dcims_award_level" :value="scope.row.awardLevel"/>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="studentName" label="参赛学生" width="250">
+                  <el-table-column prop="studentName" label="参赛学生" width="130">
                   </el-table-column>
-                  <el-table-column prop="teacherName" label="指导教师" width="250">
+                  <el-table-column prop="teacherName" label="指导教师" width="130">
                   </el-table-column>
                   <el-table-column prop="awardTime" label="获奖时间" width="120">
                   </el-table-column>
-                  <el-table-column prop="supportMaterial" label="佐证材料" width="200">
+                  <el-table-column prop="supportMaterial" label="佐证材料" width="100">
                     <template slot-scope="scope">
                       <el-tag type="primary" v-if="scope.row.supportMaterial != null">有</el-tag>
                       <el-tag type="error" v-else>无</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column fixed="right" label="查看详情" min-width="200" align="center">
+                  <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
                     <template slot-scope="scope">
                       <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
                     </template>
@@ -148,7 +148,7 @@
   <!-- 查看详情对话框 -->
   <el-dialog title="查看详情" :visible.sync="openDetail" width="500px" append-to-body>
     <el-descriptions title="团队信息">
-    <el-descriptions-item label="所属竞赛">{{ this.detailForm.competitionId }}</el-descriptions-item>
+    <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition.name }}</el-descriptions-item>
     <el-descriptions-item label="队伍名称">{{ this.detailForm.name }}</el-descriptions-item>
     <el-descriptions-item label="作品名称">
       <span v-if="this.detailForm.worksName != null">
@@ -234,7 +234,7 @@ import { listByIds } from "@/api/system/oss"
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 10
+          pageSize: 500
         },
         // 表单参数
         form: {},
@@ -251,6 +251,9 @@ import { listByIds } from "@/api/system/oss"
         // 查看详情内容
         detailForm: {
           fileSuffix: [],
+          competition: {
+            name: undefined
+          }
         },
         dateOptions: {
           shortcuts: [{
@@ -309,6 +312,13 @@ import { listByIds } from "@/api/system/oss"
         listTeamAudit(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;
+          
+          console.log(this.teamList)
+          this.teamList.forEach(e => {
+            e.teacherName = e.teacherName.join("，");
+            e.studentName = e.studentName.join("，");
+          })
+
           this.loading = false;
         });
       },
@@ -462,10 +472,11 @@ import { listByIds } from "@/api/system/oss"
           this.detailForm.supportMaterialURL.push(entity.url);
           this.detailForm.fileSuffix.push(entity.fileSuffix);
           this.detailForm.originalName.push(entity.originalName);
+          this.detailForm.competition.push(entity.competition);
         })
       }).finally(() => {
         this.openDetail = true;
-      })
+      });
     },
     /** 检查附件是否为图片 */
     checkFileSuffix(fileSuffix) {

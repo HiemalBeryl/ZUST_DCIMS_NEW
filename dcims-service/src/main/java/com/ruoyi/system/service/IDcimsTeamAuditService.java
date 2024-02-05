@@ -42,4 +42,9 @@ public interface IDcimsTeamAuditService {
      */
     Boolean deleteWithValidByIds(List<DcimsTeamAuditBo> boList);
 
+    /**
+     * 对已经归档的获奖信息进行删除
+     */
+    Boolean deleteOneById(Long id);
+
 }

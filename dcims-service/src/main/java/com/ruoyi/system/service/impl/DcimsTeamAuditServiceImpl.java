@@ -190,4 +190,17 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         }
         return flag;
     }
+
+    /**
+     * 对已经归档的获奖信息进行删除
+     *
+     * @param id
+     */
+    @Override
+    public Boolean deleteOneById(Long id) {
+        DcimsTeam team = teamBaseMapper.selectById(id);
+        team.setAudit(3);
+        team.setNextAuditId(-1L);
+        return teamBaseMapper.updateById(team) > 0;
+    }
 }

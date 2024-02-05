@@ -145,7 +145,7 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 竞赛申报书
      */
-    @NotBlank(message = "请上传竞赛申报书", groups = { AddGroup.class, EditGroup.class })
+    @NotNull(message = "请上传竞赛申报书", groups = { AddGroup.class, EditGroup.class })
     private Long attachment;
 
     /**

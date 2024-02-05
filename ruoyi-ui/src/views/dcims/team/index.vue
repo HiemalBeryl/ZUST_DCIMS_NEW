@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="竞赛id" prop="competitionId">
+      <el-form-item label="竞赛名称" prop="competitionName">
         <el-input
-          v-model="queryParams.competitionId"
-          placeholder="请输入竞赛id"
+          v-model="queryParams.competitionName"
+          placeholder="请输入竞赛名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -162,6 +162,17 @@
           <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
         </template>
       </el-table-column>
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="removeReward(scope.row)"
+            v-hasPermi="['dcims:teamAudit:removeOne']"
+          >退回获奖信息</el-button>
+        </template>
+      </el-table-column>
       <!-- <el-table-column label="审核状态" align="center" prop="audit">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
@@ -269,7 +280,7 @@
 </template>
 
 <script>
-import { listTeam, getTeam, delTeam, addTeam, updateTeam } from "@/api/dcims/team";
+import { listTeam, getTeam, delTeam, addTeam, updateTeam, removeOne } from "@/api/dcims/team";
 
 export default {
   name: "Team",
@@ -302,7 +313,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        competitionId: undefined,
+        competitionName: undefined,
         name: undefined,
         competitionType: undefined,
         awardLevel: undefined,
@@ -495,6 +506,22 @@ export default {
     openNewTab(url) {
       window.open(url, '_blank');
     },
+    /** 退回获奖信息 */
+    removeReward(row) {
+      const configIds = row.configId || this.ids;
+      const competitionName = row.competition.name
+      const teamName = row.name
+      this.$modal.confirm('是否确认退回竞赛：' + competitionName + ' 的 ' + teamName + ' 获奖信息？').then(() => {
+          this.loading = true;
+          return removeOne(row.id);
+        }).then(() => {
+          this.getList();
+          this.loading = false;
+          this.$modal.msgSuccess("退回成功");
+        }).catch(() => {}).finally(() => {
+          this.loading = false;
+        });
+    }
   }
 };
 </script>

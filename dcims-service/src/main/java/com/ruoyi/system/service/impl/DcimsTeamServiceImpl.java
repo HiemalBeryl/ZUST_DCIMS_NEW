@@ -1,7 +1,5 @@
 package com.ruoyi.system.service.impl;
 
-import cn.dev33.satoken.config.SaTokenConfig;
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
@@ -70,7 +68,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      */
     @Override
     public TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
+        // 查询某竞赛的队伍
+        List<Long> cIds = new ArrayList<>();
+        if (bo.getCompetitionName() != null && !bo.getCompetitionName().trim().equals("")){
+            LambdaQueryWrapper<DcimsCompetition> l = new LambdaQueryWrapper<>();
+            l.like(DcimsCompetition::getName, bo.getCompetitionName());
+            List<DcimsCompetition> competitionList = dcimsCompetitionMapper.selectList(l);
+            cIds = competitionList.stream().map(DcimsCompetition::getId).collect(Collectors.toList());
+        }
+
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        lqw.in(cIds.size()>0, DcimsTeam::getCompetitionId, cIds);
         // 教务处可以查看全校，学院管理员可以查看学院，普通教师查看自己
 //        List<String> roleList = StpUtil.getRoleList();
 //        if(roleList.contains("AcademyCompetitionHead")){
@@ -299,8 +307,25 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         List<Long> teacherIdSplit = Arrays.stream(bo.getTeacherId().split(",")).map(Long::parseLong).collect(Collectors.toList());
         List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdSplit);
         List<DcimsTeacherVo> teachers = basicDataService.getTeacherNameByIds(teacherIdSplit);
-        String studentName = students.stream().map(DcimsStudentVo::getName).collect(Collectors.joining(","));
-        String teacherName = teachers.stream().map(DcimsTeacherVo::getName).collect(Collectors.joining(","));
+        // 这样子写会导致教师名称顺序和工号顺序对不上，应该改正
+        List<String> studentNameList = new ArrayList<>();
+        for (String str : studentIdSplit){
+            for (DcimsStudentVo student : students){
+                if (Objects.equals(str, student.getStudentId())){
+                    studentNameList.add(student.getName());
+                }
+            }
+        }
+        String studentName = StringUtils.join(studentNameList, ",");
+        List<String> teacherNameList = new ArrayList<>();
+        for (Long str : teacherIdSplit){
+            for (DcimsTeacherVo teacher : teachers){
+                if (Objects.equals(str, teacher.getTeacherId())){
+                    teacherNameList.add(teacher.getName());
+                }
+            }
+        }
+        String teacherName = StringUtils.join(teacherNameList, ",");
         bo.setTeacherName(teacherName);
         bo.setStudentName(studentName);
 

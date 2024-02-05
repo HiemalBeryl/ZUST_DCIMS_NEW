@@ -220,28 +220,26 @@
         </el-form-item>
       </el-form>
 
-
-
       <!--  学院竞赛负责人看到的 -->
-      <el-form v-if="userInfo == 'AcademyCompetitionHead'" ref="form" :model="form" :rules="academyRules" label-width="80px">
+      <el-form v-if="userInfo.indexOf('AcademyCompetitionHead') != -1" ref="form" :model="form" :rules="academyRules" label-width="80px">
       <h2>以下是竞赛基本信息</h2>
         <el-form-item label="赛事名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入赛事名称" />
+          <el-input v-model="form.name" placeholder="请输入赛事名称"  disabled="true"/>
         </el-form-item>
         <el-form-item label="往届名称" prop="pastName">
-          <el-input v-model="form.pastName" placeholder="请输入往届名称" />
+          <el-input v-model="form.pastName" placeholder="请输入往届名称"  disabled="true"/>
         </el-form-item>
         <el-form-item label="赛事官网" prop="website">
-          <el-input v-model="form.website" placeholder="请输入赛事官网" />
+          <el-input v-model="form.website" placeholder="请输入赛事官网"  disabled="true"/>
         </el-form-item>
         <el-form-item label="赛事届次" prop="term">
-          <el-input v-model="form.term" placeholder="请输入赛事届次" />
+          <el-input v-model="form.term" placeholder="请输入赛事届次"  disabled="true"/>
         </el-form-item>
         <el-form-item label="赛事年份" prop="annual">
-          <el-input v-model="form.annual" placeholder="请输入赛事年份" />
+          <el-input v-model="form.annual" placeholder="请输入赛事年份"  disabled="true"/>
         </el-form-item>
         <el-form-item label="主办单位" prop="organizer">
-          <el-input v-model="form.organizer" placeholder="请输入主办单位" />
+          <el-input v-model="form.organizer" placeholder="请输入主办单位"  disabled="true"/>
         </el-form-item>
         <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
           <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="true"/>
@@ -254,6 +252,7 @@
             v-model="form.innerTime"
             type="datetime"
             value-format="yyyy-MM-dd HH:mm:ss"
+            disabled="true"
             placeholder="请选择校内选拔时间">
           </el-date-picker>
         </el-form-item>
@@ -262,6 +261,7 @@
             v-model="form.provinceTime"
             type="datetime"
             value-format="yyyy-MM-dd HH:mm:ss"
+            disabled="true"
             placeholder="请选择省赛时间">
           </el-date-picker>
         </el-form-item>
@@ -270,20 +270,18 @@
             v-model="form.nationalTime"
             type="datetime"
             value-format="yyyy-MM-dd HH:mm:ss"
+            disabled="true"
             placeholder="请选择国赛时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="本年度申报经费" prop="budget">
-          <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+          <el-input v-model="form.budget" placeholder="请输入本年度申报经费"  disabled="true"/>
         </el-form-item>
         <el-form-item label="获奖目标" prop="goal">
-          <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
+          <el-input v-model="form.goal" type="textarea" placeholder="请输入内容"  disabled="true"/>
         </el-form-item>
         <el-form-item label="赛事简介" prop="introduction">
-          <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="竞赛申报书" prop="attachment">
-          <file-upload v-model="form.attachment"/>
+          <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容"  disabled="true"/>
         </el-form-item>
       </el-form>
 
@@ -347,7 +345,7 @@ import {getInfo} from "@/api/login"
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 10
+          pageSize: 500
         },
         // 表单参数
         form: {},
@@ -628,7 +626,11 @@ import {getInfo} from "@/api/login"
     /** 获取角色权限 */
     getUserInfo(){
       getInfo().then(response =>{
-        this.userInfo = response.data.roles[0];
+        if (response.data.roles.indexOf('AcademyCompetitionHead') != -1){
+          this.userInfo = response.data.roles[1];
+        }else{
+          this.userInfo = response.data.roles[0];
+        }
         console.log(this.userInfo)
       })
     },
