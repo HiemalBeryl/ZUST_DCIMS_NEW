@@ -51,7 +51,7 @@ spring:
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
           url: jdbc:mysql://nas.hiemalberyl.cn:3306/dcims_ry_db?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=UTC&autoReconnect=true&rewriteBatchedStatements=true
           username: root
-          password: qw1245aszx78[]123
+          password: LLll20021225
         # 从库数据源
 #        slave:
 #          lazy: true
