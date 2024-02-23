@@ -48,4 +48,14 @@ public interface IDcimsBasicDataService {
      * 查询登录用户所对应的教师信息
      */
     DcimsTeacherVo queryLoginTeacher();
+
+    /**
+     * 从远程同步教师信息
+     */
+    void syncTeacherInfo();
+
+    /**
+     * 从远程同步学生信息
+     */
+    void syncStudentInfo();
 }

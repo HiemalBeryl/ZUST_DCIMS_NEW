@@ -146,6 +146,16 @@ public class DcimsCompetitionVo {
     private Long attachment;
 
     /**
+     * 官方红头文件类型，0-文件，1-url
+     */
+    private String redHeaderFileType;
+
+    /**
+     * 官方红头文件
+     */
+    private String redHeaderFile;
+
+    /**
      * 竞赛申报书详情
      */
     private SysOssVo oss;

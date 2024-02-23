@@ -35,7 +35,9 @@ import com.ruoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -63,6 +65,7 @@ public class SysLoginService {
     private final SysRegisterService registerService;
     private final ISysUserService userService;
     private final SysDeptMapper deptMapper;
+    private final RestTemplate restTemplate;
 
     @Value("${user.password.maxRetryCount}")
     private Integer maxRetryCount;
@@ -145,6 +148,17 @@ public class SysLoginService {
             recordLogininfor(loginUser.getUsername(), Constants.LOGOUT, MessageUtils.message("user.logout.success"));
         } catch (NotLoginException ignored) {
         }
+    }
+
+
+    /**
+     * 退出统一身份认证登录
+     */
+    public void logoutViaTicket(String logoutURL) {
+        String serviceName = "http://kjjs.zust.edu.cn";
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(logoutURL + serviceName, String.class);
+        System.out.println(logoutURL);
+        System.out.println(responseEntity);
     }
 
     /**

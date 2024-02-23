@@ -131,7 +131,17 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['dcims:competition:export']"
-        >导出</el-button>
+        >导出立项汇总表</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport2"
+          v-hasPermi="['dcims:competition:export']"
+        >批量下载申报书</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -336,9 +346,15 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('dcims/competition/export', {
+      this.download('dcims/competition/exportByType', {
         ...this.queryParams
       }, `competition_${new Date().getTime()}.xlsx`)
+    },
+    /** 批量下载申报书 */
+    handleExport2() {
+      this.download('dcims/competition/download', {
+        ...this.queryParams
+      }, `科技竞赛立项申报书_${new Date().getTime()}.zip`)
     },
     /** 打开新窗口 */
     openNewTab(url) {

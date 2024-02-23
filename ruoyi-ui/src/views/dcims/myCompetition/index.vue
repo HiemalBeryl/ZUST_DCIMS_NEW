@@ -80,16 +80,6 @@
             v-hasPermi="['dcims:competition:remove']"
           >删除</el-button>
         </el-col>
-        <el-col :span="1.5">
-          <el-button
-            type="warning"
-            plain
-            icon="el-icon-download"
-            size="mini"
-            @click="handleExport"
-            v-hasPermi="['dcims:competition:export']"
-          >导出</el-button>
-        </el-col>
         <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
   
@@ -574,12 +564,6 @@
         }).finally(() => {
           this.loading = false;
         });
-      },
-      /** 导出按钮操作 */
-      handleExport() {
-        this.download('dcims/competition/export', {
-          ...this.queryParams
-        }, `competition_${new Date().getTime()}.xlsx`)
       },
       /** 显示添加导师弹窗 */
       handleAddTutor(row) {

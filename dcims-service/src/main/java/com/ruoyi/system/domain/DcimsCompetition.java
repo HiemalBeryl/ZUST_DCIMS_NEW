@@ -126,6 +126,14 @@ public class DcimsCompetition extends BaseEntity {
      */
     private Long attachment;
     /**
+     * 官方红头文件类型，0-文件，1-url
+     */
+    private String redHeaderFileType;
+    /**
+     * 官方红头文件
+     */
+    private String redHeaderFile;
+    /**
      * 奖金核算状态
      */
     private String moneyAggregate;

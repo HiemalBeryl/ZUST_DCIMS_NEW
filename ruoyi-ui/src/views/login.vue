@@ -44,7 +44,7 @@
         <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
       </el-col>
       <el-col :span="6" :offset="10">
-        <el-button type="text" style="border:0px;padding:0px 0px 0px 0px;" @click="jump">
+        <el-button type="text" style="border:0px;padding:0px 0px 0px 0px;" @click="jump(true)">
           统一身份认证登录
         </el-button>
       </el-col>
@@ -120,6 +120,8 @@ export default {
 
     var allCookies = this.getCookies();
     console.log(allCookies);
+
+    this.jump(false);
   },
   methods: {
     getCode() {
@@ -168,13 +170,15 @@ export default {
     /*
     统一身份认证登录
     */
-    jump(){
+    jump(flag){
       this.loading = true;
       this.$store.dispatch("LoginViaTicket").then(() => {
         this.$router.push({ path: this.redirect || "/" }).catch(()=>{});
       }).catch(() => {
         this.loading = false;
-        window.alert("登录失败，请采用其他登录方式");
+        if(flag){
+          window.alert("登录失败，请采用其他登录方式");
+        }
       });
     },
     getCookies() {

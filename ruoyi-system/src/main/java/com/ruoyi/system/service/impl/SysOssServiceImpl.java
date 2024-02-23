@@ -23,6 +23,7 @@ import com.ruoyi.oss.enumd.AccessPolicyType;
 import com.ruoyi.oss.factory.OssFactory;
 import com.ruoyi.system.domain.SysOss;
 import com.ruoyi.system.domain.bo.SysOssBo;
+import com.ruoyi.system.domain.entity.OssFile;
 import com.ruoyi.system.domain.vo.SysOssVo;
 import com.ruoyi.system.mapper.SysOssMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
@@ -120,6 +121,31 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         } catch (Exception e) {
             throw new ServiceException(e.getMessage());
         }
+    }
+
+
+    /**
+     * @param ossIds
+     * @throws IOException
+     */
+    @Override
+    public List<OssFile> downloadBatchFiles(Collection<Long> ossIds) throws IOException {
+        List<SysOssVo> SysOssVoList = SpringUtils.getAopProxy(this).listByIds(ossIds);
+        if (SysOssVoList.isEmpty()) {
+            throw new ServiceException("文件数据不存在!");
+        }
+
+        OssClient storage = OssFactory.instance();
+        List<OssFile> ossFiles = new ArrayList<>();
+        for (SysOssVo sysOssVo:SysOssVoList) {
+            InputStream storageObjectContent = storage.getObjectContent(sysOssVo.getUrl());
+            OssFile ossFile = new OssFile();
+            ossFile.setFileContent(storageObjectContent);
+            ossFile.setSysOssVo(sysOssVo);
+            ossFiles.add(ossFile);
+        }
+
+        return ossFiles;
     }
 
     @Override

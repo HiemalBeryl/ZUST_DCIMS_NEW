@@ -130,7 +130,8 @@ public class SysLoginController {
      */
     @SaIgnore
     @PostMapping("/logout")
-    public R<Void> logout() {
+    public R<Void> logout(HttpServletRequest request) {
+        loginService.logoutViaTicket(request.getHeader("cas_logout_url"));
         loginService.logout();
         return R.ok("退出成功");
     }

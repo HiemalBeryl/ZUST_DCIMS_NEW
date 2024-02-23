@@ -2,7 +2,11 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.ZipUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.StringUtils;
@@ -14,6 +18,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.system.domain.DcimsCompetitionAudit;
 import com.ruoyi.system.domain.DcimsCompetitionTeacher;
 import com.ruoyi.system.domain.DcimsTeacher;
+import com.ruoyi.system.domain.entity.OssFile;
 import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.*;
 import com.ruoyi.system.service.ISysDictDataService;
@@ -21,11 +26,18 @@ import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -309,5 +321,56 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
         lqw.in(id.size() > 0, DcimsCompetition::getId, id);
         return baseMapper.selectVoList(lqw);
+    }
+
+    /**
+     * 批量下载竞赛立项申报书附件
+     */
+    public void download(DcimsCompetitionBo bo, HttpServletResponse response){
+        // 查询竞赛赛事基本信息列表，获取附件id
+        List<DcimsCompetitionVo> dataInfo = queryList(bo);
+        List<Long> attachmentIds = dataInfo.stream().map(DcimsCompetitionVo::getAttachment).collect(Collectors.toList());
+        // 根据附件id查询oss文件
+        List<OssFile> ossFileList;
+        try {
+            ossFileList = ossService.downloadBatchFiles(attachmentIds);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // 将oss文件写入本地，写入时依据竞赛名称和所属学院进行分类
+        long timestamp = new Date().getTime();
+        // 定义基础路径
+        String basePath = String.valueOf(timestamp);
+        for (DcimsCompetitionVo competition : dataInfo) {
+            ossFileList.stream().filter(ossFile -> Objects.equals(ossFile.getSysOssVo().getOssId(), competition.getAttachment())).forEach(ossFile -> {
+                String subDirectory = competition.getCollegeName();
+                String fileName = competition.getAnnual() + "年" + competition.getName() + "-科技竞赛立项申报书" + ossFile.getSysOssVo().getFileSuffix();
+                try{
+                    File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
+
+                    BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
+                    BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+                    long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
+                }catch (IORuntimeException e){
+                    System.out.println(e.getMessage());
+                }catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+        try{
+            // 根据所属学院压缩文件
+            File zip = ZipUtil.zip(String.valueOf(timestamp));
+            InputStream inputStream = new FileInputStream(zip);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
+            IoUtil.copy(inputStream, response.getOutputStream());
+            response.setContentLength((int) zip.getTotalSpace());
+            // 删除临时文件
+            FileUtil.del(new File(String.valueOf(timestamp)));
+            FileUtil.del(zip);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
     }
 }

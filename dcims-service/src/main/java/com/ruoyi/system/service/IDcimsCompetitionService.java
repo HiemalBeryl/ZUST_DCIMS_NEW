@@ -7,6 +7,8 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -72,4 +74,9 @@ public interface IDcimsCompetitionService {
      * 根据主键查竞赛vo
      */
     List<DcimsCompetitionVo> listById(List<Long> id);
+
+    /**
+     * 批量下载竞赛立项申报书附件
+     */
+    void download(DcimsCompetitionBo bo, HttpServletResponse response) throws IOException;
 }

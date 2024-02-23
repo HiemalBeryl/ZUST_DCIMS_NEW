@@ -149,6 +149,16 @@ public class DcimsCompetitionBo extends BaseEntity {
     private Long attachment;
 
     /**
+     * 官方红头文件类型，0-文件，1-url
+     */
+    private String redHeaderFileType;
+
+    /**
+     * 官方红头文件
+     */
+    private String redHeaderFile;
+
+    /**
      * 个人赛限项
      */
     private Integer personLimit;

@@ -2,8 +2,8 @@ package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.system.domain.SysOss;
 import com.ruoyi.system.domain.bo.SysOssBo;
+import com.ruoyi.system.domain.entity.OssFile;
 import com.ruoyi.system.domain.vo.SysOssVo;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +28,8 @@ public interface ISysOssService {
     SysOssVo upload(MultipartFile file);
 
     void download(Long ossId, HttpServletResponse response) throws IOException;
+
+    List<OssFile> downloadBatchFiles(Collection<Long> ossIds) throws IOException;
 
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 

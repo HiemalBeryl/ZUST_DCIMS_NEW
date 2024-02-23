@@ -1,9 +1,13 @@
 package com.ruoyi.system.controller;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import cn.dev33.satoken.annotation.SaIgnore;
+import cn.hutool.core.collection.CollUtil;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
@@ -81,6 +85,17 @@ public class DcimsCompetitionController extends BaseController {
     public void export(DcimsCompetitionBo bo, HttpServletResponse response) {
         List<DcimsCompetitionVo> list = iDcimsCompetitionService.queryList(bo);
         ExcelUtil.exportExcel(list, "竞赛赛事基本信息", DcimsCompetitionVo.class, response);
+    }
+
+    /**
+     * 导出立项汇总表
+     */
+    @SaCheckPermission("dcims:competition:export")
+    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @PostMapping("/exportByType")
+    public void exportByType(DcimsCompetitionBo bo, HttpServletResponse response) {
+        List<DcimsCompetitionVo> list = iDcimsCompetitionService.queryList(bo);
+        ExcelUtil.exportTemplate(CollUtil.newArrayList(new HashMap<>(), list), "浙江科技学院大学生科技竞赛项目申报汇总表", "excel/竞赛项目申报汇总表-模板.xlsx", response);
     }
 
     /**
@@ -167,6 +182,21 @@ public class DcimsCompetitionController extends BaseController {
     public R<Void> removeTutor(@NotNull(message = "主键不能为空")
                                @PathVariable Long id){
         return toAjax(iDcimsCompetitionService.removeTutor(id));
+    }
+
+
+    /**
+     * 批量下载竞赛立项申报书附件
+     */
+    @SaCheckPermission("dcims:competition:export")
+    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @PostMapping("/download")
+    public void download(DcimsCompetitionBo bo, HttpServletResponse response) {
+        try {
+            iDcimsCompetitionService.download(bo,response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
