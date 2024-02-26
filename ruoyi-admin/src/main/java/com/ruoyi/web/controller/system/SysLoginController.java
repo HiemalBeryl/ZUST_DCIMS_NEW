@@ -9,6 +9,7 @@ import com.ruoyi.common.core.domain.model.LoginBody;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.domain.model.SmsLoginBody;
 import com.ruoyi.common.helper.LoginHelper;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.vo.RouterVo;
 import com.ruoyi.system.service.ISysMenuService;
 import com.ruoyi.system.service.ISysUserService;
@@ -73,6 +74,10 @@ public class SysLoginController {
             System.out.println(element + ":  " + request.getHeader(element));
         }
 
+        // 判断能否通过统一认证登录
+        if(StringUtils.isEmpty(request.getHeader("cas_user"))){
+            return R.fail("未获取到统一身份认证信息，请尝试其他方式登录!");
+        }
 
 
         String userName = request.getHeader("cas_user");
@@ -131,7 +136,12 @@ public class SysLoginController {
     @SaIgnore
     @PostMapping("/logout")
     public R<Void> logout(HttpServletRequest request) {
-        loginService.logoutViaTicket(request.getHeader("cas_logout_url"));
+        String logoutURL = request.getHeader("cas_logout_url");
+        if (logoutURL != null && !logoutURL.equals("")) {
+            loginService.logoutViaTicket(logoutURL);
+        }else {
+            System.out.println("未获取到退出地址，可能是测试环境或其他原因，不执行统一身份认证退出");
+        }
         loginService.logout();
         return R.ok("退出成功");
     }
