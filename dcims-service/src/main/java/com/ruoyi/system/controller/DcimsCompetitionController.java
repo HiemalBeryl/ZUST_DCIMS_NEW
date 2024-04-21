@@ -1,10 +1,7 @@
 package com.ruoyi.system.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -95,6 +92,12 @@ public class DcimsCompetitionController extends BaseController {
     @GetMapping("/audit/list")
     public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
         TableDataInfo<DcimsCompetitionVo> dcimsCompetitionVoTableDataInfo = iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
+        dcimsCompetitionVoTableDataInfo = TableDataInfo.build(
+            dcimsCompetitionVoTableDataInfo
+                .getRows().stream()
+                .sorted(Comparator.comparing(DcimsCompetitionVo::getCollege))
+                .collect(Collectors.toList())
+        );
         return dcimsCompetitionVoTableDataInfo;
     }
 

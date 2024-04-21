@@ -29,121 +29,115 @@
 </style>
 <template>
     <div style="height:100%">
-      <!-- 顶部 -->
-        <div>
-            <el-row>
-              <el-col :span="24" ><div class="grid-content bg-purple-light" style="height:20px"></div></el-col>
-            </el-row>
-          </div>
+      <!-- 待审核列表，上方的表格 -->
+      <div class="juZhong">
+        <h2>待审核列表</h2>
+          <!-- 用于存放勾选需要审核的项目 -->
+          <div>
+              <el-row :gutter="20">
+                <el-col :span="2"><div class="grid-content"></div></el-col>
+                <!-- table 用于勾选项目 -->
+                <el-col :span="20"
+                  ><div class="grid-content">
+                    <el-table
+                      v-loading="loading"
+                      ref="multipleTable"
+                      :data="competitionList"
+                      tooltip-effect="dark"
+                      style="width: 100%"
+                      max-height="500px"
+                      @selection-change="handleSelectionChange"
+                    >
+                      <el-table-column type="selection" width="55"> </el-table-column>
+                      <el-table-column prop="name" label="赛事名称" width="200">
+                      </el-table-column>
+                      <el-table-column prop="term" label="立项届次" width="100">
+                      </el-table-column>
+                      <el-table-column prop="level" label="竞赛类别" width="100">
+                      </el-table-column>
+                      <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="100">
+                      </el-table-column>
+                      <el-table-column prop="collegeName" label="所属学院" width="200">
+                      </el-table-column>
+                      <el-table-column prop="budget" label="申报经费（万元）" width="120">
+                        <template slot-scope="scope">
+                          <span>{{scope.row.budget / 1 | rounding}}</span>
+                        </template>
+                      </el-table-column>
+                      <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+                        <template slot-scope="scope">
+                          <el-tag type="primary" v-if="scope.row.state == 0">待审批</el-tag>
+                          <el-tag type="success" v-if="scope.row.state == 1">通过审批</el-tag>
+                          <el-tag type="danger" v-if="scope.row.state == 2">教务处驳回</el-tag>
+                        </template>
+                      </el-table-column>
+                      <el-table-column prop="createTime" label="申请时间" width="120">
+                        <template slot-scope="scope">
+                          <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') || '无' }}</span>
+                        </template>
+                      </el-table-column>
+                      <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="140">
+                        <template slot-scope="scope">
+                          <el-button v-if="(scope.row.oss != null)"
+                          type="text"
+                          @click.native="handleDownload(scope.row.oss.ossId)"
+                          >在新窗口打开
+                          </el-button>
+                        </template>
+                      </el-table-column>
+                      <el-table-column fixed="right" label="集中授课安排表" align="center" prop="teachingHoursAttachmentOss.url" width="140">
+                        <template slot-scope="scope">
+                          <el-button v-if="(scope.row.teachingHoursAttachment != null)"
+                                     type="text"
+                                     @click.native="handleDownload(scope.row.teachingHoursAttachmentOss.ossId)"
+                          >在新窗口打开
+                          </el-button>
+                          <el-button v-if="(scope.row.teachingHoursAttachment == null)"
+                                     type="text"
+                                     disabled="true"
+                          >无
+                          </el-button>
+                        </template>
+                      </el-table-column>
+                      <el-table-column fixed="right" label="查看详情" min-width="100">
+                        <template slot-scope="scope">
+                          <el-button type="text" @click="handleUpdate(scope.row)">查看详情</el-button>
+                        </template>
+                      </el-table-column>
+                    </el-table>
 
-        <!-- 用于存放第一行的筛选按钮 -->
-        <div class="juZhong">
-          <h2>待审核列表</h2>
-            <!-- 用于存放勾选需要审核的项目 -->
-            <div>
-                <el-row :gutter="20">
-                  <el-col :span="2"><div class="grid-content"></div></el-col>
-
-                  <!-- table 用于勾选项目 -->
-                  <el-col :span="20"
-                    ><div class="grid-content">
-                      <el-table
-                        v-loading="loading"
-                        ref="multipleTable"
-                        :data="competitionList"
-                        tooltip-effect="dark"
-                        style="width: 100%"
-                        max-height="500px"
-                        @selection-change="handleSelectionChange"
-                      >
-                        <el-table-column type="selection" width="55"> </el-table-column>
-                        <el-table-column prop="name" label="赛事名称" width="200">
-                        </el-table-column>
-                        <el-table-column prop="term" label="立项届次" width="100">
-                        </el-table-column>
-                        <el-table-column prop="level" label="竞赛类别" width="100">
-                        </el-table-column>
-                        <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="200">
-                        </el-table-column>
-                        <el-table-column prop="budget" label="申报经费（万元）" width="120">
-                          <template slot-scope="scope">
-                            <span>{{scope.row.budget / 1 | rounding}}</span>
-                          </template>
-                        </el-table-column>
-                        <el-table-column label="审核状态" align="center" fixed="right" prop="state">
-                          <template slot-scope="scope">
-                            <el-tag type="primary" v-if="scope.row.state == 0">待审批</el-tag>
-                            <el-tag type="success" v-if="scope.row.state == 1">通过审批</el-tag>
-                            <el-tag type="danger" v-if="scope.row.state == 2">教务处驳回</el-tag>
-                          </template>
-                        </el-table-column>
-                        <el-table-column prop="createTime" label="申请时间" width="120">
-                          <template slot-scope="scope">
-                            <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') || '无' }}</span>
-                          </template>
-                        </el-table-column>
-                        <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="140">
-                          <template slot-scope="scope">
-                            <el-button v-if="(scope.row.oss != null)"
-                            type="text"
-                            @click.native="handleDownload(scope.row.oss.ossId)"
-                            >在新窗口打开
-                            </el-button>
-                          </template>
-                        </el-table-column>
-                        <el-table-column fixed="right" label="集中授课安排表" align="center" prop="teachingHoursAttachmentOss.url" width="140">
-                          <template slot-scope="scope">
-                            <el-button v-if="(scope.row.teachingHoursAttachment != null)"
-                                       type="text"
-                                       @click.native="handleDownload(scope.row.teachingHoursAttachmentOss.ossId)"
-                            >在新窗口打开
-                            </el-button>
-                            <el-button v-if="(scope.row.teachingHoursAttachment == null)"
-                                       type="text"
-                                       disabled="true"
-                            >无
-                            </el-button>
-                          </template>
-                        </el-table-column>
-                        <el-table-column fixed="right" label="查看详情" min-width="100">
-                          <template slot-scope="scope">
-                            <el-button type="text" @click="handleUpdate(scope.row)">查看详情</el-button>
-                          </template>
-                        </el-table-column>
-                      </el-table>
-
-                      <!-- 最底部按钮，提交 退回 备注 -->
-                      <div style="margin-top: 20px">
-                        <div style="float:left">
-                            <el-button @click="toggleSelection()">取消选择</el-button>
-                        </div>
-
-                        <div style="float: right">
-                          <el-tooltip class="item" effect="dark" content="请先勾选需要驳回审核的竞赛" placement="top" :disabled="!ids.length == 0">
-                            <el-button type="primary" :disabled="ids.length == 0" @click="submitOrRefuse(1)">通过审核</el-button>
-                          </el-tooltip>
-                        </div>
-                        <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
-                        <div style="float: right">
-                          <el-tooltip class="item" effect="dark" content="请先勾选需要通过审核的竞赛" placement="top" :disabled="!ids.length == 0">
-                            <el-button type="warning" :disabled="ids.length == 0" @click="submitOrRefuse(0)">不通过审核</el-button>
-                          </el-tooltip>
-                        </div>
-                        <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
-                        <div style="float: right">
-                            <!-- <el-button type="info" @click="note">备注</el-button> -->
-                        </div>
+                    <!-- 最底部按钮，提交 退回 备注 -->
+                    <div style="margin-top: 20px">
+                      <div style="float:left">
+                          <el-button @click="toggleSelection()">取消选择</el-button>
                       </div>
-                    </div></el-col
-                  >
-                  <el-col :span="2"><div class="grid-content"></div></el-col>
-                </el-row>
-              </div>
-        </div>
+
+                      <div style="float: right">
+                        <el-tooltip class="item" effect="dark" content="请先勾选需要驳回审核的竞赛" placement="top" :disabled="!ids.length == 0">
+                          <el-button type="primary" :disabled="ids.length == 0" @click="submitOrRefuse(1)">通过审核</el-button>
+                        </el-tooltip>
+                      </div>
+                      <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
+                      <div style="float: right">
+                        <el-tooltip class="item" effect="dark" content="请先勾选需要通过审核的竞赛" placement="top" :disabled="!ids.length == 0">
+                          <el-button type="warning" :disabled="ids.length == 0" @click="submitOrRefuse(0)">不通过审核</el-button>
+                        </el-tooltip>
+                      </div>
+                      <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
+                      <div style="float: right">
+                          <!-- <el-button type="info" @click="note">备注</el-button> -->
+                      </div>
+                    </div>
+                  </div></el-col
+                >
+                <el-col :span="2"><div class="grid-content"></div></el-col>
+              </el-row>
+            </div>
+      </div>
 
 
 
-      <!-- 非要弄一个新表格展示提交后的竞赛状态，做呗 -->
+      <!-- 流程跟踪列表，下方的表格 -->
       <div class="juZhong" style="margin-top: 50px" v-if="!(this.$store.state.user.roles.includes('AcademicAffairsOffice'))">
         <h2>审核流程跟踪</h2>
         <div>
@@ -190,7 +184,7 @@
         </div>
       </div>
 
-      <!-- 修改竞赛赛事基本信息对话框 -->
+      <!-- 查看竞赛详情对话框 -->
     <el-dialog title="修改竞赛赛事基本信息" :visible.sync="open1" width="500px" append-to-body>
       <!--  教务处看到的 -->
       <el-form v-if="userInfo == 'AcademicAffairsOffice' || userInfo == 'admin'" ref="form" :model="form" :rules="rules" label-width="80px">
@@ -244,6 +238,9 @@
         </el-form-item>
         <el-form-item label="竞赛负责人" prop="responsiblePersonName">
           <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
+        </el-form-item>
+        <el-form-item label="所属学院" prop="collegeName">
+          <el-input v-model="form.collegeName" placeholder="所属学院" :disabled="true"/>
         </el-form-item>
         <el-form-item label="校内选拔时间" prop="innerTime">
           <el-date-picker clearable
@@ -316,6 +313,9 @@
         <el-form-item label="竞赛负责人" prop="responsiblePersonName">
           <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
         </el-form-item>
+        <el-form-item label="所属学院" prop="collegeName">
+          <el-input v-model="form.collegeName" placeholder="所属学院" :disabled="true"/>
+        </el-form-item>
         <el-form-item label="校内选拔时间" prop="innerTime">
           <el-date-picker clearable
             v-model="form.innerTime"
@@ -361,7 +361,7 @@
       </el-form>
 
 
-
+      <!--  对话框下方公共部分 -->
       <div slot="footer" class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -600,6 +600,7 @@ import download from '@/plugins/download.js';
           organizer: undefined,
           responsiblePersonId: undefined,
           responsiblePersonName: undefined,
+          collegeName: undefined,
           innerTime: undefined,
           provinceTime: undefined,
           nationalTime: undefined,

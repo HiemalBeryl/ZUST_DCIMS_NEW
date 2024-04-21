@@ -4,6 +4,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -18,6 +19,7 @@ import com.ruoyi.system.domain.vo.SysOssVo;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.IDcimsCompetitionService;
+import com.ruoyi.system.service.ISysDictDataService;
 import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
     private final ISysOssService ossService;
+    private final ISysDictDataService dictDataService;
 
     /**
      * 查询竞赛审核
@@ -107,6 +110,20 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                 e.setOss(null);
             }
         });
+
+
+        // 查询学院名
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        voList.forEach(com -> {
+            for (SysDictData d : dictData){
+                if(com.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    com.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
+
 
         // 查询审核状态信息
         List<Long> competitionIds = new ArrayList<>();
