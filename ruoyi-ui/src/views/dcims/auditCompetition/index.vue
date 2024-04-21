@@ -31,7 +31,7 @@
     <div style="height:100%">
       <!-- 待审核列表，上方的表格 -->
       <div class="juZhong">
-        <h2>待审核列表</h2>
+        <h2>待提交列表</h2>
           <!-- 用于存放勾选需要审核的项目 -->
           <div>
               <el-row :gutter="20">
@@ -64,11 +64,11 @@
                           <span>{{scope.row.budget / 1 | rounding}}</span>
                         </template>
                       </el-table-column>
-                      <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+                      <el-table-column label="提交状态" align="center" fixed="right" prop="state">
                         <template slot-scope="scope">
-                          <el-tag type="primary" v-if="scope.row.state == 0">待审批</el-tag>
-                          <el-tag type="success" v-if="scope.row.state == 1">通过审批</el-tag>
-                          <el-tag type="danger" v-if="scope.row.state == 2">教务处驳回</el-tag>
+                          <el-tag type="primary" v-if="scope.row.state == 0">待通过</el-tag>
+                          <el-tag type="success" v-if="scope.row.state == 1">通过</el-tag>
+                          <el-tag type="danger" v-if="scope.row.state == 2">被退回</el-tag>
                         </template>
                       </el-table-column>
                       <el-table-column prop="createTime" label="申请时间" width="120">
@@ -113,14 +113,14 @@
                       </div>
 
                       <div style="float: right">
-                        <el-tooltip class="item" effect="dark" content="请先勾选需要驳回审核的竞赛" placement="top" :disabled="!ids.length == 0">
-                          <el-button type="primary" :disabled="ids.length == 0" @click="submitOrRefuse(1)">通过审核</el-button>
+                        <el-tooltip class="item" effect="dark" content="请先勾选需要通过并提交的竞赛" placement="top" :disabled="!ids.length == 0">
+                          <el-button type="primary" :disabled="ids.length == 0" @click="submitOrRefuse(1)">通过并提交</el-button>
                         </el-tooltip>
                       </div>
                       <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                       <div style="float: right">
-                        <el-tooltip class="item" effect="dark" content="请先勾选需要通过审核的竞赛" placement="top" :disabled="!ids.length == 0">
-                          <el-button type="warning" :disabled="ids.length == 0" @click="submitOrRefuse(0)">不通过审核</el-button>
+                        <el-tooltip class="item" effect="dark" content="请先勾选需要退回修改的竞赛" placement="top" :disabled="!ids.length == 0">
+                          <el-button type="warning" :disabled="ids.length == 0" @click="submitOrRefuse(0)">退回修改</el-button>
                         </el-tooltip>
                       </div>
                       <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
@@ -139,7 +139,7 @@
 
       <!-- 流程跟踪列表，下方的表格 -->
       <div class="juZhong" style="margin-top: 50px" v-if="!(this.$store.state.user.roles.includes('AcademicAffairsOffice'))">
-        <h2>审核流程跟踪</h2>
+        <h2>流程跟踪</h2>
         <div>
           <el-row :gutter="20">
             <el-col :span="2"><div class="grid-content"></div></el-col>
@@ -161,11 +161,11 @@
                 </el-table-column>
                 <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="200">
                 </el-table-column>
-                <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+                <el-table-column label="提交状态" align="center" fixed="right" prop="state">
                   <template slot-scope="scope">
-                    <el-tag type="primary" v-if="scope.row.state == 0">等待教务处审核</el-tag>
-                    <el-tag type="success" v-if="scope.row.state == 1">通过审批</el-tag>
-                    <el-tag type="danger" v-if="scope.row.state == 2">驳回审批，等待负责人修改</el-tag>
+                    <el-tag type="primary" v-if="scope.row.state == 0">等待教务处通过</el-tag>
+                    <el-tag type="success" v-if="scope.row.state == 1">通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.state == 2">竞赛被退回，等待负责人修改</el-tag>
                   </template>
                 </el-table-column>
                 <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="160">

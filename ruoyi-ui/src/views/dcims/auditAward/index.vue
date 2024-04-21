@@ -10,11 +10,11 @@
 
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
-      <h2>待审核列表</h2>
+      <h2>待提交列表</h2>
       <!-- <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content "></div></el-col>
 
-          
+
           <el-col :span="5"><div class="grid-content ">
               <div>
                   赛事等级:
@@ -28,7 +28,7 @@
               </div>
           </div></el-col>
 
-          
+
           <el-col :span="10"><div class="grid-content ">
               <span>申请时间:</span>
                 <div class="block">
@@ -42,7 +42,7 @@
                     :picker-options="dateOptions">
                   </el-date-picker>
                 </div>
-          </div></el-col> 
+          </div></el-col>
 
 
           <el-col :span="5"><div class="grid-content">
@@ -114,15 +114,15 @@
                   </div>
 
                   <div style="float: right">
-                    <el-button type="primary" @click="submitOrRefuse(1)">通过审核</el-button>
+                    <el-button type="primary" @click="submitOrRefuse(1)">通过并提交</el-button>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                    <el-button type="warning" @click="submitOrRefuse(0)">不通过审核</el-button>
+                    <el-button type="warning" @click="submitOrRefuse(0)">退回修改</el-button>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                   
+
                   </div>
                 </div>
               </div></el-col
@@ -144,7 +144,7 @@
     </div>
     </el-dialog>
   </div>
-  
+
   <!-- 查看详情对话框 -->
   <el-dialog title="查看详情" :visible.sync="openDetail" width="500px" append-to-body>
     <el-descriptions title="团队信息">
@@ -312,7 +312,7 @@ import { listByIds } from "@/api/system/oss"
         listTeamAudit(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;
-          
+
           console.log(this.teamList)
           this.teamList.forEach(e => {
             e.teacherName = e.teacherName.join("，");
@@ -528,7 +528,7 @@ this.$prompt(h(
 			//  todo .....
       console.log(value);
       permitAudit().then(response => {
-        
+
       })
 		}).catch();
 

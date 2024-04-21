@@ -41,7 +41,7 @@
 
         </template>
       </el-table-column>
-      <el-table-column label="审核状态" align="center" fixed="right" prop="audit">
+      <el-table-column label="评估状态" align="center" fixed="right" prop="audit">
         <template slot-scope="scope">
           <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
             <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
@@ -163,7 +163,7 @@
         width="30%"
         :before-close="handleClose"
         append-to-body>
-        <span>您确定要保存修改吗？这会导致获奖信息需要被重新审核！</span>
+        <span>您确定要保存修改吗？这会导致获奖信息需要被重新评估！</span>
         <span slot="footer" class="dialog-footer">
               <el-button @click="dialogVisible = false">取 消</el-button>
               <el-button type="primary" @click="submitForm">确 定</el-button>

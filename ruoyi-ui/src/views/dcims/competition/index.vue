@@ -684,14 +684,14 @@ export default {
     },
     // 退回竞赛
     refuseCompetitionAudit(competitionName, competitionId){
-      this.$confirm('是否确定退回'+competitionName+'的审核?', '提示', {
+      this.$confirm('是否确定退回名为'+competitionName+'的竞赛?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         let temp = {
           competitionId: competitionId,
-          reason: "因审核不通过而退回，请检查信息是否填写正确",
+          reason: "竞赛被退回修改，请检查信息是否填写正确",
           result: 0
         };
         this.submittForm.push(temp);

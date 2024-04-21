@@ -29,7 +29,7 @@
       </el-col>
       <el-col :span="6" v-if="$store.state.user.roles.includes('AcademicAffairsOffice') || $store.state.user.roles.includes('AcademyCompetitionHead')">
         <div>
-          <el-statistic title="待审核竞赛">
+          <el-statistic title="学院/教务处待提交竞赛">
             <template slot="formatter">
               <el-progress v-if="todoList.C" type="circle" :percentage="100" status="success"></el-progress>
               <el-progress v-if="!todoList.C" type="circle" :percentage="50" status="warning"></el-progress>
@@ -40,7 +40,7 @@
       </el-col>
       <el-col :span="6" v-if="$store.state.user.roles.includes('AcademicAffairsOffice') || $store.state.user.roles.includes('AcademyCompetitionHead')">
         <div>
-          <el-statistic title="待审核获奖">
+          <el-statistic title="学院/教务处待提交获奖">
             <template slot="formatter">
               <el-progress v-if="todoList.D" type="circle" :percentage="100" status="success"></el-progress>
               <el-progress v-if="!todoList.D" type="circle" :percentage="50" status="warning"></el-progress>

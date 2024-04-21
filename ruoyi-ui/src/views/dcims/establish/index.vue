@@ -409,7 +409,7 @@
           if (valid) {
             this.buttonLoading = true;
             addCompetition(this.form).then(response => {
-              this.$modal.msgSuccess("竞赛立项成功，请等待审核！");
+              this.$modal.msgSuccess("竞赛立项申报成功，请等待学院和教务处评估！");
               this.open = false;
               localStorage.removeItem('competitionForm')
             }).finally(() => {

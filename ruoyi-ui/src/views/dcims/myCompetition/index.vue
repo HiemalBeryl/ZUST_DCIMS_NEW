@@ -150,7 +150,7 @@
         <el-table-column label="本年度拨款" align="center" prop="appropriation" />
         <el-table-column label="个人赛限项" align="center" prop="personLimit" />
         <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
-        <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+        <el-table-column label="评估状态" align="center" fixed="right" prop="state">
         <template slot-scope="scope">
           <el-tooltip v-if="scope.row.audit != null" class="item" effect="dark" :content="scope.row.audit.reason" placement="top-end">
             <dict-tag :options="dict.type.dcims_audit_result" :value="scope.row.state"/>
@@ -160,7 +160,7 @@
       </el-table-column>
         <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
           <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" content="已经通过审核的竞赛不允许修改，如需修改，请选择删除或联系管理员" placement="top" :disabled="scope.row.state == 0 || scope.row.state == 2">
+            <el-tooltip class="item" effect="dark" content="已经通过评估的竞赛不允许修改，如需修改，请选择删除或联系管理员" placement="top" :disabled="scope.row.state == 0 || scope.row.state == 2">
               <el-button
                 size="mini"
                 type="text"
@@ -296,7 +296,7 @@
         width="30%"
         :before-close="handleClose"
         append-to-body>
-          <span>您确定要保存修改吗？这会导致竞赛需要被重新审核！</span>
+          <span>您确定要保存修改吗？这会导致竞赛需要被重新评估！</span>
             <span slot="footer" class="dialog-footer">
               <el-button @click="dialogVisible = false">取 消</el-button>
               <el-button type="primary" @click="submitForm">确 定</el-button>

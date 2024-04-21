@@ -77,8 +77,8 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="审核状态" prop="audit">
-        <el-select v-model="queryParams.audit" placeholder="请选择审核状态" clearable>
+      <el-form-item label="提交状态" prop="audit">
+        <el-select v-model="queryParams.audit" placeholder="请选择提交状态" clearable>
           <el-option
             v-for="dict in dict.type.dcims_declare_award_status"
             :key="dict.value"
