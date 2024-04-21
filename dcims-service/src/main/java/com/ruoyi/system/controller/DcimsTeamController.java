@@ -9,7 +9,10 @@ import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.io.IoUtil;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
+import com.ruoyi.system.service.IDcimsCompetitionService;
+import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +50,8 @@ public class DcimsTeamController extends BaseController {
 
     private final IDcimsTeamService iDcimsTeamService;
     private final IDcimsTeamAuditService iDcimsTeamAuditService;
+    private final IDcimsGlobalSettingService globalSettingService;
+    private final IDcimsCompetitionService competitionService;
 
     /**
      * 查询参赛团队列表
@@ -122,6 +127,11 @@ public class DcimsTeamController extends BaseController {
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DcimsTeamBo bo) {
+        // 判断是否在截止日期内
+        DcimsCompetitionVo competitionVo = competitionService.queryById(bo.getCompetitionId());
+        boolean flag = globalSettingService.isDeadline(String.valueOf(competitionVo.getAnnual()), "team");
+        if (!flag)
+            return R.fail(bo.getAnnual()+"年团队获奖申报已截止（或未开放），如有疑问请联系学院或教务处。");
         return toAjax(iDcimsTeamService.insertByBo(bo));
     }
 
@@ -133,6 +143,11 @@ public class DcimsTeamController extends BaseController {
     @RepeatSubmit()
     @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsTeamBo bo) {
+        // 判断是否在截止日期内
+        DcimsCompetitionVo competitionVo = competitionService.queryById(bo.getCompetitionId());
+        boolean flag = globalSettingService.isDeadline(String.valueOf(competitionVo.getAnnual()), "team");
+        if (!flag)
+            return R.fail(bo.getAnnual()+"年团队获奖申报已截止（或未开放），如有疑问请联系学院或教务处。");
         return toAjax(iDcimsTeamService.updateByBo(bo));
     }
 

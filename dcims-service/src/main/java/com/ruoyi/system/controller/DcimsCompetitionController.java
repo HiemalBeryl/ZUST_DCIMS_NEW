@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
 import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsGlobalSetting;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
+import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.ISysDeptService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
@@ -48,6 +50,7 @@ public class DcimsCompetitionController extends BaseController {
     private final IDcimsCompetitionService iDcimsCompetitionService;
     private final IDcimsCompetitionAuditService iDcimsCompetitionAuditService;
     private final ISysDeptService deptService;
+    private final IDcimsGlobalSettingService globalSettingService;
 
     /**
      * 查询竞赛赛事基本信息列表
@@ -152,6 +155,10 @@ public class DcimsCompetitionController extends BaseController {
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DcimsCompetitionBo bo) {
+        // 判断是否在截止日期内
+        boolean flag = globalSettingService.isDeadline(String.valueOf(bo.getAnnual()), "competition");
+        if (!flag)
+            return R.fail(bo.getAnnual()+"年竞赛立项申报已截止（或未开放），如有疑问请联系学院或教务处。");
         return toAjax(iDcimsCompetitionService.insertByBo(bo));
     }
 

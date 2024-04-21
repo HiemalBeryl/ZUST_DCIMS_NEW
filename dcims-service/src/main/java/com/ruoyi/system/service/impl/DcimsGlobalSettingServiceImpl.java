@@ -192,8 +192,8 @@ public class DcimsGlobalSettingServiceImpl implements IDcimsGlobalSettingService
             if (ObjectUtil.isNull(globalSetting.getCompetitionStartTime()) || ObjectUtil.isNull(globalSetting.getCompetitionEndTime())) {
                 return false;
             }
-            boolean flag1 = DateUtil.between(now, globalSetting.getCompetitionStartTime(), DateUnit.SECOND) > 0L;
-            boolean flag2 = DateUtil.between(globalSetting.getCompetitionEndTime(), now, DateUnit.SECOND) > 0L;
+            boolean flag1 = DateUtil.between(globalSetting.getCompetitionStartTime(), now,  DateUnit.SECOND, false) < 0L;
+            boolean flag2 = DateUtil.between(now, globalSetting.getCompetitionEndTime(), DateUnit.SECOND, false) > 0L;
             if (flag1 && flag2) {
                 return true;
             }
@@ -201,8 +201,8 @@ public class DcimsGlobalSettingServiceImpl implements IDcimsGlobalSettingService
             if (ObjectUtil.isNull(globalSetting.getTeamStartTime()) || ObjectUtil.isNull(globalSetting.getTeamEndTime())) {
                 return false;
             }
-            boolean flag1 = DateUtil.between(now, globalSetting.getTeamStartTime(), DateUnit.SECOND) > 0L;
-            boolean flag2 = DateUtil.between(globalSetting.getTeamEndTime(), now, DateUnit.SECOND) > 0L;
+            boolean flag1 = DateUtil.between(globalSetting.getTeamEndTime(), now, DateUnit.SECOND) < 0L;
+            boolean flag2 = DateUtil.between(now, globalSetting.getTeamStartTime(), DateUnit.SECOND) > 0L;
             if (flag1 && flag2) {
                 return true;
             }
