@@ -2,9 +2,12 @@ package com.ruoyi.system.domain.vo;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.ruoyi.common.annotation.DataColumn;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
 import lombok.Data;
@@ -57,7 +60,7 @@ public class DcimsCompetitionVo {
      * 赛事届次
      */
     @ExcelProperty(value = "赛事届次")
-    private Long term;
+    private String term;
 
     /**
      * 赛事年份
@@ -146,6 +149,16 @@ public class DcimsCompetitionVo {
     private Long attachment;
 
     /**
+     * 集中授课安排表
+     */
+    private Long teachingHoursAttachment;
+
+    /**
+     * 集中授课安排表详情
+     */
+    private SysOssVo teachingHoursAttachmentOss;
+
+    /**
      * 官方红头文件类型，0-文件，1-url
      */
     private String redHeaderFileType;
@@ -196,4 +209,15 @@ public class DcimsCompetitionVo {
      * 审核状态详细
      */
     private DcimsCompetitionAuditVo audit;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 导出时序号
+     */
+    @TableField(exist = false)
+    private int order;
 }

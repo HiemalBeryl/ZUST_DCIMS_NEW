@@ -1,3 +1,32 @@
+<style lang="scss" scoped>
+
+/* 自定义数字输入框append  */
+.mo-input--number {
+  border: 1px solid #DCDFE6;
+  width: 60%;
+  display: flex;
+  border-radius: 4px;
+  .el-input-number--mini{
+    flex: 1;
+  }
+  ::v-deep .el-input__inner{
+    border: none!important;
+  }
+}
+
+.define-append{
+  width: 40px;
+  display: inline-block;
+  background: #F5F7FA;
+  padding: 0px 3px;
+  border-left: none;
+  height: 32px;
+  line-height: 32px;
+  color: #909399;
+  font-size: 12px;
+  text-align: center;
+}
+</style>
 <template>
     <div class="app-container">
       <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
@@ -38,7 +67,7 @@
         <el-form-item label="赛事年份" prop="annual">
           <el-input
             v-model="queryParams.annual"
-            placeholder="请输入赛事年份"
+            placeholder="请输入赛事年份（如2024）"
             clearable
             @keyup.enter.native="handleQuery"
           />
@@ -56,7 +85,7 @@
           <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
         </el-form-item>
       </el-form>
-  
+
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
           <el-button
@@ -82,35 +111,40 @@
         </el-col>
         <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
       </el-row>
-  
+
       <el-table v-loading="loading" :data="competitionList" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column label="主键" align="center" prop="id" v-if="false"/>
-        <el-table-column label="赛事名称" align="center" prop="name" />
+        <el-table-column label="赛事名称" align="center" prop="name" width="200px"/>
         <el-table-column label="赛事类别" align="center" prop="level">
           <template slot-scope="scope">
             <dict-tag :options="dict.type.dcims_competition_type" :value="scope.row.level"/>
           </template>
         </el-table-column>
-        <el-table-column label="往届名称" align="center" prop="pastName" />
+        <el-table-column label="往届名称" align="center" prop="pastName" width="200px"/>
         <el-table-column label="赛事届次" align="center" prop="term" />
         <el-table-column label="赛事年份" align="center" prop="annual" />
-        <el-table-column label="主办单位" align="center" prop="organizer" />
+        <el-table-column label="主办单位" align="center" prop="organizer" width="200px"/>
         <el-table-column label="竞赛负责人工号" align="center" prop="responsiblePersonId" />
         <el-table-column label="竞赛负责人" align="center" prop="responsiblePersonName" />
-        <el-table-column label="校内选拔时间" align="center" prop="innerTime" width="180">
+        <el-table-column label="所属学院" align="center" prop="college" width="150px">
           <template slot-scope="scope">
-            <span>{{ "无" || parseTime(scope.row.innerTime, '{y}-{m}-{d}') }}</span>
+            <dict-tag :options="dict.type.dcims_college" :value="scope.row.college"/>
           </template>
         </el-table-column>
-        <el-table-column label="省赛时间" align="center" prop="provinceTime" width="180">
+        <el-table-column label="校内选拔时间" align="center" prop="innerTime" width="130">
           <template slot-scope="scope">
-            <span>{{ "无" || parseTime(scope.row.provinceTime, '{y}-{m}-{d}') }}</span>
+            <span>{{ parseTime(scope.row.innerTime, '{y}-{m}-{d}') || '无' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="国赛时间" align="center" prop="nationalTime" width="180">
+        <el-table-column label="省赛时间" align="center" prop="provinceTime" width="130">
           <template slot-scope="scope">
-            <span>{{ "无" || parseTime(scope.row.nationalTime, '{y}-{m}-{d}') }}</span>
+            <span>{{ parseTime(scope.row.provinceTime, '{y}-{m}-{d}') || '无' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="国赛时间" align="center" prop="nationalTime" width="130">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.nationalTime, '{y}-{m}-{d}') || '无' }}</span>
           </template>
         </el-table-column>
         <el-table-column label="本年度拨款" align="center" prop="appropriation" />
@@ -126,13 +160,16 @@
       </el-table-column>
         <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="text"
-              icon="el-icon-edit"
-              @click="handleUpdate(scope.row)"
-              v-hasPermi="['dcims:competition:edit']"
-            >修改</el-button>
+            <el-tooltip class="item" effect="dark" content="已经通过审核的竞赛不允许修改，如需修改，请选择删除或联系管理员" placement="top" :disabled="scope.row.state == 0 || scope.row.state == 2">
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-edit"
+                @click="handleUpdate(scope.row)"
+                :disabled="scope.row.state == 1"
+                v-hasPermi="['dcims:competition:edit']"
+              >修改</el-button>
+            </el-tooltip>
             <el-button
               size="mini"
               type="text"
@@ -150,7 +187,7 @@
           </template>
         </el-table-column>
       </el-table>
-  
+
       <pagination
         v-show="total>0"
         :total="total"
@@ -158,7 +195,7 @@
         :limit.sync="queryParams.pageSize"
         @pagination="getList"
       />
-  
+
       <!-- 修改竞赛赛事基本信息对话框 -->
       <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
         <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -221,7 +258,10 @@
             </el-date-picker>
           </el-form-item>
           <el-form-item label="本年度申报经费" prop="budget">
-            <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+            <div  class="mo-input--number">
+              <el-input-number v-model="form.budget" controls-position="right" :precision="2" :step="0.1" :min="0" :max="100"></el-input-number>
+              <div class="define-append">万元</div>
+            </div>
           </el-form-item>
           <el-form-item label="本年度拨款" prop="appropriation">
             <el-input v-model="form.appropriation" :disabled="true" placeholder="请输入本年度拨款" />
@@ -553,7 +593,7 @@
       /** 删除按钮操作 */
       handleDelete(row) {
         const ids = row.id || this.ids;
-        this.$modal.confirm('是否确认删除竞赛赛事基本信息编号为"' + ids + '"的数据项？').then(() => {
+        this.$modal.confirm('是否确认删除竞赛名为"' + row.name + '"的数据项？').then(() => {
           this.loading = true;
           return delCompetition(ids);
         }).then(() => {
@@ -626,4 +666,3 @@
     }
   };
   </script>
-  

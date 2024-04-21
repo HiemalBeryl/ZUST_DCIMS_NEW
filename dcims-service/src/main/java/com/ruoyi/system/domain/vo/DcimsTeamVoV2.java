@@ -133,4 +133,8 @@ public class DcimsTeamVoV2 {
      */
     private Integer nextAuditId;
 
+    /**
+     * 创建人
+     */
+    private String createBy;
 }

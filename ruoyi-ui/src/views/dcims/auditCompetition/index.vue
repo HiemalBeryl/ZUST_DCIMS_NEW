@@ -1,3 +1,32 @@
+<style lang="scss" scoped>
+
+/* 自定义数字输入框append  */
+.mo-input--number {
+  border: 1px solid #DCDFE6;
+  width: 60%;
+  display: flex;
+  border-radius: 4px;
+  .el-input-number--mini{
+    flex: 1;
+  }
+  ::v-deep .el-input__inner{
+    border: none!important;
+  }
+}
+
+.define-append{
+  width: 40px;
+  display: inline-block;
+  background: #F5F7FA;
+  padding: 0px 3px;
+  border-left: none;
+  height: 32px;
+  line-height: 32px;
+  color: #909399;
+  font-size: 12px;
+  text-align: center;
+}
+</style>
 <template>
     <div style="height:100%">
       <!-- 顶部 -->
@@ -10,51 +39,6 @@
         <!-- 用于存放第一行的筛选按钮 -->
         <div class="juZhong">
           <h2>待审核列表</h2>
-            <!-- <el-row :gutter="20">
-                <el-col :span="2"><div class="grid-content "></div></el-col>
-
-                <el-col :span="5"><div class="grid-content ">
-                    <div>
-                        赛事类别:
-                    </div>
-                    <div>
-                        <el-select v-model="value" placeholder="请选择赛事类别">
-                            <el-option
-                              v-for="item in levelOption"
-                              :key="item.value"
-                              :label="item.label"
-                              :value="item.value">
-                            </el-option>
-                          </el-select>
-                    </div>
-                </div></el-col>
-
-                <el-col :span="10"><div class="grid-content ">
-                    <span>申请时间:</span>
-                      <div class="block">
-                        <el-date-picker
-                          v-model="date1"
-                          type="daterange"
-                          align="right"
-                          range-separator="至"
-                          start-placeholder="开始日期"
-                          end-placeholder="结束日期"
-                          :picker-options="dateOptions">
-                        </el-date-picker>
-                      </div>
-                </div></el-col>
-
-                <el-col :span="5"><div class="grid-content">
-                    <div>关键词搜索:</div>
-                    <div>
-                        <el-input clearable v-model="keyWord" placeholder="请键入关键词"></el-input>
-
-                    </div>
-                </div></el-col>
-
-                <el-col :span="2"><div class="grid-content"></div></el-col>
-            </el-row> -->
-
             <!-- 用于存放勾选需要审核的项目 -->
             <div>
                 <el-row :gutter="20">
@@ -75,26 +59,53 @@
                         <el-table-column type="selection" width="55"> </el-table-column>
                         <el-table-column prop="name" label="赛事名称" width="200">
                         </el-table-column>
-                        <el-table-column prop="term" label="立项届次" width="200">
+                        <el-table-column prop="term" label="立项届次" width="100">
                         </el-table-column>
-                        <el-table-column prop="level" label="竞赛类别" width="200">
+                        <el-table-column prop="level" label="竞赛类别" width="100">
                         </el-table-column>
                         <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="200">
                         </el-table-column>
                         <el-table-column prop="budget" label="申报经费（万元）" width="120">
-                        </el-table-column>
-                        <el-table-column prop="shenQingShiJian" label="申请时间" width="120">
-                        </el-table-column>
-                        <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="160">
                           <template slot-scope="scope">
-                            <el-button v-if="(scope.row.oss != null)" 
-                            type="text" 
-                            @click.native="openNewTab(scope.row.oss.url)"
+                            <span>{{scope.row.budget / 1 | rounding}}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+                          <template slot-scope="scope">
+                            <el-tag type="primary" v-if="scope.row.state == 0">待审批</el-tag>
+                            <el-tag type="success" v-if="scope.row.state == 1">通过审批</el-tag>
+                            <el-tag type="danger" v-if="scope.row.state == 2">教务处驳回</el-tag>
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="createTime" label="申请时间" width="120">
+                          <template slot-scope="scope">
+                            <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') || '无' }}</span>
+                          </template>
+                        </el-table-column>
+                        <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="140">
+                          <template slot-scope="scope">
+                            <el-button v-if="(scope.row.oss != null)"
+                            type="text"
+                            @click.native="handleDownload(scope.row.oss.ossId)"
                             >在新窗口打开
                             </el-button>
                           </template>
                         </el-table-column>
-                        <el-table-column fixed="right" label="查看详情" min-width="200">
+                        <el-table-column fixed="right" label="集中授课安排表" align="center" prop="teachingHoursAttachmentOss.url" width="140">
+                          <template slot-scope="scope">
+                            <el-button v-if="(scope.row.teachingHoursAttachment != null)"
+                                       type="text"
+                                       @click.native="handleDownload(scope.row.teachingHoursAttachmentOss.ossId)"
+                            >在新窗口打开
+                            </el-button>
+                            <el-button v-if="(scope.row.teachingHoursAttachment == null)"
+                                       type="text"
+                                       disabled="true"
+                            >无
+                            </el-button>
+                          </template>
+                        </el-table-column>
+                        <el-table-column fixed="right" label="查看详情" min-width="100">
                           <template slot-scope="scope">
                             <el-button type="text" @click="handleUpdate(scope.row)">查看详情</el-button>
                           </template>
@@ -108,11 +119,15 @@
                         </div>
 
                         <div style="float: right">
-                          <el-button type="primary" @click="submitOrRefuse(1)">通过审核</el-button>
+                          <el-tooltip class="item" effect="dark" content="请先勾选需要驳回审核的竞赛" placement="top" :disabled="!ids.length == 0">
+                            <el-button type="primary" :disabled="ids.length == 0" @click="submitOrRefuse(1)">通过审核</el-button>
+                          </el-tooltip>
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">
-                          <el-button type="warning" @click="submitOrRefuse(0)">不通过审核</el-button>
+                          <el-tooltip class="item" effect="dark" content="请先勾选需要通过审核的竞赛" placement="top" :disabled="!ids.length == 0">
+                            <el-button type="warning" :disabled="ids.length == 0" @click="submitOrRefuse(0)">不通过审核</el-button>
+                          </el-tooltip>
                         </div>
                         <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                         <div style="float: right">
@@ -124,11 +139,56 @@
                   <el-col :span="2"><div class="grid-content"></div></el-col>
                 </el-row>
               </div>
-
-
-
-
         </div>
+
+
+
+      <!-- 非要弄一个新表格展示提交后的竞赛状态，做呗 -->
+      <div class="juZhong" style="margin-top: 50px" v-if="!(this.$store.state.user.roles.includes('AcademicAffairsOffice'))">
+        <h2>审核流程跟踪</h2>
+        <div>
+          <el-row :gutter="20">
+            <el-col :span="2"><div class="grid-content"></div></el-col>
+            <!-- table 用于勾选项目 -->
+            <el-col :span="20"
+            ><div class="grid-content">
+              <el-table
+                v-loading="loading2"
+                ref="multipleTable"
+                :data="competitionProcessingList"
+                tooltip-effect="dark"
+                style="width: 100%"
+                max-height="500px"
+              >
+                <el-table-column type="selection" width="55"> </el-table-column>
+                <el-table-column prop="name" label="赛事名称" width="200">
+                </el-table-column>
+                <el-table-column prop="annual" label="赛事年份" width="200">
+                </el-table-column>
+                <el-table-column prop="responsiblePersonName" label="竞赛负责人" width="200">
+                </el-table-column>
+                <el-table-column label="审核状态" align="center" fixed="right" prop="state">
+                  <template slot-scope="scope">
+                    <el-tag type="primary" v-if="scope.row.state == 0">等待教务处审核</el-tag>
+                    <el-tag type="success" v-if="scope.row.state == 1">通过审批</el-tag>
+                    <el-tag type="danger" v-if="scope.row.state == 2">驳回审批，等待负责人修改</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column fixed="right" label="竞赛申报书" align="center" prop="oss.url" width="160">
+                  <template slot-scope="scope">
+                    <el-button v-if="(scope.row.oss != null)"
+                               type="text"
+                               @click.native="handleDownload(scope.row.oss.ossId)"
+                    >在新窗口打开
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div></el-col>
+            <el-col :span="2"><div class="grid-content"></div></el-col>
+          </el-row>
+        </div>
+      </div>
 
       <!-- 修改竞赛赛事基本信息对话框 -->
     <el-dialog title="修改竞赛赛事基本信息" :visible.sync="open1" width="500px" append-to-body>
@@ -146,8 +206,11 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="本年度拨款" prop="appropriation">
-          <el-input v-model="form.appropriation" placeholder="请输入本年度拨款" />
+        <el-form-item label="本年度追加经费" prop="appropriation">
+          <div  class="mo-input--number">
+            <el-input-number v-model="form.appropriation" controls-position="right" :precision="2" :step="0.1" :min="0" :max="100"></el-input-number>
+            <div class="define-append">万元</div>
+          </div>
         </el-form-item>
         <el-form-item label="个人赛限项" prop="personLimit">
           <el-input v-model="form.personLimit" placeholder="请输入个人赛限项" />
@@ -207,13 +270,19 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="本年度申报经费" prop="budget">
-          <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+          <div  class="mo-input--number">
+            <el-input-number v-model="form.budget" controls-position="right" :precision="2" :step="0.1" :min="0" :max="100"></el-input-number>
+            <div class="define-append">万元</div>
+          </div>
         </el-form-item>
         <el-form-item label="获奖目标" prop="goal">
           <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
         </el-form-item>
         <el-form-item label="赛事简介" prop="introduction">
           <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容" />
+        </el-form-item>
+        <el-form-item label="集中授课安排表" prop="teachingHoursAttachment">
+          <file-upload v-model="form.teachingHoursAttachment"/>
         </el-form-item>
         <el-form-item label="竞赛申报书" prop="attachment">
           <file-upload v-model="form.attachment"/>
@@ -283,6 +352,12 @@
         <el-form-item label="赛事简介" prop="introduction">
           <el-input v-model="form.introduction" type="textarea" placeholder="请输入内容"  disabled="true"/>
         </el-form-item>
+        <el-form-item label="集中授课安排表" prop="teachingHoursAttachment">
+          <file-upload v-model="form.teachingHoursAttachment" disabled="true"/>
+        </el-form-item>
+        <el-form-item label="竞赛申报书" prop="attachment">
+          <file-upload v-model="form.attachment" disabled="true"/>
+        </el-form-item>
       </el-form>
 
 
@@ -296,7 +371,7 @@
     <!-- 提交和退回审核信息对话框-->
     <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
     <el-form ref="form2" :model="submitt" label-width="100px">
-        <el-input v-model="submitt.reason" type="textArea" placeholder="备注原因" />
+        <el-input v-model="submitt.reason" type="textArea" placeholder="备注提交或退回原因（非必填）" />
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button :loading="buttonLoading" type="primary" @click="submitForm2">确 定</el-button>
@@ -307,9 +382,10 @@
 </template>
 
 <script>
-import {listCompetitionAudit, permitAudit, refuseAudit, updateAuditCompetition} from "@/api/dcims/competitionAudit";
+import {listCompetitionAudit, listCompetitionInProcessing, permitAudit, refuseAudit, updateAuditCompetition} from "@/api/dcims/competitionAudit";
 import {getCompetition} from "@/api/dcims/competition"
 import {getInfo} from "@/api/login"
+import download from '@/plugins/download.js';
 
   export default {
     name:"liXiangShenHe",
@@ -332,6 +408,12 @@ import {getInfo} from "@/api/login"
       total: 0,
       // 竞赛赛事基本信息表格数据
       competitionList: [],
+      // 第二个表格的数据
+      competitionProcessingList: [],
+      // 第二个表格是否加载
+      loading2: true,
+      // 第二个表格数据总数
+      totalProcessing: 0,
       // 弹出层标题
       title: "",
       // 是否显示弹出层1
@@ -466,7 +548,12 @@ import {getInfo} from "@/api/login"
     created() {
       this.getList();
       this.getUserInfo();
-      console.log(this.competitionList);
+      this.getListInProcessing();
+    },
+    filters: {
+      rounding (value) {
+        return value.toFixed(2)
+      }
     },
     methods: {
       /** 查询竞赛赛事基本信息列表 */
@@ -477,6 +564,15 @@ import {getInfo} from "@/api/login"
           this.total = response.total;
           this.loading = false;
         });
+      },
+      /** 查询已经通过审核的竞赛，现在的状态 **/
+      getListInProcessing() {
+        this.loading2 = true;
+        listCompetitionInProcessing(this.queryParams).then(response => {
+          this.competitionProcessingList = response.rows;
+          this.totalProcessing = response.total;
+          this.loading2 = false;
+        })
       },
       /** 修改按钮操作 */
     handleUpdate(row) {
@@ -599,11 +695,12 @@ import {getInfo} from "@/api/login"
                 this.submittForm = [];
               }).finally(() => {
               this.buttonLoading = false;
+              this.getListInProcessing();
             });
             }else{
               // 执行退回审核逻辑
               refuseAudit(this.submittForm).then(response => {
-                this.$modal.msgError("退回选中竞赛成功");
+                this.$modal.msgSuccess("退回选中竞赛成功");
                 this.submittForm = [];
                 this.open2 = false;
                 this.getList();
@@ -611,6 +708,7 @@ import {getInfo} from "@/api/login"
                 this.submittForm = [];
               }).finally(() => {
               this.buttonLoading = false;
+              this.getListInProcessing();
             });
             }
     },
@@ -631,7 +729,6 @@ import {getInfo} from "@/api/login"
         }else{
           this.userInfo = response.data.roles[0];
         }
-        console.log(this.userInfo)
       })
     },
     /** 判断审核通过竞赛是否添加了类别(ABC) */
@@ -660,6 +757,10 @@ import {getInfo} from "@/api/login"
     openNewTab(url) {
       window.open(url, '_blank');
     },
+      // 下载按钮操作
+      handleDownload(ossId) {
+        download.oss(ossId);
+      }
     }
   }
 

@@ -66,14 +66,18 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsCompetition::getNextAuditId,teacherId);
-        // 获取状态为待审核的竞赛
-        lqw.eq(DcimsCompetition::getState,0);
+        // 获取状态为待审核或被退回的竞赛, 可以对这些竞赛重新提交或退回。
+        List<String> status = new ArrayList<>();
+        status.add("0");
+        status.add("2");
+        lqw.in(DcimsCompetition::getState, status);
         Page<DcimsCompetitionVo> result = competitionBaseMapper.selectVoPage(pageQuery.build(), lqw);
 
         // 获取团队对应oss信息
         Set<Long> OSSIds = new HashSet<>();
         result.getRecords().forEach(e -> {
-            OSSIds.add(Long.valueOf(e.getAttachment()));
+            OSSIds.add(e.getAttachment());
+            OSSIds.add(e.getTeachingHoursAttachment());
         });
         OSSIds.removeAll(Collections.singleton(null));
         System.out.println(OSSIds);
@@ -87,9 +91,14 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                     if (oss.getOssId().equals(vo.getAttachment())){
                         vo.setOss(oss);
                     }
+                    if (oss.getOssId().equals(vo.getTeachingHoursAttachment())){
+                        vo.setTeachingHoursAttachmentOss(oss);
+                    }
                 });
                 if (ObjectUtil.isNull(vo.getOss()))
                     vo.setOss(new SysOssVo());
+                if (ObjectUtil.isNull(vo.getTeachingHoursAttachmentOss()))
+                    vo.setTeachingHoursAttachmentOss(new SysOssVo());
                 return vo;
             }).collect(Collectors.toList());
         }
@@ -98,6 +107,33 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                 e.setOss(null);
             }
         });
+
+        // 查询审核状态信息
+        List<Long> competitionIds = new ArrayList<>();
+        for(DcimsCompetitionVo vo : voList){
+            competitionIds.add(vo.getId());
+        }
+        LambdaQueryWrapper<DcimsCompetitionAudit> lqw2 = new LambdaQueryWrapper<>();
+        lqw2.in(competitionIds.size() > 0, DcimsCompetitionAudit::getCompetitionId, competitionIds);
+        List<DcimsCompetitionAuditVo> auditList = competitionAuditBaseMapper.selectVoList(lqw2);
+        Map<Long, DcimsCompetitionAuditVo> m = new HashMap<>();
+        for (DcimsCompetitionAuditVo audit : auditList){
+            DcimsCompetitionAuditVo audit1 = m.get(audit.getCompetitionId());
+            if (audit1 != null){
+                if (audit1.getId() < audit.getId()){
+                    m.put(audit.getCompetitionId(), audit);
+                }
+            }else {
+                m.put(audit.getCompetitionId(), audit);
+            }
+        }
+        for (DcimsCompetitionAuditVo audit : m.values()){
+            for (DcimsCompetitionVo vo : voList){
+                if (Objects.equals(audit.getCompetitionId(), vo.getId())){
+                    vo.setAudit(audit);
+                }
+            }
+        }
 
         return TableDataInfo.build(voList);
     }
@@ -158,6 +194,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
                     add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     comAuditList.add(add1);
                     add2.setNextAuditId(sysDept.getLeaderTeacherId());
+                    add2.setState("0");
                     comList.add(add2);
                 }
             }
@@ -180,6 +217,7 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
     public Boolean deleteWithValidByIds(List<DcimsCompetitionAuditBo> boList) {
         List<DcimsCompetition> comList = new ArrayList<>();
         List<DcimsCompetitionAudit> comAuditList = new ArrayList<>();
+
         for (DcimsCompetitionAuditBo bo:boList) {
             //手动为Bo添加操作者等部分数据
             bo.setTeacherId(AccountUtils.getAccount(StpUtil.getLoginIdAsString()).getTeacherId());
@@ -187,11 +225,28 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
             DcimsCompetitionAudit add1 = BeanUtil.toBean(bo, DcimsCompetitionAudit.class);
             DcimsCompetition add2 = competitionBaseMapper.selectById(bo.getCompetitionId());
             if(add2 == null)   add2 = new DcimsCompetition();
+            // 正常判断是否该审核人进行操作
             if(add1.getTeacherId().equals(add2.getNextAuditId())){
                 comAuditList.add(add1);
                 comList.add(add2);
-                add1.setNextTeacherId(-1L);
-                add2.setNextAuditId(-1L);
+                // 教务处退回时，获取学院负责人的工号，审核人更改为学院负责人
+                add1.setNextTeacherId(getCollegeLeaderId(add2.getCollege()));
+                add2.setNextAuditId(getCollegeLeaderId(add2.getCollege()));
+                add2.setState("2");
+                // 学院退回时，检查审核人和当前登录用户的工号是否相同，如果相容则填写-1，待老师修改后重新提交
+                if (add2.getNextAuditId().equals(AccountUtils.getAccount().getTeacherId())) {
+                    add1.setNextTeacherId(-1L);
+                    add2.setNextAuditId(-1L);
+                    add2.setState("2");
+                }
+            }
+            // 教务处可以对通过审核的竞赛执行强退操作
+            if(AccountUtils.getAccount().getTeacherId().equals(102099L)){
+                comAuditList.add(add1);
+                comList.add(add2);
+                // 教务处退回时，获取学院负责人的工号，审核人更改为学院负责人
+                add1.setNextTeacherId(getCollegeLeaderId(add2.getCollege()));
+                add2.setNextAuditId(getCollegeLeaderId(add2.getCollege()));
                 add2.setState("2");
             }
         }
@@ -240,5 +295,21 @@ public class DcimsCompetitionAuditServiceImpl implements IDcimsCompetitionAuditS
         System.out.println(roleList);
         System.out.println(flag);
         return competitionService.updateByBo(bo, flag);
+    }
+
+
+    /**
+     * 根据学院id获取学院负责人的工号
+     */
+    public Long getCollegeLeaderId(Long college){
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysDept::getParentId,100);
+        lqw.eq(SysDept::getOrderNum, college);
+        SysDept sysDept = sysDeptMapper.selectOne(lqw);
+        System.out.println("传入学院："+ college + "结果：" + sysDept.getLeaderTeacherId());
+        if (sysDept != null){
+            return sysDept.getLeaderTeacherId();
+        }
+        return null;
     }
 }

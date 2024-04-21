@@ -1,9 +1,12 @@
 package com.ruoyi.system.controller;
 
+import java.io.*;
 import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import cn.dev33.satoken.annotation.SaIgnore;
+import cn.hutool.core.io.IoUtil;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import com.ruoyi.common.annotation.RepeatSubmit;
@@ -82,6 +86,22 @@ public class DcimsTeamController extends BaseController {
         ExcelUtil.exportExcel(list, "参赛团队", DcimsTeamVo.class, response);
     }
 
+
+    /**
+     * 批量下载附件
+     */
+    @SaCheckPermission("dcims:team:export")
+    @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
+    @PostMapping("/download")
+    public void downloadAttachment(DcimsTeamBo bo, HttpServletResponse response) {
+        try {
+            iDcimsTeamService.download(bo,response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
     /**
      * 获取参赛团队详细信息
      *
@@ -138,5 +158,24 @@ public class DcimsTeamController extends BaseController {
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {
         return toAjax(iDcimsTeamService.deleteWithValidByIds(Arrays.asList(ids), true));
+    }
+
+    /**
+     * 获取批量导入模板
+     */
+    @SaIgnore
+    @GetMapping("/importTemplate")
+    public void importTemplate(HttpServletResponse response) {
+        File file = iDcimsTeamService.getImportTemplate();
+        try {
+            InputStream inputStream = new FileInputStream(file);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + ";charset=utf-8");
+            IoUtil.copy(inputStream, response.getOutputStream());
+            response.setContentLength((int) file.length());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

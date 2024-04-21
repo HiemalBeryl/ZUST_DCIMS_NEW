@@ -11,50 +11,50 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="核算开始时间" prop="startTime">
-        <el-date-picker clearable
-          v-model="queryParams.startTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择核算开始时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="核算结束时间" prop="endTime">
-        <el-date-picker clearable
-          v-model="queryParams.endTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择核算结束时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
+<!--      <el-form-item label="核算开始时间" prop="startTime">-->
+<!--        <el-date-picker clearable-->
+<!--          v-model="queryParams.startTime"-->
+<!--          type="date"-->
+<!--          value-format="yyyy-MM-dd"-->
+<!--          placeholder="请选择核算开始时间">-->
+<!--        </el-date-picker>-->
+<!--      </el-form-item>-->
+<!--      <el-form-item label="核算结束时间" prop="endTime">-->
+<!--        <el-date-picker clearable-->
+<!--          v-model="queryParams.endTime"-->
+<!--          type="date"-->
+<!--          value-format="yyyy-MM-dd"-->
+<!--          placeholder="请选择核算结束时间">-->
+<!--        </el-date-picker>-->
+<!--      </el-form-item>-->
+<!--      <el-form-item>-->
+<!--        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>-->
+<!--        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>-->
+<!--      </el-form-item>-->
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['dcims:worktimeAllocation:add']"
-        >新增计算</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['dcims:worktimeAllocation:remove']"
-        >删除</el-button>
-      </el-col>
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="primary"-->
+<!--          plain-->
+<!--          icon="el-icon-plus"-->
+<!--          size="mini"-->
+<!--          @click="handleAdd"-->
+<!--          v-hasPermi="['dcims:worktimeAllocation:add']"-->
+<!--        >新增计算</el-button>-->
+<!--      </el-col>-->
+<!--      <el-col :span="1.5">-->
+<!--        <el-button-->
+<!--          type="danger"-->
+<!--          plain-->
+<!--          icon="el-icon-delete"-->
+<!--          size="mini"-->
+<!--          :disabled="multiple"-->
+<!--          @click="handleDelete"-->
+<!--          v-hasPermi="['dcims:worktimeAllocation:remove']"-->
+<!--        >删除</el-button>-->
+<!--      </el-col>-->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -68,49 +68,66 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
+<!--    <el-table v-loading="loading" :data="worktimeAllocationList" @selection-change="handleSelectionChange">-->
+<!--      <el-table-column type="selection" width="55" align="center" />-->
+<!--      &lt;!&ndash; <el-table-column label="主键" align="center" prop="id" v-if="true"/> &ndash;&gt;-->
+<!--      <el-table-column label="年份" align="center" prop="year" />-->
+<!--      <el-table-column label="核算开始时间" align="center" prop="startTime" width="180">-->
+<!--        <template slot-scope="scope">-->
+<!--          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--      <el-table-column label="核算结束时间" align="center" prop="endTime" width="180">-->
+<!--        <template slot-scope="scope">-->
+<!--          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--      &lt;!&ndash; <el-table-column label="计算公式" align="center" prop="fomular" />-->
+<!--      <el-table-column label="核算状态" align="center" prop="status" /> &ndash;&gt;-->
+<!--      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">-->
+<!--        <template slot-scope="scope">-->
+<!--          <el-button-->
+<!--            size="mini"-->
+<!--            type="text"-->
+<!--            icon="el-icon-edit"-->
+<!--            @click="handleUpdate(scope.row)"-->
+<!--            v-hasPermi="['dcims:worktimeAllocation:query']"-->
+<!--          >查看</el-button>-->
+<!--          <el-button-->
+<!--            size="mini"-->
+<!--            type="text"-->
+<!--            icon="el-icon-delete"-->
+<!--            @click="handleDelete(scope.row)"-->
+<!--            v-hasPermi="['dcims:worktimeAllocation:remove']"-->
+<!--          >删除</el-button>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--    </el-table>-->
+
     <el-table v-loading="loading" :data="worktimeAllocationList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="主键" align="center" prop="id" v-if="true"/> -->
-      <el-table-column label="年份" align="center" prop="year" />
-      <el-table-column label="核算开始时间" align="center" prop="startTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="核算结束时间" align="center" prop="endTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <!-- <el-table-column label="计算公式" align="center" prop="fomular" />
-      <el-table-column label="核算状态" align="center" prop="status" /> -->
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['dcims:worktimeAllocation:query']"
-          >查看</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['dcims:worktimeAllocation:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column>
+      <el-table-column label="考核年度" align="center" prop="year" />
+      <el-table-column label="竞赛名称" align="center" prop="competitionName" />
+      <el-table-column label="竞赛类别" align="center" prop="type" />
+      <el-table-column label="竞赛时间" align="center" prop="time" />
+      <el-table-column label="竞赛方式" align="center" prop="mode" />
+      <el-table-column label="获奖项数" align="center" prop="awardNum" />
+      <el-table-column label="获奖等级" align="center" prop="awardLevel" />
+      <el-table-column label="主办单位" align="center" prop="organizer" />
+      <el-table-column label="学时" align="center" prop="credit" />
+      <el-table-column label="集中授课学时" align="center" prop="concentratedCredit" />
+      <el-table-column label="负责人工号" align="center" prop="leaderId" />
+      <el-table-column label="负责人姓名" align="center" prop="leader" />
+      <el-table-column label="所属部门" align="center" prop="department" />
+      <el-table-column label="备注" align="center" prop="remark" />
     </el-table>
 
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+<!--      <pagination-->
+<!--      v-show="total>0"-->
+<!--      :total="total"-->
+<!--      :page.sync="queryParams.pageNum"-->
+<!--      :limit.sync="queryParams.pageSize"-->
+<!--      @pagination="getList"-->
+<!--    />-->
 
     <!-- 添加或修改工作量分配对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -188,7 +205,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        year: undefined,
+        year: 2023,
         startTime: undefined,
         endTime: undefined,
         status: undefined,
@@ -219,9 +236,8 @@ export default {
     /** 查询工作量分配列表 */
     getList() {
       this.loading = true;
-      listWorktimeAllocation(this.queryParams).then(response => {
-        this.worktimeAllocationList = response.rows;
-        this.total = response.total;
+      listWorktimeAllocation(this.queryParams.year).then(response => {
+        this.worktimeAllocationList = response;
         this.loading = false;
       });
     },
@@ -319,7 +335,7 @@ export default {
     handleExport() {
       this.download('dcims/worktimeAllocation/export', {
         ...this.queryParams
-      }, `worktimeAllocation_${new Date().getTime()}.xlsx`)
+      }, `工作量汇总${new Date().getTime()}.xlsx`)
     }
   }
 };

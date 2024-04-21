@@ -28,7 +28,7 @@ public interface IDcimsCompetitionService {
     /**
      * 查询竞赛赛事基本信息列表
      */
-    TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionBo bo, PageQuery pageQuery, boolean audit, boolean export);
 
     /**
      * 根据登录用户对应教师工号，查询竞赛赛事基本信息列表
@@ -39,6 +39,11 @@ public interface IDcimsCompetitionService {
      * 查询竞赛赛事基本信息列表
      */
     List<DcimsCompetitionVo> queryList(DcimsCompetitionBo bo);
+
+    /**
+     * 根据竞赛名列表，查询竞赛赛事基本信息列表
+     */
+    List<DcimsCompetitionVo> queryList(List<String> CompetitionNames);
 
     /**
      * 新增竞赛赛事基本信息
@@ -79,4 +84,10 @@ public interface IDcimsCompetitionService {
      * 批量下载竞赛立项申报书附件
      */
     void download(DcimsCompetitionBo bo, HttpServletResponse response) throws IOException;
+
+    /**
+     * 批量下载集中授课表
+     */
+    void download2(DcimsCompetitionBo bo, HttpServletResponse response) throws IOException;
+
 }

@@ -8,6 +8,7 @@ import com.ruoyi.system.domain.vo.SysOssVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -27,9 +28,13 @@ public interface ISysOssService {
 
     SysOssVo upload(MultipartFile file);
 
+    SysOssVo upload(File file, String originalfileName);
+
     void download(Long ossId, HttpServletResponse response) throws IOException;
 
     List<OssFile> downloadBatchFiles(Collection<Long> ossIds) throws IOException;
+
+    List<OssFile> downloadBatchFilesByHttp(Collection<Long> ossIds) throws IOException;
 
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 

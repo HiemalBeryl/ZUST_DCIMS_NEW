@@ -121,7 +121,7 @@ export default {
     var allCookies = this.getCookies();
     console.log(allCookies);
 
-    this.jump(false);
+    // this.jump(false);
   },
   methods: {
     getCode() {

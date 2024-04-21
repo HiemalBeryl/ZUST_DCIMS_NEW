@@ -57,7 +57,7 @@ public class DcimsCompetitionBo extends BaseEntity {
      * 赛事届次
      */
     @NotNull(message = "赛事届次不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long term;
+    private String term;
 
     /**
      * 赛事年份

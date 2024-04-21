@@ -11,7 +11,7 @@ let downloadLoadingInstance;
 export default {
   oss(ossId) {
     var url = baseURL + '/system/oss/download/' + ossId
-    downloadLoadingInstance = Loading.service({ text: "正在下载数据，请稍候", spinner: "el-icon-loading", background: "rgba(0, 0, 0, 0.7)", })
+    downloadLoadingInstance = Loading.service({ text: "正在下载数据，请耐心等待", spinner: "el-icon-loading", background: "rgba(0, 0, 0, 0.7)", })
     axios({
       method: 'get',
       url: url,

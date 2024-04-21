@@ -7,7 +7,7 @@ export function list() {
       method: 'get',
     })
   }
-  
+
   // 删除某一年份
   export function del(year) {
     return request({
@@ -15,7 +15,7 @@ export function list() {
       method: 'get'
     })
   }
-  
+
   // 添加年份
   export function add(year) {
     return request({
@@ -23,7 +23,7 @@ export function list() {
       method: 'get'
     })
   }
-  
+
   // 查询年份内业务的起止时间
   export function getDetail(year){
     return request({
@@ -40,4 +40,11 @@ export function list() {
       data: data
     })
   }
-  
+
+  // 获取教师todo
+  export function getTeacherTodo(){
+    return request({
+      url: '/dcims/setting/myWorkload',
+      method: 'get'
+    })
+  }

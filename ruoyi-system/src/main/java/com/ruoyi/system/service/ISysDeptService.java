@@ -113,4 +113,13 @@ public interface ISysDeptService {
      * @return 结果
      */
     int deleteDeptById(Long deptId);
+
+    /**
+     * 查询部门负责人
+     *
+     * @param collegeId 学院ID（排序号）
+     * @param isParent 是否是教务处
+     * @return 结果
+     */
+    Long getDeptSuperintendent(Long collegeId, boolean isParent);
 }

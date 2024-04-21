@@ -103,6 +103,7 @@ export default {
         this.$store.dispatch('LogOut').then(() => {
           //TODO:同时退出统一身份认证
           axios.get("https://authserver.zust.edu.cn/authserver/logout?service=http://kjjs.zust.edu.cn/").then(()=>{
+            window.open("https://authserver-443.webvpn.zust.edu.cn/authserver/login?service=https%3A%2F%2Fkjjs.zust.edu.cn%2Findex.html", "_self");
           }).catch(()=>{});
           location.href = process.env.VUE_APP_CONTEXT_PATH + "index.html";
         })

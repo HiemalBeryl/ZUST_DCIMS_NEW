@@ -19,6 +19,15 @@
       <el-table-column label="指导教师姓名" align="center" prop="teacherName" />
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
+      <el-table-column label="类型" align="center" prop="createBy">
+        <template slot-scope="scope">
+          <el-tag type="primary" v-if="scope.row.createBy == $store.state.user.name">我创建的</el-tag>
+          <el-tag type="success" v-if="scope.row.createBy != $store.state.user.name">我管理的</el-tag>
+<!--          {{$store.state.user.name}},-->
+<!--          {{scope.row.teacherId}},-->
+<!--          {{scope.row.createBy}}-->
+        </template>
+      </el-table-column>
       <el-table-column label="佐证材料" align="center" prop="oss.url" >
         <template slot-scope="scope">
           <ImagePreview

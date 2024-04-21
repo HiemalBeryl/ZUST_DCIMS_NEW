@@ -1,3 +1,32 @@
+<style lang="scss" scoped>
+
+/* 自定义数字输入框append  */
+.mo-input--number {
+  border: 1px solid #DCDFE6;
+  width: 100%;
+  display: flex;
+  border-radius: 4px;
+  .el-input-number--mini{
+    flex: 1;
+  }
+  ::v-deep .el-input__inner{
+    border: none!important;
+  }
+}
+
+.define-append{
+  width: 40px;
+  display: inline-block;
+  background: #F5F7FA;
+  padding: 0px 3px;
+  border-left: none;
+  height: 32px;
+  line-height: 32px;
+  color: #909399;
+  font-size: 12px;
+  text-align: center;
+}
+</style>
 <template> <!--赛事立项 -->
   <div>
     <div style="border-bottom: 1px solid #dbdbdb;height:60px;width:600px ;">
@@ -9,7 +38,7 @@
         </h1>
       </span>
     </div>
-  
+
     <!-- 添加或修改竞赛赛事基本信息对话框 -->
     <div v-if="dict.type.dcims_years.length > 0">
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
@@ -23,7 +52,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item label="赛事届次" prop="term">
-             <el-input v-model="form.term" placeholder="请输入赛事届次" />
+             <el-input v-model="form.term" placeholder="请输入赛事届次（如：12）" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -61,12 +90,14 @@
         <el-row>
           <el-col :span="8">
             <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-              <el-input v-model="form.responsiblePersonId" :disabled="true" placeholder="请输入竞赛负责人工号" />
+<!--              <el-input v-model="form.responsiblePersonId" :disabled="true" placeholder="请输入竞赛负责人工号" />-->
+              {{ form.responsiblePersonId }}
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-              <el-input v-model="form.responsiblePersonName" :disabled="true" placeholder="请输入竞赛负责人" />
+<!--              <el-input v-model="form.responsiblePersonName" :disabled="true" placeholder="请输入竞赛负责人" />-->
+              {{ form.responsiblePersonName }}
             </el-form-item>
           </el-col>
         </el-row>
@@ -123,9 +154,9 @@
           </el-col>
         </el-row>
         </div>
-  
+
         <el-divider></el-divider>
-  
+
         <div>
         <h3>额外信息</h3>
         <el-row>
@@ -139,13 +170,17 @@
               <el-input v-model="form.website" placeholder="请输入赛事官网" />
             </el-form-item>
           </el-col>
-  
-  
+
+
         </el-row>
         <el-row>
-          <el-col :span="8">
+          <el-col :span="4">
             <el-form-item label="本年度申报经费" prop="budget">
-              <el-input v-model="form.budget" placeholder="请输入本年度申报经费" />
+              <div  class="mo-input--number">
+                <el-input-number v-model="form.budget" controls-position="right" :precision="2" :step="0.1" :min="0" :max="100"></el-input-number>
+                <div class="define-append">万元</div>
+              </div>
+
             </el-form-item>
           </el-col>
         </el-row>
@@ -221,7 +256,7 @@
         </el-row>
         <el-row>
           <el-col :span="18">
-            <el-form-item label="竞赛官方红头文件" prop="redHeaderFile">
+            <el-form-item label="竞赛官方通知文件" prop="redHeaderFile">
               <file-upload v-model="form.redHeaderFile"/>
             </el-form-item>
           </el-col>
@@ -241,11 +276,11 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="cancel">清 空</el-button>
       </div>
     </div>
-  
-  
+
+
     <!-- 当年未开启竞赛立项时显示的内容-->
     <div v-if="dict.type.dcims_years.length == 0" style="border-bottom: 1px solid #dbdbdb;height:60px;width:600px ;">
       <span slot="label">
@@ -258,7 +293,7 @@
   <script>
   import {addCompetition} from "@/api/dcims/competition";
   import {queryLoginTeacher,listTeacherDict} from "@/api/dcims/basicData";
-  
+
   export default {
     name: "Competition",
     dicts: ['dcims_audit_result', 'dcims_competition_type', 'dcims_teacher', 'dcims_college', 'dcims_years'],
@@ -334,13 +369,33 @@
         provinceTimeIsNull: false,
         // 是否不填写国赛时间
         nationalTimeIsNull: false,
+        //
+        listenChange: undefined
       }
     },
     created(){
-      queryLoginTeacher().then(response => {
-        this.form.responsiblePersonId = response.data.teacherId;
-        this.form.responsiblePersonName = response.data.name;
-      });
+      this.form = {
+        responsiblePersonId: undefined,
+        responsiblePersonName: undefined
+      };
+      this.getLoginTeacher();
+
+      // 检测是否存在上次未填写完成的表单
+      var arr = JSON.parse(localStorage.getItem("competitionForm"))
+      var userName = this.$store.state.user.nick
+      console.log(userName.toString());
+      console.log(arr);
+      if(Object.keys(arr[1]).length > 2 && userName.toString() == arr[0].toString()){
+        this.$confirm('存在上次未填写完成的表单，是否载入数据？')
+          .then(_ => {
+            console.log("before");
+            this.initLocalStorageData(arr);
+            console.log("after");
+          })
+          .catch(_ => {});
+      }
+
+      this.getLoginTeacher();
     },
     methods: {
       /** 提交按钮 */
@@ -356,6 +411,7 @@
             addCompetition(this.form).then(response => {
               this.$modal.msgSuccess("竞赛立项成功，请等待审核！");
               this.open = false;
+              localStorage.removeItem('competitionForm')
             }).finally(() => {
               this.buttonLoading = false;
               this.reset();
@@ -408,8 +464,8 @@
           updateBy: undefined,
           delFlag: undefined
         };
-        this.teacherIds = [];
-        this.teachingHour = [];
+        this.teacherIds = [''];
+        this.teachingHour = [''];
         this.resetForm("form");
         queryLoginTeacher().then(response => {
         this.form.responsiblePersonId = response.data.teacherId;
@@ -457,7 +513,7 @@
       changeInnerTime(){
         this.innerTimeIsNull = !this.innerTimeIsNull
         this.form.innerTime = undefined
-          
+
       },
       changeProvinceTime(){
         this.provinceTimeIsNull = !this.provinceTimeIsNull
@@ -467,7 +523,56 @@
         this.nationalTimeIsNull = !this.nationalTimeIsNull
         this.form.nationalTime = undefined
       },
-    }
+      initLocalStorageData(arr){
+        console.log(arr)
+          this.form = arr[1];
+          this.teacherIds = arr[2];
+          this.teachingHour = arr[3];
+          console.log(this.form);
+          console.log(this.teacherIds);
+          console.log(this.teachingHour);
+      },
+      getLoginTeacher(){
+        //填写提交人
+        queryLoginTeacher().then(response => {
+          this.form.responsiblePersonId = response.data.teacherId;
+          this.form.responsiblePersonName = response.data.name;
+        });
+      }
+    },
+    watch: {
+      form(newValue) {
+        if(newValue){
+          var tempData = [];
+          tempData.push(this.$store.state.user.nick); //保存用户名，区分用户填写的表单
+          tempData.push(this.form); //值变化时保存在tempData
+          tempData.push(this.teacherIds); //值变化时保存在tempData
+          tempData.push(this.teachingHour); //值变化时保存在tempData
+          localStorage.setItem("competitionForm", JSON.stringify(tempData)); //本地存储存储的是字符串
+
+        }
+      },
+      teacherIds(newValue, oldValue) {
+        if(newValue != null) {
+          var tempData = [];
+          tempData.push(this.$store.state.user.nick); //保存用户名，区分用户填写的表单
+          tempData.push(this.form); //值变化时保存在tempData
+          tempData.push(this.teacherIds); //值变化时保存在tempData
+          tempData.push(this.teachingHour); //值变化时保存在tempData
+          localStorage.setItem("competitionForm", JSON.stringify(tempData)); //本地存储存储的是字符串
+        }
+      },
+      teachingHour(newValue, oldValue) {
+        if(newValue != null) {
+          var tempData = [];
+          tempData.push(this.$store.state.user.nick); //保存用户名，区分用户填写的表单
+          tempData.push(this.form); //值变化时保存在tempData
+          tempData.push(this.teacherIds); //值变化时保存在tempData
+          tempData.push(this.teachingHour); //值变化时保存在tempData
+          localStorage.setItem("competitionForm", JSON.stringify(tempData)); //本地存储存储的是字符串
+        }
+      },
+      deep: true
+    },
   }
   </script>
-  

@@ -9,6 +9,15 @@ export function listCompetitionAudit(query) {
   })
 }
 
+// 查询流程中的竞赛列表
+export function  listCompetitionInProcessing(query) {
+  return request({
+    url: 'dcims/competition/audit/listInProcessing',
+    method: 'get',
+    params: query
+  })
+}
+
 // 通过竞赛审核
 export function permitAudit(params) {
   return request({

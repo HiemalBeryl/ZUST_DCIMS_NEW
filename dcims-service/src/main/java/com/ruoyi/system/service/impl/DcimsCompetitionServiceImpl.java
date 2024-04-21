@@ -9,18 +9,18 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ZipUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysDictData;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.system.domain.DcimsCompetitionAudit;
-import com.ruoyi.system.domain.DcimsCompetitionTeacher;
-import com.ruoyi.system.domain.DcimsTeacher;
+import com.ruoyi.system.domain.*;
 import com.ruoyi.system.domain.entity.OssFile;
 import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.mapper.*;
+import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysDictDataService;
 import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
@@ -29,7 +29,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
-import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 
 import javax.servlet.ServletOutputStream;
@@ -57,6 +56,7 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     private final DcimsCompetitionAuditMapper competitionAuditBaseMapper;
     private final SysDeptMapper sysDeptMapper;
     private final ISysOssService ossService;
+    private final ISysDeptService deptService;
     private final ISysDictDataService dictDataService;
 
     /**
@@ -71,10 +71,17 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
      * 查询竞赛赛事基本信息列表
      */
     @Override
-    public TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionBo bo, PageQuery pageQuery) {
+    public TableDataInfo<DcimsCompetitionVo> queryPageList(DcimsCompetitionBo bo, PageQuery pageQuery, boolean audit, boolean export) {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
-        // 只能查询出通过审核的竞赛
-        // lqw.eq(DcimsCompetition::getState, 1);
+        // audit为true的话，只能查询出通过审核的竞赛
+        lqw.eq(audit, DcimsCompetition::getState, 1);
+        // 如果查询所有竞赛，那么根据id倒序
+        lqw.orderBy(!audit, false, DcimsCompetition::getId);
+
+        Integer college = getFromCollege();
+        if (college != -1)
+            lqw.eq(DcimsCompetition::getCollege, college);
+
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         TableDataInfo<DcimsCompetitionVo> build = TableDataInfo.build(result);
         // 获取团队对应oss信息
@@ -105,6 +112,32 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
                 e.setOss(null);
             }
         });
+
+        // 查询学院名
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        voList.forEach(com -> {
+            for (SysDictData d : dictData){
+                if(com.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    com.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
+
+        if(export){
+            // 根据ABC类排序，A类在最前面，C类在最后
+            voList = voList.stream()
+                .sorted(Comparator.comparing(DcimsCompetitionVo::getCollege)
+                    .thenComparing(DcimsCompetitionVo::getLevel)
+                    .thenComparing(DcimsCompetitionVo::getId))
+                .collect(Collectors.toList());
+            // 填写序号
+            for (int i = 0; i <= voList.size() - 1; i++){
+                voList.get(i).setOrder(i + 1);
+            }
+        }
+
         TableDataInfo<DcimsCompetitionVo> build1 = TableDataInfo.build(voList);
         BeanUtils.copyProperties(build ,build1);
         build1.setRows(voList);
@@ -147,6 +180,16 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
                 }
             }
         }
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        build.getRows().forEach(com -> {
+            for (SysDictData d : dictData){
+                if(com.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    com.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
         return build;
     }
 
@@ -156,6 +199,27 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     @Override
     public List<DcimsCompetitionVo> queryList(DcimsCompetitionBo bo) {
         LambdaQueryWrapper<DcimsCompetition> lqw = buildQueryWrapper(bo);
+        List<DcimsCompetitionVo> dcimsCompetitionVos = baseMapper.selectVoList(lqw);
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        dcimsCompetitionVos.forEach(com -> {
+            for (SysDictData d : dictData){
+                if(com.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    com.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
+        return dcimsCompetitionVos;
+    }
+
+    /**
+     * 根据竞赛名列表，查询竞赛赛事基本信息列表
+     */
+    @Override
+    public List<DcimsCompetitionVo> queryList(List<String> CompetitionNames) {
+        LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(DcimsCompetition::getName, CompetitionNames);
         List<DcimsCompetitionVo> dcimsCompetitionVos = baseMapper.selectVoList(lqw);
         SysDictData sysDictData = new SysDictData();
         sysDictData.setDictType("dcims_college");
@@ -329,7 +393,11 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     public void download(DcimsCompetitionBo bo, HttpServletResponse response){
         // 查询竞赛赛事基本信息列表，获取附件id
         List<DcimsCompetitionVo> dataInfo = queryList(bo);
-        List<Long> attachmentIds = dataInfo.stream().map(DcimsCompetitionVo::getAttachment).collect(Collectors.toList());
+        PageQuery pq = new PageQuery();
+        pq.setPageNum(0);
+        pq.setPageSize(10000);
+        List<Long> attachmentIds = queryPageList(bo, pq, true, false).getRows().stream().map(DcimsCompetitionVo::getAttachment).collect(Collectors.toList());
+//        List<Long> attachmentIds = dataInfo.stream().map(DcimsCompetitionVo::getAttachment).collect(Collectors.toList());
         // 根据附件id查询oss文件
         List<OssFile> ossFileList;
         try {
@@ -372,5 +440,80 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public void download2(DcimsCompetitionBo bo, HttpServletResponse response){
+        // 查询竞赛赛事基本信息列表，获取附件id
+        List<DcimsCompetitionVo> dataInfo = queryList(bo);
+        PageQuery pq = new PageQuery();
+        pq.setPageNum(0);
+        pq.setPageSize(10000);
+        List<Long> attachmentIds = queryPageList(bo, pq, true, false).getRows().stream().filter(e -> e.getTeachingHoursAttachment() != null).map(DcimsCompetitionVo::getTeachingHoursAttachment).collect(Collectors.toList());
+        System.out.println(attachmentIds);
+//        List<Long> attachmentIds = dataInfo.stream().map(DcimsCompetitionVo::getAttachment).collect(Collectors.toList());
+        // 根据附件id查询oss文件
+        List<OssFile> ossFileList;
+        try {
+            ossFileList = ossService.downloadBatchFiles(attachmentIds);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        // 将oss文件写入本地，写入时依据竞赛名称和所属学院进行分类
+        long timestamp = new Date().getTime();
+        // 定义基础路径
+        String basePath = String.valueOf(timestamp);
+        System.out.println(dataInfo);
+        System.out.println(ossFileList);
+        for (DcimsCompetitionVo competition : dataInfo) {
+            ossFileList.stream().filter(ossFile -> Objects.equals(ossFile.getSysOssVo().getOssId(), competition.getTeachingHoursAttachment())).forEach(ossFile -> {
+                String subDirectory = competition.getCollegeName();
+                String fileName = competition.getAnnual() + "年" + competition.getName() + "-集中授课安排表" + ossFile.getSysOssVo().getFileSuffix();
+                System.out.println("匹配到了："+ subDirectory + "  " + fileName);
+                try{
+                    File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
+
+                    BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
+                    BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+                    long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
+                }catch (IORuntimeException e){
+                    System.out.println(e.getMessage());
+                }catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
+        try{
+            // 根据所属学院压缩文件
+            File zip = ZipUtil.zip(basePath);
+            InputStream inputStream = new FileInputStream(zip);
+            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
+            IoUtil.copy(inputStream, response.getOutputStream());
+            response.setContentLength((int) zip.getTotalSpace());
+            // 删除临时文件
+//            FileUtil.del(new File(String.valueOf(timestamp)));
+//            FileUtil.del(zip);
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * 获取当前教师所属学院
+     */
+    public Integer getFromCollege(){
+        // 教务处可以查看全校，学院管理员可以查看学院，普通教师查看自己
+        List<SysDept> depts = deptService.selectDeptList(new SysDept());
+        long loginId = AccountUtils.getAccount().getTeacherId();
+        Integer teacherCollege = -1;
+        Optional<SysDept> first = depts.stream().filter(e -> e.getLeaderTeacherId() != null)
+            .filter(e -> e.getLeaderTeacherId().equals(loginId)).findFirst();
+        if (first.isPresent()){
+            teacherCollege = first.get().getOrderNum();
+        }
+        if (first.isPresent() && first.get().getDeptName().equals("浙江科技学院教务处")){
+            teacherCollege = -1;
+        }
+        return teacherCollege;
     }
 }

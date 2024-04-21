@@ -26,4 +26,8 @@ public interface IDcimsGlobalSettingService {
      * 查询是否处于截止时间内
      */
     boolean isDeadline(String year, String businessType);
+    /**
+     * 根据教师工号查询待办事项
+     */
+    Map<String, Object> getTodoList();
 }

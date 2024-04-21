@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.system.domain.DcimsTeam;
+import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
@@ -8,6 +9,9 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
@@ -59,4 +63,14 @@ public interface IDcimsTeamService {
      * 校验并批量删除参赛团队信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    /**
+     * 获取批量导入模板
+     */
+    public File getImportTemplate();
+
+    /**
+     * 下载获奖团队信息以及附件
+     */
+    void download(DcimsTeamBo bo, HttpServletResponse response) throws IOException;
 }

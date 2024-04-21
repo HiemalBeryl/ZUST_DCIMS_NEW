@@ -9,6 +9,14 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="赛事年份" prop="annual">
+        <el-input
+          v-model="queryParams.annual"
+          placeholder="请输入赛事年份（如2024）"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="队伍名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -126,7 +134,17 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['dcims:team:export']"
-        >导出</el-button>
+        >下载获奖信息表</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport2"
+          v-hasPermi="['dcims:team:export']"
+        >下载佐证材料</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -314,6 +332,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         competitionName: undefined,
+        annual: undefined,
         name: undefined,
         competitionType: undefined,
         awardLevel: undefined,
@@ -490,7 +509,13 @@ export default {
     handleExport() {
       this.download('dcims/team/export', {
         ...this.queryParams
-      }, `team_${new Date().getTime()}.xlsx`)
+      }, `获奖信息表${new Date().getTime()}.xlsx`)
+    },
+    /** 导出按钮操作 */
+    handleExport2() {
+      this.download('dcims/team/download', {
+        ...this.queryParams
+      }, `获奖佐证材料附件${new Date().getTime()}.zip`)
     },
     /** 是否填写作品名称 */
     changeWorksName(){

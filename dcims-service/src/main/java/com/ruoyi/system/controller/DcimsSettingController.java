@@ -1,5 +1,6 @@
 package com.ruoyi.system.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
 import com.ruoyi.common.annotation.Log;
@@ -27,7 +28,6 @@ public class DcimsSettingController {
 
 
     @SaCheckPermission("dcims:globalSetting:1")
-    @Log(title = "查询全局设置年份列表", businessType = BusinessType.QUERY)
     @GetMapping("/list")
     public List<String> list() {
         return iDcimsGlobalSettingService.getAnnualList();
@@ -51,7 +51,6 @@ public class DcimsSettingController {
 
 
     @SaCheckPermission("dcims:globalSetting:1")
-    @Log(title = "查询年份内业务的起止时间", businessType = BusinessType.QUERY)
     @GetMapping("/listDetail")
     public DcimsGlobalSetting getDetail(String year){
         return iDcimsGlobalSettingService.getDetail(year);
@@ -68,5 +67,13 @@ public class DcimsSettingController {
         System.out.println(globalSettingBo);
         System.out.println(globalSetting);
         return iDcimsGlobalSettingService.changeDetail(globalSetting);
+    }
+
+    @GetMapping("/myWorkload")
+    @SaCheckLogin
+    public Map<String, Object> myWorkload() {
+        Map<String, Object> todoList = iDcimsGlobalSettingService.getTodoList();
+        System.out.println(todoList);
+        return todoList;
     }
 }

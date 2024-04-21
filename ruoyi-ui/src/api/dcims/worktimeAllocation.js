@@ -1,11 +1,10 @@
 import request from '@/utils/request'
 
 // 查询工作量分配列表
-export function listWorktimeAllocation(query) {
+export function listWorktimeAllocation(year) {
   return request({
-    url: '/dcims/worktimeAllocation/list',
-    method: 'get',
-    params: query
+    url: '/dcims/worktimeAllocation/v2/list?year=' + year,
+    method: 'get'
   })
 }
 

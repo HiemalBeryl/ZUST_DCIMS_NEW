@@ -2,8 +2,10 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.convert.Convert;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -35,8 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,6 +131,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
      */
     @Override
     public List<OssFile> downloadBatchFiles(Collection<Long> ossIds) throws IOException {
+        System.out.println(ossIds.toString());
         List<SysOssVo> SysOssVoList = SpringUtils.getAopProxy(this).listByIds(ossIds);
         if (SysOssVoList.isEmpty()) {
             throw new ServiceException("文件数据不存在!");
@@ -138,7 +140,16 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         OssClient storage = OssFactory.instance();
         List<OssFile> ossFiles = new ArrayList<>();
         for (SysOssVo sysOssVo:SysOssVoList) {
-            InputStream storageObjectContent = storage.getObjectContent(sysOssVo.getUrl());
+            System.out.println(sysOssVo.getUrl());
+            InputStream storageObjectContent = null;
+            for (int retryTimes = 0; retryTimes <= 5 && storageObjectContent == null; retryTimes++){
+                try{
+                    Thread.sleep(200);
+                    storageObjectContent = storage.getObjectContent(sysOssVo.getUrl());
+                }catch (Exception e){
+                    System.out.println("retryTimes is " + retryTimes);
+                }
+            }
             OssFile ossFile = new OssFile();
             ossFile.setFileContent(storageObjectContent);
             ossFile.setSysOssVo(sysOssVo);
@@ -147,6 +158,44 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
 
         return ossFiles;
     }
+
+
+    /**
+     * @param ossIds
+     * @throws IOException
+     */
+    @Override
+    public List<OssFile> downloadBatchFilesByHttp(Collection<Long> ossIds) throws IOException {
+        System.out.println(ossIds.toString());
+        List<SysOssVo> SysOssVoList = SpringUtils.getAopProxy(this).listByIds(ossIds);
+        if (SysOssVoList.isEmpty()) {
+            throw new ServiceException("文件数据不存在!");
+        }
+
+
+        List<OssFile> ossFiles = new ArrayList<>();
+        for (SysOssVo sysOssVo:SysOssVoList) {
+            System.out.println(sysOssVo.getUrl());
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ByteArrayInputStream storageObjectContent = new ByteArrayInputStream(new byte[10]);
+
+            try{
+                String url = sysOssVo.getUrl().replace("http://kjjs-443.webvpn.zust.edu.cn/minio-oss/", "http://127.0.0.1:9000/");
+                System.out.println(url);
+                HttpUtil.download(url, os, false);
+                storageObjectContent = new ByteArrayInputStream(os.toByteArray());
+            }catch (Exception ignored){
+
+            }
+            OssFile ossFile = new OssFile();
+            ossFile.setFileContent(storageObjectContent);
+            ossFile.setSysOssVo(sysOssVo);
+            ossFiles.add(ossFile);
+        }
+
+        return ossFiles;
+    }
+
 
     @Override
     public SysOssVo upload(MultipartFile file) {
@@ -171,6 +220,36 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         BeanCopyUtils.copy(oss, sysOssVo);
         return this.matchingUrl(sysOssVo);
     }
+
+
+    @Override
+    public SysOssVo upload(File file, String originalfileName) {
+        byte[] bytes = new byte[(int) file.length()];
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            fis.read(bytes);
+        } catch (FileNotFoundException e) {
+            throw new ServiceException(e.getMessage());
+        } catch (IOException e) {
+            throw new ServiceException(e.getMessage());
+        }
+        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
+        OssClient storage = OssFactory.instance();
+        UploadResult uploadResult;
+        uploadResult = storage.uploadSuffix(bytes, suffix, null);
+        // 保存文件信息
+        SysOss oss = new SysOss();
+        oss.setUrl(uploadResult.getUrl());
+        oss.setFileSuffix(suffix);
+        oss.setFileName(uploadResult.getFilename());
+        oss.setOriginalName(originalfileName);
+        oss.setService(storage.getConfigKey());
+        baseMapper.insert(oss);
+        SysOssVo sysOssVo = new SysOssVo();
+        BeanCopyUtils.copy(oss, sysOssVo);
+        return this.matchingUrl(sysOssVo);
+    }
+
 
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {

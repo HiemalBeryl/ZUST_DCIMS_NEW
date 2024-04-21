@@ -127,4 +127,9 @@ public class DcimsTeamVo {
      * 审核状态详细
      */
     private DcimsTeamAuditVo auditDetail;
+
+    /**
+     * 创建人
+     */
+    private String createBy;
 }

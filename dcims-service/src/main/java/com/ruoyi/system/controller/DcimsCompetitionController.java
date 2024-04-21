@@ -1,16 +1,20 @@
 package com.ruoyi.system.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
+import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
+import com.ruoyi.system.service.ISysDeptService;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -46,6 +50,7 @@ public class DcimsCompetitionController extends BaseController {
 
     private final IDcimsCompetitionService iDcimsCompetitionService;
     private final IDcimsCompetitionAuditService iDcimsCompetitionAuditService;
+    private final ISysDeptService deptService;
 
     /**
      * 查询竞赛赛事基本信息列表
@@ -53,7 +58,7 @@ public class DcimsCompetitionController extends BaseController {
     @SaCheckPermission("dcims:competition:list")
     @GetMapping("/list")
     public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionBo bo, PageQuery pageQuery) {
-        return iDcimsCompetitionService.queryPageList(bo, pageQuery);
+        return iDcimsCompetitionService.queryPageList(bo, pageQuery, true, false);
     }
 
     /**
@@ -66,13 +71,30 @@ public class DcimsCompetitionController extends BaseController {
     }
 
     /**
+     * 根据登录用户对应教师工号，查询正在审核中的竞赛列表
+     */
+    @SaCheckPermission("dcims:competition:listByTeacherId")
+    @GetMapping("/audit/listInProcessing")
+    public TableDataInfo<DcimsCompetitionVo> listByTeacherIdInAuditProcessing(DcimsCompetitionBo bo, PageQuery pageQuery) {
+        // 本接口只查询最新的30个
+        pageQuery.setPageSize(30);
+        TableDataInfo<DcimsCompetitionVo> info = iDcimsCompetitionService.queryPageList(bo, pageQuery, false, false);
+        // 对结果筛选，只返回正在审核中和被退回的竞赛，同时应该限制下一级审核人的工号为教务处老师
+        List<DcimsCompetitionVo> result = info.getRows().stream()
+            .filter(e -> e.getState().equals("0") || e.getState().equals("2"))
+            .filter(e -> e.getNextAuditId().equals(102099L) || e.getNextAuditId().equals(-1L))
+            .collect(Collectors.toList());
+        return TableDataInfo.build(result);
+    }
+
+
+    /**
      * 查询待审核竞赛列表
      */
     @SaCheckPermission("dcims:competition:list")
     @GetMapping("/audit/list")
     public TableDataInfo<DcimsCompetitionVo> list(DcimsCompetitionAuditBo bo, PageQuery pageQuery) {
         TableDataInfo<DcimsCompetitionVo> dcimsCompetitionVoTableDataInfo = iDcimsCompetitionAuditService.queryPageList(bo, pageQuery);
-        System.out.println(dcimsCompetitionVoTableDataInfo);
         return dcimsCompetitionVoTableDataInfo;
     }
 
@@ -94,8 +116,17 @@ public class DcimsCompetitionController extends BaseController {
     @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
     @PostMapping("/exportByType")
     public void exportByType(DcimsCompetitionBo bo, HttpServletResponse response) {
-        List<DcimsCompetitionVo> list = iDcimsCompetitionService.queryList(bo);
-        ExcelUtil.exportTemplate(CollUtil.newArrayList(new HashMap<>(), list), "浙江科技学院大学生科技竞赛项目申报汇总表", "excel/竞赛项目申报汇总表-模板.xlsx", response);
+        PageQuery pq = new PageQuery();
+        pq.setPageSize(1000);
+        pq.setPageNum(1);
+        TableDataInfo<DcimsCompetitionVo> list = iDcimsCompetitionService.queryPageList(bo, pq, true, true);
+        HashMap<Object, Object> map = new HashMap<>();
+        if (bo.getAnnual() != null){
+            map.put("year", bo.getAnnual());
+        }else{
+            map.put("year", "20xx");
+        }
+        ExcelUtil.exportTemplate(CollUtil.newArrayList(map, list.getRows()), "浙江科技学院大学生科技竞赛项目申报汇总表", "excel/竞赛项目申报汇总表-模板.xlsx", response);
     }
 
     /**
@@ -199,4 +230,18 @@ public class DcimsCompetitionController extends BaseController {
         }
     }
 
+
+    /**
+     * 批量下载集中授课表
+     */
+    @SaCheckPermission("dcims:competition:export")
+    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @PostMapping("/download2")
+    public void download2(DcimsCompetitionBo bo, HttpServletResponse response) {
+        try {
+            iDcimsCompetitionService.download2(bo,response);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

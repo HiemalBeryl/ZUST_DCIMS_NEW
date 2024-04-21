@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -207,5 +208,27 @@ public class DcimsGlobalSettingServiceImpl implements IDcimsGlobalSettingService
             }
         }
         return false;
+    }
+
+    /**
+     * 根据教师工号查询待办事项
+     */
+    @Override
+    public Map<String, Object> getTodoList() {
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("A", false);
+        resultMap.put("B", false);
+        List<String> annualList = getAnnualList();
+        annualList.forEach(year -> {
+            if (isDeadline(year, "team")) {
+                resultMap.put("B", true);
+            }
+        });
+        annualList.forEach(year -> {
+            if (isDeadline(year, "competition")) {
+                resultMap.put("A", true);
+            }
+        });
+        return resultMap;
     }
 }

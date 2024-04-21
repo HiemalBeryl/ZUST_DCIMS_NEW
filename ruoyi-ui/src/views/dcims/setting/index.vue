@@ -93,7 +93,7 @@ export default {
       selectedYear: '',
       yearOptions: [],
       establishSwitch: false,
-      establishTime: "",
+      establishTime: ["", ""],
       teamSwitch: false,
       teamTime: "",
       pickerOptions: {
@@ -167,9 +167,9 @@ export default {
     getDetail(){
       this.id = ""
       this.establishSwitch = false
-      this.establishTime = ""
+      this.establishTime = ["", ""]
       this.teamSwitch = false
-      this.teamTime = ""
+      this.teamTime = ["", ""]
 
       getDetail(this.selectedYear).then(response => {
         this.id = response.id

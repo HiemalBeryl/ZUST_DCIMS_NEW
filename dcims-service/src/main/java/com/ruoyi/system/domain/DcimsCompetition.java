@@ -56,7 +56,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 赛事届次
      */
-    private Long term;
+    private String term;
     /**
      * 赛事年份
      */
@@ -112,7 +112,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 集中授课安排表
      */
-    private String teachingHoursAttachment;
+    private Long teachingHoursAttachment;
     /**
      * 获奖目标
      */
@@ -157,6 +157,10 @@ public class DcimsCompetition extends BaseEntity {
      * 审核状态
      */
     private String state;
+    /**
+     * 创建时间
+     */
+    private Date createTime;
     /**
      * 版本
      */

@@ -88,9 +88,8 @@ export function updateUserProfile(data) {
 }
 
 // 用户密码重置
-export function updateUserPwd(oldPassword, newPassword) {
+export function updateUserPwd(newPassword) {
   const data = {
-    oldPassword,
     newPassword
   }
   return request({
