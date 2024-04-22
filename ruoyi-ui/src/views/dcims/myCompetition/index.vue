@@ -147,7 +147,7 @@
             <span>{{ parseTime(scope.row.nationalTime, '{y}-{m}-{d}') || '无' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="本年度拨款" align="center" prop="appropriation" />
+        <el-table-column label="本年度追加经费" align="center" prop="appropriation" />
         <el-table-column label="个人赛限项" align="center" prop="personLimit" />
         <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
         <el-table-column label="评估状态" align="center" fixed="right" prop="state">
@@ -263,8 +263,8 @@
               <div class="define-append">万元</div>
             </div>
           </el-form-item>
-          <el-form-item label="本年度拨款" prop="appropriation">
-            <el-input v-model="form.appropriation" :disabled="true" placeholder="请输入本年度拨款" />
+          <el-form-item label="本年度追加经费" prop="appropriation">
+            <el-input v-model="form.appropriation" :disabled="true" placeholder="请输入本年度追加经费" />
           </el-form-item>
           <el-form-item label="获奖目标" prop="goal">
             <el-input v-model="form.goal" type="textarea" placeholder="请输入内容" />
