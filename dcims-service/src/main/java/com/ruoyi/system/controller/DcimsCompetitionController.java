@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.DcimsGlobalSetting;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
@@ -84,6 +85,12 @@ public class DcimsCompetitionController extends BaseController {
             .filter(e -> e.getState().equals("0") || e.getState().equals("2"))
             .filter(e -> e.getNextAuditId().equals(102099L) || e.getNextAuditId().equals(-1L))
             .collect(Collectors.toList());
+        // 如果当前登录账号为教务处，那么只显示被退回的竞赛
+        if(StrUtil.equals(getUsername(), "102099")){
+            result = result.stream()
+                .filter(e -> e.getState().equals("2"))
+                .collect(Collectors.toList());
+        }
         return TableDataInfo.build(result);
     }
 

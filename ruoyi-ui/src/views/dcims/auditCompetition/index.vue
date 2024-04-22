@@ -138,7 +138,7 @@
 
 
       <!-- 流程跟踪列表，下方的表格 -->
-      <div class="juZhong" style="margin-top: 50px" v-if="!(this.$store.state.user.roles.includes('AcademicAffairsOffice'))">
+      <div class="juZhong" style="margin-top: 50px">
         <h2>流程跟踪</h2>
         <div>
           <el-row :gutter="20">
