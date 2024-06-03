@@ -42,6 +42,9 @@ public class CacheController {
         CACHES.add(new SysCache(CacheConstants.RATE_LIMIT_KEY, "限流处理"));
         CACHES.add(new SysCache(CacheNames.SYS_OSS_CONFIG, "OSS配置"));
         CACHES.add(new SysCache(CacheConstants.PWD_ERR_CNT_KEY, "密码错误次数"));
+
+//        // 以下是依据业务自定义的caches
+//        CACHES.add(new SysCache(CacheConstants.DCIMS_TEAM_LIST, "获奖团队数据"));
     }
 
     /**
@@ -127,7 +130,7 @@ public class CacheController {
      * @param cacheName 缓存名
      */
     @SaCheckPermission("monitor:cache:list")
-    @DeleteMapping("/clearCacheName/{cacheName}")
+    @PostMapping("/clearCacheName/delete/{cacheName}")
     public R<Void> clearCacheName(@PathVariable String cacheName) {
         if (isCacheNames(cacheName)) {
             CacheUtils.clear(cacheName);
@@ -143,7 +146,7 @@ public class CacheController {
      * @param cacheKey key名
      */
     @SaCheckPermission("monitor:cache:list")
-    @DeleteMapping("/clearCacheKey/{cacheName}/{cacheKey}")
+    @PostMapping("/clearCacheKey/delete/{cacheName}/{cacheKey}")
     public R<Void> clearCacheKey(@PathVariable String cacheName, @PathVariable String cacheKey) {
         if (isCacheNames(cacheName)) {
             CacheUtils.evict(cacheName, cacheKey);
@@ -157,7 +160,7 @@ public class CacheController {
      * 清理全部缓存监控
      */
     @SaCheckPermission("monitor:cache:list")
-    @DeleteMapping("/clearCacheAll")
+    @PostMapping("/clearCacheAll/delete")
     public R<Void> clearCacheAll() {
         RedisUtils.deleteKeys("*");
         return R.ok();

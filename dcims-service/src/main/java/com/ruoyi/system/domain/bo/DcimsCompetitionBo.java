@@ -40,7 +40,7 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 赛事类别
      */
-    @NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
+    //@NotBlank(message = "赛事类别不能为空", groups = { EditGroup.class })
     private String level;
 
     /**
@@ -57,7 +57,7 @@ public class DcimsCompetitionBo extends BaseEntity {
      * 赛事届次
      */
     @NotNull(message = "赛事届次不能为空", groups = { AddGroup.class, EditGroup.class })
-    private Long term;
+    private String term;
 
     /**
      * 赛事年份
@@ -82,6 +82,18 @@ public class DcimsCompetitionBo extends BaseEntity {
      */
     @NotBlank(message = "竞赛负责人不能为空", groups = { AddGroup.class, EditGroup.class })
     private String responsiblePersonName;
+
+    /**
+     * 所属学院
+     */
+    @NotNull(message = "所属学院不能为空", groups = { AddGroup.class, EditGroup.class })
+    private Long college;
+
+    /**
+     * 负责人手机号
+     */
+    @NotNull(message = "手机号不能为空", groups = { AddGroup.class})
+    private Long phone;
 
     /**
      * 校内选拔时间
@@ -109,6 +121,18 @@ public class DcimsCompetitionBo extends BaseEntity {
     private BigDecimal appropriation;
 
     /**
+     * 总学时
+     */
+    //@NotNull(message = "总学时不能为空", groups = { AddGroup.class, EditGroup.class })
+    private String teachingHours;
+
+    /**
+     * 集中授课安排表
+     */
+    //@NotBlank(message = "请上传集中授课安排表", groups = { AddGroup.class, EditGroup.class })
+    private String teachingHoursAttachment;
+
+    /**
      * 获奖目标
      */
     private String goal;
@@ -121,8 +145,18 @@ public class DcimsCompetitionBo extends BaseEntity {
     /**
      * 竞赛申报书
      */
-    @NotBlank(message = "竞赛申报书不能为空", groups = { AddGroup.class, EditGroup.class })
-    private String attachment;
+    @NotNull(message = "请上传竞赛申报书", groups = { AddGroup.class, EditGroup.class })
+    private Long attachment;
+
+    /**
+     * 官方红头文件类型，0-文件，1-url
+     */
+    private String redHeaderFileType;
+
+    /**
+     * 官方红头文件
+     */
+    private String redHeaderFile;
 
     /**
      * 个人赛限项

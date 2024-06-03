@@ -1,13 +1,15 @@
 <template>
   <div class="login">
+    <meta name="referrer" content="no-referrer"/>
     <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form">
+      <h3 class="title">浙江科技大学</h3>
       <h3 class="title">竞赛信息管理系统</h3>
       <el-form-item prop="username">
         <el-input
           v-model="loginForm.username"
           type="text"
           auto-complete="off"
-          placeholder="账号"
+          placeholder="账号(教师工号)"
         >
           <svg-icon slot="prefix" icon-class="user" class="el-input__icon input-icon" />
         </el-input>
@@ -37,7 +39,16 @@
           <img :src="codeUrl" @click="getCode" class="login-code-img"/>
         </div>
       </el-form-item>
-      <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
+      <el-row>
+      <el-col :span="6">
+        <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
+      </el-col>
+      <el-col :span="6" :offset="10">
+        <el-button type="text" style="border:0px;padding:0px 0px 0px 0px;" @click="jump(true)">
+          统一身份认证登录
+        </el-button>
+      </el-col>
+      </el-row>
       <el-form-item style="width:100%;">
         <el-button
           :loading="loading"
@@ -62,9 +73,9 @@
 </template>
 
 <script>
-import { getCodeImg } from "@/api/login";
+import { getCodeImg, loginViaTicket } from "@/api/login";
 import Cookies from "js-cookie";
-import { encrypt, decrypt } from '@/utils/jsencrypt'
+import { encrypt, decrypt } from '@/utils/jsencrypt';
 
 export default {
   name: "Login",
@@ -72,8 +83,8 @@ export default {
     return {
       codeUrl: "",
       loginForm: {
-        username: "admin",
-        password: "admin123",
+        username: "",
+        password: "",
         rememberMe: false,
         code: "",
         uuid: ""
@@ -106,6 +117,11 @@ export default {
   created() {
     this.getCode();
     this.getCookie();
+
+    var allCookies = this.getCookies();
+    console.log(allCookies);
+
+    // this.jump(false);
   },
   methods: {
     getCode() {
@@ -150,6 +166,31 @@ export default {
           });
         }
       });
+    },
+    /*
+    统一身份认证登录
+    */
+    jump(flag){
+      this.loading = true;
+      this.$store.dispatch("LoginViaTicket").then(() => {
+        this.$router.push({ path: this.redirect || "/" }).catch(()=>{});
+      }).catch(() => {
+        this.loading = false;
+        if(flag){
+          window.alert("登录失败，请采用其他登录方式");
+        }
+      });
+    },
+    getCookies() {
+    var cookies = document.cookie.split(';').map(cookie => cookie.trim());
+    var cookieObject = {};
+
+    cookies.forEach(cookie => {
+        var [name, value] = cookie.split('=');
+        cookieObject[name] = value;
+    });
+
+    return cookieObject;
     }
   }
 };

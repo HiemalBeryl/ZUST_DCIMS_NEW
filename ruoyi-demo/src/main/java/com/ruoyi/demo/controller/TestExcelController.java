@@ -1,5 +1,6 @@
 package com.ruoyi.demo.controller;
 
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ public class TestExcelController {
     /**
      * 单列表多数据
      */
+    @SaIgnore
     @GetMapping("/exportTemplateOne")
     public void exportTemplateOne(HttpServletResponse response) {
         Map<String, String> map = new HashMap<>();

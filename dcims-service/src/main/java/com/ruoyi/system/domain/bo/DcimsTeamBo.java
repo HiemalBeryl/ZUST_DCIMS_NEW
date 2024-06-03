@@ -36,9 +36,24 @@ public class DcimsTeamBo extends BaseEntity {
     private Long competitionId;
 
     /**
+     * 竞赛名称
+     */
+    private String competitionName;
+
+    /**
+     * 赛事年份
+     */
+    private Integer annual;
+
+    /**
      * 队伍名称
      */
     private String name;
+
+    /**
+     * 作品名称
+     */
+    private String worksName;
 
     /**
      * 比赛类型
@@ -60,7 +75,7 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 指导教师姓名
      */
-    @NotBlank(message = "指导教师姓名不能为空", groups = { AddGroup.class, EditGroup.class })
+    //@NotBlank(message = "指导教师姓名不能为空", groups = { AddGroup.class })
     private String teacherName;
 
     /**
@@ -72,7 +87,7 @@ public class DcimsTeamBo extends BaseEntity {
     /**
      * 参赛学生姓名
      */
-    @NotBlank(message = "参赛学生姓名不能为空", groups = { AddGroup.class, EditGroup.class })
+    //@NotBlank(message = "参赛学生姓名不能为空", groups = { AddGroup.class })
     private String studentName;
 
     /**
@@ -90,7 +105,7 @@ public class DcimsTeamBo extends BaseEntity {
      * 佐证材料
      */
     @Null(message = "创建队伍时不能上传佐证材料，如需上传，请进入获奖申报页面", groups = { AddGroup.class })
-    private String supportMaterial;
+    private Long supportMaterial;
 
     /**
      * 审核状态

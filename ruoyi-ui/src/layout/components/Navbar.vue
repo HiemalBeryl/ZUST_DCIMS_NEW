@@ -6,16 +6,14 @@
     <top-nav id="topmenu-container" class="topmenu-container" v-if="topNav"/>
 
     <div class="right-menu">
+      <template>
+        <span class="right-menu-item">
+          {{ this.$store.state.user.nick }}
+        </span>
+      </template>
+
       <template v-if="device!=='mobile'">
         <search id="header-search" class="right-menu-item" />
-
-        <el-tooltip content="源码地址" effect="dark" placement="bottom">
-          <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <el-tooltip content="文档地址" effect="dark" placement="bottom">
-          <ruo-yi-doc id="ruoyi-doc" class="right-menu-item hover-effect" />
-        </el-tooltip>
 
         <screenfull id="screenfull" class="right-menu-item hover-effect" />
 
@@ -56,6 +54,7 @@ import SizeSelect from '@/components/SizeSelect'
 import Search from '@/components/HeaderSearch'
 import RuoYiGit from '@/components/RuoYi/Git'
 import RuoYiDoc from '@/components/RuoYi/Doc'
+import axios from 'axios'
 
 export default {
   components: {
@@ -102,7 +101,11 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$store.dispatch('LogOut').then(() => {
-          location.href = process.env.VUE_APP_CONTEXT_PATH + "index";
+          //TODO:同时退出统一身份认证
+          axios.get("https://authserver.zust.edu.cn/authserver/logout?service=http://kjjs.zust.edu.cn/").then(()=>{
+            window.open("https://authserver-443.webvpn.zust.edu.cn/authserver/login?service=https%3A%2F%2Fkjjs.zust.edu.cn%2Findex.html", "_self");
+          }).catch(()=>{});
+          location.href = process.env.VUE_APP_CONTEXT_PATH + "index.html";
         })
       }).catch(() => {});
     }

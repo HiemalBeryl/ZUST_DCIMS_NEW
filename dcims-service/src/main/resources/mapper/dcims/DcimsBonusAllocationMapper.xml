@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.DcimsBonusAllocationMapper">
+
+    <resultMap type="com.ruoyi.system.domain.DcimsBonusAllocation" id="DcimsBonusAllocationResult">
+        <result property="id" column="id"/>
+        <result property="years" column="years"/>
+        <result property="college" column="college"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="retentionRatio" column="retention_ratio"/>
+        <result property="distributable" column="distributable"/>
+        <result property="allocated" column="allocated"/>
+        <result property="unallocated" column="unallocated"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="teacherInCharge" column="teacher_in_charge"/>
+        <result property="version" column="version"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+
+</mapper>

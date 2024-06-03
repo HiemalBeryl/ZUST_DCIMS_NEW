@@ -3,8 +3,12 @@ package com.ruoyi.system.controller;
 import java.util.Arrays;
 import java.util.List;
 
+import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.common.core.validate.PermitGroup;
 import com.ruoyi.common.core.validate.RefuseGroup;
+import com.ruoyi.system.domain.bo.CompetitionPartialBo;
+import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
+import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import lombok.RequiredArgsConstructor;
 
@@ -52,8 +56,19 @@ public class DcimsCompetitionAuditController extends BaseController {
      */
     @SaCheckPermission("dcims:competitionAudit:remove")
     @Log(title = "竞赛审核", businessType = BusinessType.DELETE)
-    @DeleteMapping()
+    @PostMapping("/delete")
     public R<Void> remove(@Validated(RefuseGroup.class) @RequestBody List<DcimsCompetitionAuditBo> boList) {
         return toAjax(iDcimsCompetitionAuditService.deleteWithValidByIds(boList));
+    }
+
+    /**
+     * 修改竞赛部分信息
+     */
+    @SaCheckPermission("dcims:competitionAudit:update")
+    @Log(title = "团队获奖审核", businessType = BusinessType.UPDATE)
+    @RepeatSubmit()
+    @PostMapping("/put")
+    public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsCompetitionBo bo) {
+        return toAjax(iDcimsCompetitionAuditService.updateByBoPartial(bo));
     }
 }

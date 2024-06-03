@@ -10,10 +10,11 @@
 
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
-      <el-row :gutter="20">
+      <h2>待提交列表</h2>
+      <!-- <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content "></div></el-col>
 
-          <!-- 用于存放等级的筛选框 -->
+
           <el-col :span="5"><div class="grid-content ">
               <div>
                   赛事等级:
@@ -27,7 +28,7 @@
               </div>
           </div></el-col>
 
-          <!-- 用于存放时间筛选框 -->
+
           <el-col :span="10"><div class="grid-content ">
               <span>申请时间:</span>
                 <div class="block">
@@ -43,17 +44,17 @@
                 </div>
           </div></el-col>
 
-          <!-- 用于存放关键词的搜索 -->
+
           <el-col :span="5"><div class="grid-content">
               <div>关键词搜索:</div>
               <div>
-                  <el-input clearable="true" placeholder="请键入关键词"></el-input>
+                  <el-input clearable placeholder="请键入关键词"></el-input>
 
               </div>
           </div></el-col>
 
           <el-col :span="2"><div class="grid-content"></div></el-col>
-      </el-row>
+      </el-row>-->
 
       <!-- 用于存放勾选需要审核的获奖信息 -->
       <div>
@@ -69,36 +70,40 @@
                   :data="teamList"
                   tooltip-effect="dark"
                   style="width: 100%"
-                  max-height="500px"
+                  max-height="600px"
                   @selection-change="handleSelectionChange"
                 >
                   <el-table-column type="selection" width="55"> </el-table-column>
-                  <el-table-column prop="competitionId" label="赛事id" width="150">
+                  <el-table-column prop="competition.name" label="赛事名称" width="200">
                   </el-table-column>
-                  <el-table-column prop="name" label="团队名称" width="150">
+                  <el-table-column prop="name" label="团队名称" width="100">
                   </el-table-column>
-                  <el-table-column prop="competitionType" label="比赛类型" width="150">
+                  <el-table-column prop="competitionType" label="比赛类型" width="80">
                     <template slot-scope="scope">
                      <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="awardLevel" label="获奖等级" width="150">
+                  <el-table-column prop="awardLevel" label="获奖等级" width="110">
                     <template slot-scope="scope">
                      <dict-tag :options="dict.type.dcims_award_level" :value="scope.row.awardLevel"/>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="studentName" label="参赛学生" width="120">
+                  <el-table-column prop="studentName" label="参赛学生" width="130">
                   </el-table-column>
-                  <el-table-column prop="teacherName" label="指导教师" width="120">
+                  <el-table-column prop="teacherName" label="指导教师" width="130">
                   </el-table-column>
                   <el-table-column prop="awardTime" label="获奖时间" width="120">
                   </el-table-column>
-                  <el-table-column prop="supportMaterial" label="佐证材料" width="120">
+                  <el-table-column prop="supportMaterial" label="佐证材料" width="100">
+                    <template slot-scope="scope">
+                      <el-tag type="primary" v-if="scope.row.supportMaterial != null">有</el-tag>
+                      <el-tag type="error" v-else>无</el-tag>
+                    </template>
                   </el-table-column>
-                  <el-table-column fixed="right" label="查看详情" width="120">
-                    <el-button type="text" @click="checkDetail"
-                      >查看详情</el-button
-                    >
+                  <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
+                    <template slot-scope="scope">
+                      <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
+                    </template>
                   </el-table-column>
                 </el-table>
 
@@ -109,32 +114,28 @@
                   </div>
 
                   <div style="float: right">
-                    <el-button type="primary" @click="submitOrRefuse(1)">提交</el-button>
+                    <el-button type="primary" @click="submitOrRefuse(1)">通过并提交</el-button>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                    <el-button type="warning" @click="submitOrRefuse(0)">退回</el-button>
+                    <el-button type="warning" @click="submitOrRefuse(0)">退回修改</el-button>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                   
+
                   </div>
                 </div>
               </div></el-col
             >
             <el-col :span="2"><div class="grid-content"></div></el-col>
           </el-row>
-        </div>
+      </div>
   </div>
 
-
+  <!-- 提交和退回审核信息对话框-->
   <div>
-    <!-- 提交和退回审核信息对话框-->
     <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
     <el-form ref="form2" :model="submitt" label-width="100px">
-      <el-form-item label="审核人工号" prop="nextTeacherId">
-        <el-input v-model="submitt.nextTeacherId" placeholder="请输入下一级审核人的工号" />
-      </el-form-item>
         <el-input v-model="submitt.reason" type="textArea" placeholder="备注原因" />
     </el-form>
     <div slot="footer" class="dialog-footer">
@@ -143,16 +144,67 @@
     </div>
     </el-dialog>
   </div>
+
+  <!-- 查看详情对话框 -->
+  <el-dialog title="查看详情" :visible.sync="openDetail" width="500px" append-to-body>
+    <el-descriptions title="团队信息">
+    <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition.name }}</el-descriptions-item>
+    <el-descriptions-item label="队伍名称">{{ this.detailForm.name }}</el-descriptions-item>
+    <el-descriptions-item label="作品名称">
+      <span v-if="this.detailForm.worksName != null">
+        {{ this.detailForm.worksName }}
+      </span>
+      <span v-else>
+        无
+      </span>
+    </el-descriptions-item>
+    <el-descriptions-item label="比赛类型">
+      <dict-tag :options="dict.type.dcims_award_type" :value="detailForm.competitionType"/>
+    </el-descriptions-item>
+    <el-descriptions-item label="奖项等级">
+      <dict-tag :options="dict.type.dcims_award_level" :value="detailForm.awardLevel"/>
+    </el-descriptions-item>
+    <el-descriptions-item label="指导教师">{{ this.detailForm.teacherName }}</el-descriptions-item>
+    <el-descriptions-item label="参赛学生">{{ this.detailForm.studentName }}</el-descriptions-item>
+    <el-descriptions-item label="是否存在更高级奖项" :span="2">
+      <span v-if="this.detailForm.advancedAwardNumber != null">
+        <el-tag size="small">是</el-tag>
+      </span>
+      <span v-else>
+        <el-tag size="small">否</el-tag>
+      </span>
+    </el-descriptions-item>
+    <el-descriptions-item label="佐证材料" v-if="openDetail == true">
+          <ImagePreview
+            v-if="checkFileSuffix(detailForm.fileSuffix) && openDetail == true"
+            :width=300 :height=300
+            :src="this.detailForm.supportMaterialURL[0]"
+            :preview-src-list="[this.detailForm.supportMaterialURL[0]]"/>
+          <span v-if="!checkFileSuffix(detailForm.fileSuffix) && openDetail == true">
+            {{ this.detailForm.originalName[0] }}
+            <el-button size="small">
+              <a :href="this.detailForm.supportMaterialURL[0]" target="_blank" style="text-decoration: none">
+		          下载
+	            </a>
+            </el-button>
+          </span>
+          <el-button v-if="(detailForm.supportMaterialURL[0] != null)" type="text" @click.native="openNewTab(detailForm.supportMaterialURL[0])">在新窗口打开</el-button>
+    </el-descriptions-item>
+    </el-descriptions>
+  </el-dialog>
+
+
   </div>
 </template>
 
 <script>
 import {listTeamAudit, permitAudit, refuseAudit} from "@/api/dcims/teamAudit";
 import {getTeam, updateTeam} from "@/api/dcims/team"
+import { listByIds } from "@/api/system/oss"
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
-    dicts: ['dcims_award_type'],
+    dicts: ['dcims_award_type', 'dcims_award_level'],
     data() {
       return {
       // 按钮loading
@@ -182,7 +234,7 @@ import {getTeam, updateTeam} from "@/api/dcims/team"
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 10
+          pageSize: 500
         },
         // 表单参数
         form: {},
@@ -193,6 +245,15 @@ import {getTeam, updateTeam} from "@/api/dcims/team"
           teamId: undefined,// 团队id
           reason: undefined,// 退回或提交原因
           nextTeacherId: undefined// 下一级审核教师的工号
+        },
+        // 查看详情对话框是否显示
+        openDetail: false,
+        // 查看详情内容
+        detailForm: {
+          fileSuffix: [],
+          competition: {
+            name: undefined
+          }
         },
         dateOptions: {
           shortcuts: [{
@@ -251,6 +312,13 @@ import {getTeam, updateTeam} from "@/api/dcims/team"
         listTeamAudit(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;
+
+          console.log(this.teamList)
+          this.teamList.forEach(e => {
+            e.teacherName = e.teacherName.join("，");
+            e.studentName = e.studentName.join("，");
+          })
+
           this.loading = false;
         });
       },
@@ -325,7 +393,9 @@ import {getTeam, updateTeam} from "@/api/dcims/team"
     cancel() {
       this.open1 = false;
       this.open2 = false;
+      this.openDetail = false;
       this.reset();
+      this.detailForm = {};
     },
     /** 提交竞赛信息按钮 */
     submitForm() {
@@ -371,7 +441,7 @@ import {getTeam, updateTeam} from "@/api/dcims/team"
             }else{
               // 执行退回审核逻辑
               refuseAudit(this.submittForm).then(response => {
-                this.$modal.msgSuccess("退回选中竞赛成功");
+                this.$modal.msgError("退回选中竞赛成功");
                 this.submittForm = [];
                 this.open2 = false;
                 this.getList();
@@ -391,9 +461,34 @@ import {getTeam, updateTeam} from "@/api/dcims/team"
       this.loading = false;
       this.open2 = true;
     },
-
-
-
+    /** 查看详情 */
+    checkDetail(row){
+      this.detailForm = row;
+      this.detailForm.supportMaterialURL = [];
+      this.detailForm.fileSuffix = [];
+      this.detailForm.originalName = [];
+      listByIds(this.detailForm.supportMaterial).then(response => {
+        response.data.forEach(entity => {
+          this.detailForm.supportMaterialURL.push(entity.url);
+          this.detailForm.fileSuffix.push(entity.fileSuffix);
+          this.detailForm.originalName.push(entity.originalName);
+          this.detailForm.competition.push(entity.competition);
+        })
+      }).finally(() => {
+        this.openDetail = true;
+      });
+    },
+    /** 检查附件是否为图片 */
+    checkFileSuffix(fileSuffix) {
+      let arr = [".png", ".jpg", ".jpeg", ".webp"];
+      return arr.some(type => {
+        return fileSuffix.indexOf(type) > -1;
+      });
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
+    },
      returnWarn() {
 const h = this.$createElement;
 this.$prompt(h(
@@ -433,7 +528,7 @@ this.$prompt(h(
 			//  todo .....
       console.log(value);
       permitAudit().then(response => {
-        
+
       })
 		}).catch();
 

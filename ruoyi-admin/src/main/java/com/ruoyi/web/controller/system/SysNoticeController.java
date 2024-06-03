@@ -61,7 +61,7 @@ public class SysNoticeController extends BaseController {
      */
     @SaCheckPermission("system:notice:edit")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/put")
     public R<Void> edit(@Validated @RequestBody SysNotice notice) {
         return toAjax(noticeService.updateNotice(notice));
     }
@@ -73,7 +73,7 @@ public class SysNoticeController extends BaseController {
      */
     @SaCheckPermission("system:notice:remove")
     @Log(title = "通知公告", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{noticeIds}")
+    @PostMapping("/delete/{noticeIds}")
     public R<Void> remove(@PathVariable Long[] noticeIds) {
         return toAjax(noticeService.deleteNoticeByIds(noticeIds));
     }

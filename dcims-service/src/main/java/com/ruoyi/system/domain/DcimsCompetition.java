@@ -1,6 +1,7 @@
 package com.ruoyi.system.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.ruoyi.common.core.validate.AddGroup;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import java.io.Serializable;
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * 竞赛赛事基本信息对象 dcims_competition
@@ -28,7 +31,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 主键
      */
-    @TableId(value = "id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
      * 排序号
@@ -53,7 +56,7 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 赛事届次
      */
-    private Long term;
+    private String term;
     /**
      * 赛事年份
      */
@@ -70,6 +73,14 @@ public class DcimsCompetition extends BaseEntity {
      * 竞赛负责人
      */
     private String responsiblePersonName;
+    /**
+     * 所属学院
+     */
+    private Long college;
+    /**
+     * 负责人手机号
+     */
+    private Long phone;
     /**
      * 校内选拔时间
      */
@@ -95,6 +106,14 @@ public class DcimsCompetition extends BaseEntity {
      */
     private BigDecimal appropriation;
     /**
+     * 总学时
+     */
+    private String teachingHours;
+    /**
+     * 集中授课安排表
+     */
+    private Long teachingHoursAttachment;
+    /**
      * 获奖目标
      */
     private String goal;
@@ -105,7 +124,15 @@ public class DcimsCompetition extends BaseEntity {
     /**
      * 竞赛申报书
      */
-    private String attachment;
+    private Long attachment;
+    /**
+     * 官方红头文件类型，0-文件，1-url
+     */
+    private String redHeaderFileType;
+    /**
+     * 官方红头文件
+     */
+    private String redHeaderFile;
     /**
      * 奖金核算状态
      */
@@ -130,6 +157,10 @@ public class DcimsCompetition extends BaseEntity {
      * 审核状态
      */
     private String state;
+    /**
+     * 创建时间
+     */
+    private Date createTime;
     /**
      * 版本
      */

@@ -2,9 +2,12 @@ package com.ruoyi.system.domain.vo;
 
 import java.math.BigDecimal;
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.ruoyi.common.annotation.DataColumn;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
 import lombok.Data;
@@ -27,7 +30,6 @@ public class DcimsCompetitionVo {
     /**
      * 主键
      */
-    @ExcelProperty(value = "主键")
     private Long id;
 
     /**
@@ -58,7 +60,7 @@ public class DcimsCompetitionVo {
      * 赛事届次
      */
     @ExcelProperty(value = "赛事届次")
-    private Long term;
+    private String term;
 
     /**
      * 赛事年份
@@ -83,6 +85,23 @@ public class DcimsCompetitionVo {
      */
     @ExcelProperty(value = "竞赛负责人")
     private String responsiblePersonName;
+
+    /**
+     * 所属学院
+     */
+    private Long college;
+
+    /**
+     * 所属学院
+     */
+    @ExcelProperty(value = "所属学院")
+    private String collegeName;
+
+    /**
+     * 负责人手机号
+     */
+    @ExcelProperty(value = "负责人手机号")
+    private Long phone;
 
     /**
      * 校内选拔时间
@@ -127,7 +146,32 @@ public class DcimsCompetitionVo {
     /**
      * 竞赛申报书
      */
-    private String attachment;
+    private Long attachment;
+
+    /**
+     * 集中授课安排表
+     */
+    private Long teachingHoursAttachment;
+
+    /**
+     * 集中授课安排表详情
+     */
+    private SysOssVo teachingHoursAttachmentOss;
+
+    /**
+     * 官方红头文件类型，0-文件，1-url
+     */
+    private String redHeaderFileType;
+
+    /**
+     * 官方红头文件
+     */
+    private String redHeaderFile;
+
+    /**
+     * 竞赛申报书详情
+     */
+    private SysOssVo oss;
 
     /**
      * 奖金核算状态
@@ -160,4 +204,20 @@ public class DcimsCompetitionVo {
      * 审核状态
      */
     private String state;
+
+    /**
+     * 审核状态详细
+     */
+    private DcimsCompetitionAuditVo audit;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 导出时序号
+     */
+    @TableField(exist = false)
+    private int order;
 }

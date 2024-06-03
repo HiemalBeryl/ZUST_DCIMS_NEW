@@ -16,12 +16,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="organizer" column="organizer"/>
         <result property="responsiblePersonId" column="responsible_person_id"/>
         <result property="responsiblePersonName" column="responsible_person_name"/>
+        <result property="college" column="college"/>
         <result property="innerTime" column="inner_time"/>
         <result property="provinceTime" column="province_time"/>
         <result property="nationalTime" column="national_time"/>
         <result property="stopTime" column="stop_time"/>
         <result property="budget" column="budget"/>
         <result property="appropriation" column="appropriation"/>
+        <result property="teachingHours" column="teaching_hours"/>
+        <result property="teachingHoursAttachment" column="teaching_hours_attachment"/>
         <result property="goal" column="goal"/>
         <result property="introduction" column="introduction"/>
         <result property="attachment" column="attachment"/>

@@ -2,9 +2,9 @@
   <div class="app-container">
     <el-table v-loading="loading" :data="teamList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" v-if="true"/>
-      <el-table-column label="竞赛id" align="center" prop="competitionId" />
+      <el-table-column label="竞赛名称" align="center" prop="competition.name" />
       <el-table-column label="队伍名称" align="center" prop="name" />
+      <el-table-column label="作品名称" align="center" prop="worksName" />
       <el-table-column label="比赛类型" align="center" prop="competitionType">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
@@ -19,13 +19,37 @@
       <el-table-column label="指导教师姓名" align="center" prop="teacherName" />
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
-      <el-table-column label="佐证材料" align="center" prop="supportMaterial" />
-      <el-table-column label="审核状态" align="center" prop="audit">
+      <el-table-column label="类型" align="center" prop="createBy">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
+          <el-tag type="primary" v-if="scope.row.createBy == $store.state.user.name">我创建的</el-tag>
+          <el-tag type="success" v-if="scope.row.createBy != $store.state.user.name">我管理的</el-tag>
+<!--          {{$store.state.user.name}},-->
+<!--          {{scope.row.teacherId}},-->
+<!--          {{scope.row.createBy}}-->
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="佐证材料" align="center" prop="oss.url" >
+        <template slot-scope="scope">
+          <ImagePreview
+            v-if="previewListResource && scope.row.oss != null && checkFileSuffix(scope.row.oss.fileSuffix)"
+            :width=100 :height=100
+            :src="scope.row.oss.url"
+            :preview-src-list="[scope.row.oss.url]"/>
+          <span v-text="scope.row.oss.originalName"
+                v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)"/>
+          <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
+
+        </template>
+      </el-table-column>
+      <el-table-column label="评估状态" align="center" fixed="right" prop="audit">
+        <template slot-scope="scope">
+          <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
+            <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
+          </el-tooltip>
+          <dict-tag v-if="scope.row.auditDetail == null" :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -62,6 +86,10 @@
           <el-form-item label="队伍名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入队伍名称" />
           </el-form-item>
+          <el-form-item label="作品名称" prop="name">
+            <el-input v-model="form.worksName" :disabled="worksNameIsNull" placeholder="请输入作品名称" />
+            <el-checkbox label="作品名称" @change="changeWorksName()">无</el-checkbox>
+          </el-form-item>
           <el-form-item label="比赛类型" prop="competitionType">
             <el-select v-model="form.competitionType" placeholder="请选择比赛类型">
               <el-option
@@ -72,17 +100,43 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="指导教师工号" prop="teacherId">
-            <el-input v-model="form.teacherId" type="textarea" placeholder="请输入内容" />
+          <el-form-item label="指导教师" prop="teacherId">
+            <el-select
+              v-model="form.teacherId"
+              filterable
+              remote
+              multiple
+              :reserve-keyword="false"
+              placeholder="请输入教师姓名"
+              :remote-method="queryTeacher"
+              :loading="loadingTeacher"
+              @change="syncTeacherName">
+              <el-option
+                v-for="item in optionsTeacher"
+                :key="item.teacherId"
+                :label="item.name"
+                :value="item.teacherId">
+              </el-option>
+            </el-select>
           </el-form-item>
-          <el-form-item label="指导教师姓名" prop="teacherName">
-            <el-input v-model="form.teacherName" type="textarea" placeholder="请输入内容" />
-          </el-form-item>
-          <el-form-item label="参赛学生学号" prop="studentId">
-            <el-input v-model="form.studentId" type="textarea" placeholder="请输入内容" />
-          </el-form-item>
-          <el-form-item label="参赛学生姓名" prop="studentName">
-            <el-input v-model="form.studentName" type="textarea" placeholder="请输入内容" />
+          <el-form-item label="参赛学生" prop="studentId">
+            <el-select
+              v-model="form.studentId"
+              filterable
+              remote
+              multiple
+              :reserve-keyword="false"
+              placeholder="请输入学生姓名"
+              :remote-method="queryStudent"
+              :loading="loadingStudent"
+              @change="syncStudentName">
+              <el-option
+                v-for="item in optionsStudent"
+                :key="item.studentId"
+                :label="item.studentId + '  ' + item.name"
+                :value="item.studentId">
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="比赛时间" prop="competitionTime">
             <el-date-picker clearable
@@ -92,18 +146,37 @@
               placeholder="请选择比赛时间">
             </el-date-picker>
           </el-form-item>
-          
+
         </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button :loading="buttonLoading" type="primary" @click="submitForm">确 定</el-button>
+        <el-button :loading="buttonLoading" type="primary" @click="dialogVisible = true">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
+
+
+
+
+      <!-- 二次确认是否修改团队信息 -->
+      <el-dialog
+        title="提示"
+        :visible.sync="dialogVisible"
+        width="30%"
+        :before-close="handleClose"
+        append-to-body>
+        <span>您确定要保存修改吗？这会导致获奖信息需要被重新评估！</span>
+        <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="submitForm">确 定</el-button>
+          </span>
+      </el-dialog>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import { listTeamByTeacherId, getTeam, delTeam, addTeam, updateTeam } from "@/api/dcims/team";
+import { listCompetition } from "@/api/dcims/competition"
+import { listTeacherDict, listStudentDict } from "@/api/dcims/basicData"
 
 export default {
   name: "Team",
@@ -130,6 +203,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 二次确认是否修改
+      dialogVisible: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -169,7 +244,23 @@ export default {
         supportMaterial: [
           { required: true, message: "佐证材料不能为空", trigger: "blur" }
         ],
-      }
+      },
+      // 是否不填写作品名称
+      worksNameIsNull: false,
+      // 是否正在查找竞赛列表
+      loadingCompetition: undefined,
+      // 是否正在查找教师列表
+      loadingTeacher: undefined,
+      // 是否正在查找学生列表
+      loadingStudent: undefined,
+      // 可选竞赛
+      optionsCompetition: [],
+      // 可选教师
+      optionsTeacher: [],
+      // 可选学生
+      optionsStudent: [],
+      // 预览列表图片
+      previewListResource: true,
     };
   },
   created() {
@@ -182,6 +273,14 @@ export default {
       listTeamByTeacherId(this.queryParams).then(response => {
         this.teamList = response.rows;
         this.total = response.total;
+
+        this.teamList.forEach(element => {
+        element.teacherId = element.teacherId.join();
+        element.studentId = element.studentId.join();
+        element.teacherName = element.teacherName.join();
+        element.studentName = element.studentName.join();
+        });
+
         this.loading = false;
       });
     },
@@ -197,6 +296,7 @@ export default {
         orderNum: undefined,
         competitionId: undefined,
         name: undefined,
+        worksName: undefined,
         competitionType: undefined,
         awardLevel: undefined,
         teacherId: undefined,
@@ -250,13 +350,28 @@ export default {
         this.form = response.data;
         this.open = true;
         this.title = "修改参赛团队";
+        // 调用姓名查询回显用
+        // this.form.teacherName.forEach((element) => {
+        //   this.queryTeacher(element);
+        // })
+        // this.form.studentName.forEach((element) => {
+        //   this.queryStudent(element);
+        // })
+        // syncStudentName();
+        // syncTeacherName();
       });
     },
     /** 提交按钮 */
     submitForm() {
+      this.dialogVisible = false;
       this.$refs["form"].validate(valid => {
         if (valid) {
           this.buttonLoading = true;
+          // 将数组类型的教师学生信息转换为字符串
+          this.form.teacherId = this.form.teacherId.join(",");
+          this.form.teacherName = this.form.teacherName.join(",");
+          this.form.studentId = this.form.studentId.join(",");
+          this.form.studentName = this.form.studentName.join(",");
           if (this.form.id != null) {
             updateTeam(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
@@ -297,7 +412,109 @@ export default {
       this.download('dcims/team/export', {
         ...this.queryParams
       }, `team_${new Date().getTime()}.xlsx`)
-    }
+    },
+    /** 是否填写作品名称 */
+    changeWorksName(){
+      this.worksNameIsNull = !this.worksNameIsNull;
+      if(this.worksNameIsNull){
+        this.form.worksName = null;
+      }
+    },
+    /** 关闭二次确认窗口 */
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done();
+        })
+        .catch(_ => {});
+    },
+    // 根据选中学号同步学生姓名
+    syncStudentName(){
+      console.log(this.optionsStudent);
+      this.form.studentName = [];
+      this.form.studentId.forEach(element => {
+        this.form.studentName.push(
+          this.optionsStudent.filter(function(item){
+            if (item.studentId == element){
+              return item.name;
+            }
+          })[0].name
+        );
+      });
+    },
+    // 根据选中工号同步教师姓名
+    syncTeacherName(){
+      this.form.teacherName = [];
+      this.form.teacherId.forEach(element => {
+        this.form.teacherName.push(
+          this.optionsTeacher.filter(function(item){
+            if (item.teacherId == element){
+              return item.name;
+            }
+          })[0].name
+        );
+      });
+    },
+    /** 查询竞赛列表 */
+    queryCompetition(query) {
+      if (query !== '') {
+        this.loadingCompetition = true;
+        const params = {
+          annual: this.year,
+          name: query,
+        };
+        setTimeout(() => {
+          listCompetition(params).then(response => {
+            this.optionsCompetition = response.rows;
+          }).finally(() => {
+            this.loadingCompetition = false;
+          })
+        }, 200);
+      } else {
+        this.optionsCompetition = [];
+      }
+    },
+    /** 查询教师列表 */
+    queryTeacher(query) {
+      if (query !== '') {
+        this.loadingTeacher = true;
+        setTimeout(() => {
+          listTeacherDict(query).then(response => {
+            this.optionsTeacher = response.rows;
+          }).finally(() => {
+            this.loadingTeacher = false;
+          })
+        }, 200);
+      } else {
+        this.optionsTeacher = [];
+      }
+    },
+    /** 查询学生列表 */
+    queryStudent(query) {
+      if (query !== '') {
+        this.loadingStudent = true;
+        setTimeout(() => {
+          listStudentDict(query).then(response => {
+            this.optionsStudent = response.rows;
+          }).finally(() => {
+            this.loadingStudent = false;
+          })
+        }, 200);
+      } else {
+        this.optionsStudent = [];
+      }
+    },
+    checkFileSuffix(fileSuffix) {
+      let arr = ["png", "jpg", "jpeg"];
+      return arr.some(type => {
+        return fileSuffix.indexOf(type) > -1;
+      });
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
+    },
+
   }
 };
 </script>

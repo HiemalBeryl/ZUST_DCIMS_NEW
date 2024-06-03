@@ -108,7 +108,7 @@ public class SysOssController extends BaseController {
      */
     //@SaCheckPermission("system:oss:remove")
     @Log(title = "OSS对象存储", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{ossIds}")
+    @PostMapping("/delete/{ossIds}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ossIds) {
         return toAjax(iSysOssService.deleteWithValidByIds(Arrays.asList(ossIds), true));

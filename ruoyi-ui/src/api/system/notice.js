@@ -29,8 +29,8 @@ export function addNotice(data) {
 // 修改公告
 export function updateNotice(data) {
   return request({
-    url: '/system/notice',
-    method: 'put',
+    url: '/system/notice/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,7 +38,7 @@ export function updateNotice(data) {
 // 删除公告
 export function delNotice(noticeId) {
   return request({
-    url: '/system/notice/' + noticeId,
-    method: 'delete'
+    url: '/system/notice/delete/' + noticeId,
+    method: 'post'
   })
 }

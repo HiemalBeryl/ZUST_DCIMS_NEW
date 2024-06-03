@@ -56,7 +56,7 @@ public class SysProfileController extends BaseController {
      * 修改用户
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PostMapping("/put")
     public R<Void> updateProfile(@RequestBody SysUser user) {
         if (StringUtils.isNotEmpty(user.getPhonenumber()) && !userService.checkPhoneUnique(user)) {
             return R.fail("修改用户'" + user.getUserName() + "'失败，手机号码已存在");
@@ -78,22 +78,17 @@ public class SysProfileController extends BaseController {
     /**
      * 重置密码
      *
-     * @param newPassword 旧密码
-     * @param oldPassword 新密码
+     * @param newPassword 新密码
      */
     @Log(title = "个人信息", businessType = BusinessType.UPDATE)
-    @PutMapping("/updatePwd")
-    public R<Void> updatePwd(String oldPassword, String newPassword) {
+    @PostMapping("/updatePwd/put")
+    public R<Void> updatePwd(String newPassword) {
         SysUser user = userService.selectUserById(LoginHelper.getUserId());
         String userName = user.getUserName();
         String password = user.getPassword();
-        if (!BCrypt.checkpw(oldPassword, password)) {
-            return R.fail("修改密码失败，旧密码错误");
-        }
         if (BCrypt.checkpw(newPassword, password)) {
             return R.fail("新密码不能与旧密码相同");
         }
-
         if (userService.resetUserPwd(userName, BCrypt.hashpw(newPassword)) > 0) {
             return R.ok();
         }

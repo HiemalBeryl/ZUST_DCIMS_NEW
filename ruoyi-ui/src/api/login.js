@@ -69,3 +69,11 @@ export function getCodeSms() {
     timeout: 20000
   })
 }
+
+// 统一身份认证登录
+export function loginViaTicket() {
+  return request({
+    url: '/loginViaTicket',
+    method: 'post'
+  })
+}

@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询待审核竞赛列表
+// 查询待审核团队列表
 export function listTeamAudit(query) {
   return request({
     url: '/dcims/team/audit/list',
@@ -9,7 +9,7 @@ export function listTeamAudit(query) {
   })
 }
 
-// 通过竞赛审核
+// 通过团队审核
 export function permitAudit(params) {
   return request({
     url: '/dcims/teamAudit/',
@@ -18,11 +18,11 @@ export function permitAudit(params) {
   })
 }
 
-// 退回竞赛审核
+// 退回团队审核
 export function refuseAudit(params) {
   return request({
-    url: '/dcims/teamAudit/',
-    method: 'delete',
+    url: '/dcims/teamAudit/delete/',
+    method: 'post',
     data: params
   })
 }

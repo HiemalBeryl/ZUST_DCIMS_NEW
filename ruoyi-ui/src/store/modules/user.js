@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/login'
+import { login, logout, getInfo, loginViaTicket } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -17,6 +17,9 @@ const user = {
     SET_NAME: (state, name) => {
       state.name = name
     },
+    SET_NICK: (state, nick) => {
+      state.nick = nick
+    },
     SET_AVATAR: (state, avatar) => {
       state.avatar = avatar
     },
@@ -29,7 +32,7 @@ const user = {
   },
 
   actions: {
-    // 登录   
+    // 登录
     Login({ commit }, userInfo) {
       const username = userInfo.username.trim()
       const password = userInfo.password
@@ -37,6 +40,21 @@ const user = {
       const uuid = userInfo.uuid
       return new Promise((resolve, reject) => {
         login(username, password, code, uuid).then(res => {
+          window.localStorage.setItem("token",res.data.token)
+          console.log(window.localStorage.getItem('token'))
+          setToken(res.data.token)
+          commit('SET_TOKEN', res.data.token)
+          resolve()
+        }).catch(error => {
+          reject(error)
+        })
+      })
+    },
+
+    // 统一身份认证登录
+    LoginViaTicket({ commit }) {
+      return new Promise((resolve, reject) => {
+        loginViaTicket().then(res => {
           window.localStorage.setItem("token",res.data.token)
           console.log(window.localStorage.getItem('token'))
           setToken(res.data.token)
@@ -61,6 +79,7 @@ const user = {
             commit('SET_ROLES', ['ROLE_DEFAULT'])
           }
           commit('SET_NAME', user.userName)
+          commit('SET_NICK', user.nickName)
           commit('SET_AVATAR', avatar)
           resolve(res)
         }).catch(error => {

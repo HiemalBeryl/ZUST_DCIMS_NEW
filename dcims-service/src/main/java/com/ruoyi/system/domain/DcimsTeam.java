@@ -27,7 +27,7 @@ public class DcimsTeam extends BaseEntity {
     /**
      * 主键
      */
-    @TableId(value = "id")
+    @TableId(value = "id",type = IdType.AUTO)
     private Long id;
     /**
      * 排序号
@@ -41,6 +41,10 @@ public class DcimsTeam extends BaseEntity {
      * 队伍名称
      */
     private String name;
+    /**
+     * 作品名称
+     */
+    private String worksName;
     /**
      * 比赛类型
      */
@@ -80,7 +84,7 @@ public class DcimsTeam extends BaseEntity {
     /**
      * 佐证材料
      */
-    private String supportMaterial;
+    private Long supportMaterial;
     /**
      * 审核状态
      */

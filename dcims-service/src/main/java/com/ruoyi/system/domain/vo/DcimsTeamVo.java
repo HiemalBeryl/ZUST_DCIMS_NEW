@@ -42,6 +42,12 @@ public class DcimsTeamVo {
     private String name;
 
     /**
+     * 作品名称
+     */
+    @ExcelProperty(value = "作品名称")
+    private String worksName;
+
+    /**
      * 比赛类型
      */
     @ExcelProperty(value = "比赛类型", converter = ExcelDictConvert.class)
@@ -98,7 +104,12 @@ public class DcimsTeamVo {
      * 佐证材料
      */
     @ExcelProperty(value = "佐证材料")
-    private String supportMaterial;
+    private Long supportMaterial;
+
+    /**
+     * 佐证材料地址
+     */
+    private String supportMaterialURL;
 
     /**
      * 审核状态
@@ -112,4 +123,13 @@ public class DcimsTeamVo {
      */
     private Integer nextAuditId;
 
+    /**
+     * 审核状态详细
+     */
+    private DcimsTeamAuditVo auditDetail;
+
+    /**
+     * 创建人
+     */
+    private String createBy;
 }

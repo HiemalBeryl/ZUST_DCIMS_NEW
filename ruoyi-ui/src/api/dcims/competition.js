@@ -9,6 +9,15 @@ export function listCompetition(query) {
   })
 }
 
+// 根据登录用户教师工号查询竞赛赛事基本信息列表
+export function listCompetitionByTeacherId(query) {
+  return request({
+    url: '/dcims/competition/listByTeacherId',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询竞赛赛事基本信息详细
 export function getCompetition(id) {
   return request({
@@ -29,8 +38,8 @@ export function addCompetition(data) {
 // 修改竞赛赛事基本信息
 export function updateCompetition(data) {
   return request({
-    url: '/dcims/competition',
-    method: 'put',
+    url: '/dcims/competition/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,7 +47,31 @@ export function updateCompetition(data) {
 // 删除竞赛赛事基本信息
 export function delCompetition(id) {
   return request({
-    url: '/dcims/competition/' + id,
-    method: 'delete'
+    url: '/dcims/competition/delete/' + id,
+    method: 'post'
+  })
+}
+
+// 根据竞赛id查询指导教师
+export function getTutor(id) {
+  return request({
+    url: '/dcims/competition/tutor/' + id,
+    method: 'get',
+  })
+}
+
+// 为竞赛添加指导教师
+export function addTutor(competitionId, teacherIds) {
+  return request({
+    url: '/dcims/competition/tutor/competitionId/'+competitionId+'/teacherIds/'+teacherIds,
+    method: 'post',
+  })
+}
+
+// 删除竞赛赛事基本信息
+export function deleteTutor(id) {
+  return request({
+    url: '/dcims/competition/tutor/delete/' + id,
+    method: 'post'
   })
 }

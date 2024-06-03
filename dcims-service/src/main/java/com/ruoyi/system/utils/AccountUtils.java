@@ -14,7 +14,7 @@ public class AccountUtils {
     private static AccountMapper accountMapper;
 
     @Autowired
-    public void AccountUtils(AccountMapper accountMapper){
+    public AccountUtils(AccountMapper accountMapper){
         AccountUtils.accountMapper = accountMapper;
     }
 

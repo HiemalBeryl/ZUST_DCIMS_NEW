@@ -29,8 +29,8 @@ export function addTree(data) {
 // 修改测试树表
 export function updateTree(data) {
   return request({
-    url: '/demo/tree',
-    method: 'put',
+    url: '/demo/tree/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,7 +38,7 @@ export function updateTree(data) {
 // 删除测试树表
 export function delTree(id) {
   return request({
-    url: '/demo/tree/' + id,
-    method: 'delete'
+    url: '/demo/tree/delete/' + id,
+    method: 'post'
   })
 }

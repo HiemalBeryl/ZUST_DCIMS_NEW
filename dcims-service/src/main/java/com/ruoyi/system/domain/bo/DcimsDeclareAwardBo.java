@@ -84,8 +84,8 @@ public class DcimsDeclareAwardBo extends BaseEntity {
     /**
      * 佐证材料
      */
-    @NotBlank(message = "佐证材料不能为空", groups = {EditGroup.class})
-    private String supportMaterial;
+    @NotNull(message = "佐证材料不能为空", groups = {EditGroup.class})
+    private Long supportMaterial;
 
     /**
      * 审核状态
@@ -96,6 +96,5 @@ public class DcimsDeclareAwardBo extends BaseEntity {
     /**
      * 下一级审核人工号
      */
-    @NotNull(message = "审核人工号不能为空", groups = {EditGroup.class})
     private Integer nextAuditId;
 }

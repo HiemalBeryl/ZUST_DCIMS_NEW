@@ -29,8 +29,8 @@ export function addOssConfig(data) {
 // 修改对象存储配置
 export function updateOssConfig(data) {
   return request({
-    url: '/system/oss/config',
-    method: 'put',
+    url: '/system/oss/config/put',
+    method: 'post',
     data: data
   })
 }
@@ -38,8 +38,8 @@ export function updateOssConfig(data) {
 // 删除对象存储配置
 export function delOssConfig(ossConfigId) {
   return request({
-    url: '/system/oss/config/' + ossConfigId,
-    method: 'delete'
+    url: '/system/oss/config/delete/' + ossConfigId,
+    method: 'post'
   })
 }
 
@@ -51,8 +51,8 @@ export function changeOssConfigStatus(ossConfigId, status, configKey) {
     configKey
   }
   return request({
-    url: '/system/oss/config/changeStatus',
-    method: 'put',
+    url: '/system/oss/config/changeStatus/put',
+    method: 'post',
     data: data
   })
 }

@@ -5,6 +5,7 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
+import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public interface IDcimsTeamAuditService {
     /**
      * 查询竞赛审核列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamAuditBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVoV2> queryPageListAudit(DcimsTeamAuditBo bo, PageQuery pageQuery);
 
     /**
      * 查询竞赛审核列表
@@ -40,4 +41,10 @@ public interface IDcimsTeamAuditService {
      * 校验并批量删除竞赛审核信息
      */
     Boolean deleteWithValidByIds(List<DcimsTeamAuditBo> boList);
+
+    /**
+     * 对已经归档的获奖信息进行删除
+     */
+    Boolean deleteOneById(Long id);
+
 }

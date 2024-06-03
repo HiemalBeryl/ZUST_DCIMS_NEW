@@ -304,4 +304,23 @@ public class SysDeptServiceImpl implements ISysDeptService, DeptService {
         return baseMapper.deleteById(deptId);
     }
 
+
+    /**
+     * 查询部门负责人
+     *
+     * @param collegeId 学院ID（排序号）
+     * @param isParent 是否是教务处
+     * @return 结果
+     */
+    @Override
+    public Long getDeptSuperintendent(Long collegeId, boolean isParent) {
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        if (isParent) {
+            lqw.eq(SysDept::getDeptId, 100);
+        }else{
+            lqw.eq(SysDept::getParentId,100);
+            lqw.eq(SysDept::getOrderNum,collegeId);
+        }
+        return baseMapper.selectOne(lqw).getLeaderTeacherId();
+    }
 }

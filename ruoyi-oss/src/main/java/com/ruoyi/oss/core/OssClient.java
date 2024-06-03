@@ -57,6 +57,9 @@ public class OssClient {
             } else {
                 clientConfig.setProtocol(Protocol.HTTP);
             }
+            clientConfig.setSocketTimeout(30000);
+            clientConfig.setConnectionTimeout(30000);
+            clientConfig.setMaxErrorRetry(8);
             AmazonS3ClientBuilder build = AmazonS3Client.builder()
                 .withEndpointConfiguration(endpointConfig)
                 .withClientConfiguration(clientConfig)
@@ -145,6 +148,7 @@ public class OssClient {
 
     public InputStream getObjectContent(String path) {
         path = path.replace(getUrl() + "/", "");
+        System.out.println(path);
         S3Object object = client.getObject(properties.getBucketName(), path);
         return object.getObjectContent();
     }

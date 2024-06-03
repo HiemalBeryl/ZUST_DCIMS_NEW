@@ -1,14 +1,20 @@
 package com.ruoyi.system.service;
 
-import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
+import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 参赛团队Service接口
@@ -21,22 +27,17 @@ public interface IDcimsTeamService {
     /**
      * 查询参赛团队
      */
-    DcimsTeamVo queryById(Long id);
+    DcimsTeamVoV2 queryById(Long id);
 
     /**
      * 查询参赛团队列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageList(DcimsTeamBo bo, PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery);
 
     /**
      * 根据教师工号查询参赛团队列表
      */
-    TableDataInfo<DcimsTeamVo> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery);
-
-    /**
-     * 查询待审核团队列表
-     */
-    TableDataInfo<DcimsTeamVo> queryPageListAudit(DcimsTeamBo bo,PageQuery pageQuery);
+    TableDataInfo<DcimsTeamVoV2> queryPageListByTeacherId(DcimsTeamBo bo, PageQuery pageQuery);
 
     /**
      * 查询参赛团队列表
@@ -63,4 +64,39 @@ public interface IDcimsTeamService {
      * 校验并批量删除参赛团队信息
      */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
+
+    /**
+     * 获取批量导入模板
+     */
+    File getImportTemplate(Integer annual);
+
+    /**
+     * 读取用户上传的模板内数据
+     */
+    List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file);
+
+    /**
+     * 将数据保存在Redis中
+     */
+    Map<String, Object> saveDataToRedis(List<DcimsTeamImportExcel> importTeamData);
+
+    /**
+     * 手动修改批量导入的数据
+     */
+    Map<String, Object> editImportData(String id, List<DcimsTeamImportExcel> importTeamData);
+
+    /**
+     * 为批量导入追加数据
+     */
+    Map<String, Object> appendImportData(String id, String type, InputStream file);
+
+    /**
+     * 批量导入数据保存
+     */
+    boolean submitImportData(String ImportDataId);
+
+    /**
+     * 下载获奖团队信息以及附件
+     */
+    void download(DcimsTeamBo bo, HttpServletResponse response) throws IOException;
 }

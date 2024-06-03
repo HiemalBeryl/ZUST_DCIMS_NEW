@@ -8,10 +8,13 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.Constants;
+import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.event.LogininforEvent;
 import com.ruoyi.common.core.domain.dto.RoleDTO;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
+import com.ruoyi.common.core.domain.model.RegisterBody;
 import com.ruoyi.common.core.domain.model.XcxLoginUser;
 import com.ruoyi.common.enums.DeviceType;
 import com.ruoyi.common.enums.LoginType;
@@ -26,14 +29,23 @@ import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.redis.RedisUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.system.mapper.SysDeptMapper;
+import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -48,8 +60,13 @@ import java.util.function.Supplier;
 public class SysLoginService {
 
     private final SysUserMapper userMapper;
+    private final SysRoleMapper roleMapper;
     private final ISysConfigService configService;
     private final SysPermissionService permissionService;
+    private final SysRegisterService registerService;
+    private final ISysUserService userService;
+    private final SysDeptMapper deptMapper;
+    private final RestTemplate restTemplate;
 
     @Value("${user.password.maxRetryCount}")
     private Integer maxRetryCount;
@@ -132,6 +149,17 @@ public class SysLoginService {
             recordLogininfor(loginUser.getUsername(), Constants.LOGOUT, MessageUtils.message("user.logout.success"));
         } catch (NotLoginException ignored) {
         }
+    }
+
+
+    /**
+     * 退出统一身份认证登录
+     */
+    public void logoutViaTicket(String logoutURL) {
+        String serviceName = "http://kjjs.zust.edu.cn";
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity(logoutURL + serviceName, String.class);
+        System.out.println(logoutURL);
+        System.out.println(responseEntity);
     }
 
     /**
@@ -290,5 +318,96 @@ public class SysLoginService {
 
         // 登录成功 清空错误次数
         RedisUtils.deleteObject(errorKey);
+    }
+
+
+    /**
+     * 统一身份认证
+     */
+    public String loginViaTicket(String userName, String nickName, String email, String phoneNumber, String sex){
+        if (userName.trim().equals("") || nickName.trim().equals(""))
+            throw new UserException("user.not.exists", userName);
+        // 判断用户是否第一次通过统一认证登录
+        SysUser user = userMapper.selectOne(new LambdaQueryWrapper<SysUser>()
+            .select(SysUser::getUserName, SysUser::getStatus)
+            .eq(SysUser::getUserName, userName));
+        // 如果用户不存在，先注册用户
+        if (ObjectUtil.isNull(user)) {
+            log.info("登录用户：{} 是第一次登录本系统.", userName);
+            log.info("创建用户：{} .", userName);
+            RegisterBody registerBody = new RegisterBody();
+            registerBody.setUsername(userName);
+            registerBody.setPassword(phoneNumber);
+            registerBody.setUserType("sys_user");
+            registerService.register(registerBody);
+        }
+        // 获取注册后的用户对象
+        SysUser doUser = loadUserByUsername(userName);
+        // 填充必要数据，并将新用户设置为普通教师
+        if (ObjectUtil.isNull(user)) {
+            doUser.setNickName(nickName);
+            doUser.setEmail(email);
+            doUser.setPhonenumber(phoneNumber);
+            doUser.setSex(sex);
+            doUser.setTeacherId(userName);
+
+            // TODO: 判断系统中是否预先设置了该教师的职位。否则一律为学科竞赛负责人
+            doUser = getTeacherRole(doUser);
+
+            userService.updateUser(doUser);
+        }
+        SysUser afterUser = loadUserByUsername(userName);
+
+        // 此处可根据登录用户的数据不同 自行创建 loginUser
+        LoginUser loginUser = buildLoginUser(afterUser);
+        // 生成token
+        LoginHelper.loginByDevice(loginUser, DeviceType.PC);
+
+        recordLogininfor(userName, Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success"));
+        recordLoginInfo(afterUser.getUserId(), userName);
+        return StpUtil.getTokenValue();
+    }
+
+    /**
+     * 教师角色判断
+     */
+    public SysUser getTeacherRole(SysUser user){
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysDept::getLeaderTeacherId, user.getTeacherId());
+        SysDept dept = deptMapper.selectOne(lqw);
+        Long[] roleIds = new Long[2];
+        roleIds[0] = 6L;
+        roleIds[1] = 7L;
+        if(!ObjectUtil.isNull(dept)){
+            // 判断是教务处还是学院竞赛协调人
+            LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+            if(dept.getDeptName().equals("浙江科技学院教务处")){
+                wrapper.eq(SysRole::getRoleName,"校级管理员");
+                SysRole role = roleMapper.selectOne(wrapper);
+                if(ObjectUtil.isNull(role)){
+                    throw new UserException("system.internal.error", user.getTeacherId());
+                }
+                roleIds[1] = role.getRoleId();
+                user.setRoleIds(roleIds);
+            }else{
+                wrapper.eq(SysRole::getRoleName,"学院竞赛负责人");
+                SysRole role = roleMapper.selectOne(wrapper);
+                if(ObjectUtil.isNull(role)){
+                    throw new UserException("system.internal.error", user.getTeacherId());
+                }
+                roleIds[1] = role.getRoleId();
+                user.setRoleIds(roleIds);
+            }
+        }
+        LambdaQueryWrapper<SysRole> wrapper1 = new LambdaQueryWrapper<>();
+        wrapper1.eq(SysRole::getRoleName,"学科竞赛负责人");
+        SysRole role = roleMapper.selectOne(wrapper1);
+        if(ObjectUtil.isNull(role)){
+            throw new UserException("system.internal.error", user.getTeacherId());
+        }
+        roleIds[0] = role.getRoleId();
+        System.out.println(Arrays.toString(roleIds));
+        user.setRoleIds(roleIds);
+        return user;
     }
 }

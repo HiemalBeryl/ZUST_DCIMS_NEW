@@ -1,14 +1,14 @@
 {
   "name": "ruoyi-vue-plus",
   "version": "4.6.0",
-  "description": "RuoYi-Vue-Plus后台管理系统",
+  "description": "竞赛信息管理系统-浙江科技大学",
   "author": "LionLi",
   "license": "MIT",
   "scripts": {
     "serve": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
     "build": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
     "dev": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build:prod": "vue-cli-service build",
+    "build:prod": "SET NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build",
     "preview": "node build/index.js --preview",
     "lint": "eslint --ext .js,.vue src"
   },
