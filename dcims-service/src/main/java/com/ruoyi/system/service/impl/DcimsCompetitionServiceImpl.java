@@ -83,6 +83,8 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
             lqw.eq(DcimsCompetition::getCollege, college);
 
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        System.out.println(lqw);
+        System.out.println(result.getRecords().stream().map(DcimsCompetitionVo::getName).collect(Collectors.toList()));
         TableDataInfo<DcimsCompetitionVo> build = TableDataInfo.build(result);
         // 获取团队对应oss信息
         Set<Long> OSSIds = new HashSet<>();
@@ -141,6 +143,7 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         TableDataInfo<DcimsCompetitionVo> build1 = TableDataInfo.build(voList);
         BeanUtils.copyProperties(build ,build1);
         build1.setRows(voList);
+        System.out.println(build1);
         return build1;
     }
 
@@ -214,12 +217,25 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
     }
 
     /**
+     * 查询竞赛赛事基本信息列表
+     */
+    @Override
+    public List<DcimsCompetitionVo> queryList(Integer annual) {
+        DcimsCompetitionBo bo = new DcimsCompetitionBo();
+        bo.setAnnual(annual);
+        PageQuery pq = new PageQuery();
+        pq.setPageNum(0);
+        pq.setPageSize(10000);
+        return this.queryPageList(bo, pq, true, false).getRows();
+    }
+
+    /**
      * 根据竞赛名列表，查询竞赛赛事基本信息列表
      */
     @Override
     public List<DcimsCompetitionVo> queryList(List<String> CompetitionNames) {
         LambdaQueryWrapper<DcimsCompetition> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(DcimsCompetition::getName, CompetitionNames);
+        lqw.in(DcimsCompetition::getName, CompetitionNames);
         List<DcimsCompetitionVo> dcimsCompetitionVos = baseMapper.selectVoList(lqw);
         SysDictData sysDictData = new SysDictData();
         sysDictData.setDictType("dcims_college");
@@ -503,17 +519,21 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
      */
     public Integer getFromCollege(){
         // 教务处可以查看全校，学院管理员可以查看学院，普通教师查看自己
-        List<SysDept> depts = deptService.selectDeptList(new SysDept());
-        long loginId = AccountUtils.getAccount().getTeacherId();
-        Integer teacherCollege = -1;
-        Optional<SysDept> first = depts.stream().filter(e -> e.getLeaderTeacherId() != null)
-            .filter(e -> e.getLeaderTeacherId().equals(loginId)).findFirst();
-        if (first.isPresent()){
-            teacherCollege = first.get().getOrderNum();
+        try {
+            List<SysDept> depts = deptService.selectDeptList(new SysDept());
+            long loginId = AccountUtils.getAccount().getTeacherId();
+            Integer teacherCollege = -1;
+            Optional<SysDept> first = depts.stream().filter(e -> e.getLeaderTeacherId() != null)
+                .filter(e -> e.getLeaderTeacherId().equals(loginId)).findFirst();
+            if (first.isPresent()){
+                teacherCollege = first.get().getOrderNum();
+            }
+            if (first.isPresent() && first.get().getDeptName().equals("浙江科技学院教务处")){
+                teacherCollege = -1;
+            }
+            return teacherCollege;
+        }catch (Exception e){
+            return -1;
         }
-        if (first.isPresent() && first.get().getDeptName().equals("浙江科技学院教务处")){
-            teacherCollege = -1;
-        }
-        return teacherCollege;
     }
 }

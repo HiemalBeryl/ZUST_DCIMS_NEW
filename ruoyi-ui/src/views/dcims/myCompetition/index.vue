@@ -127,11 +127,7 @@
         <el-table-column label="主办单位" align="center" prop="organizer" width="200px"/>
         <el-table-column label="竞赛负责人工号" align="center" prop="responsiblePersonId" />
         <el-table-column label="竞赛负责人" align="center" prop="responsiblePersonName" />
-        <el-table-column label="所属学院" align="center" prop="college" width="150px">
-          <template slot-scope="scope">
-            <dict-tag :options="dict.type.dcims_college" :value="scope.row.college"/>
-          </template>
-        </el-table-column>
+        <el-table-column label="所属学院" align="center" prop="collegeName" width="150px"/>
         <el-table-column label="校内选拔时间" align="center" prop="innerTime" width="130">
           <template slot-scope="scope">
             <span>{{ parseTime(scope.row.innerTime, '{y}-{m}-{d}') || '无' }}</span>

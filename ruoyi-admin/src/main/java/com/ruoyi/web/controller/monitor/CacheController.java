@@ -42,6 +42,9 @@ public class CacheController {
         CACHES.add(new SysCache(CacheConstants.RATE_LIMIT_KEY, "限流处理"));
         CACHES.add(new SysCache(CacheNames.SYS_OSS_CONFIG, "OSS配置"));
         CACHES.add(new SysCache(CacheConstants.PWD_ERR_CNT_KEY, "密码错误次数"));
+
+//        // 以下是依据业务自定义的caches
+//        CACHES.add(new SysCache(CacheConstants.DCIMS_TEAM_LIST, "获奖团队数据"));
     }
 
     /**

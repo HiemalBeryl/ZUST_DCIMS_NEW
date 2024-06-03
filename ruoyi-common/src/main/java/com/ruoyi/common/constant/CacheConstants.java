@@ -46,4 +46,9 @@ public interface CacheConstants {
      * 登录账户密码错误次数 redis key
      */
     String PWD_ERR_CNT_KEY = "pwd_err_cnt:";
+
+    /**
+     * 队伍数据临时保存 redis key
+     */
+//    String DCIMS_TEAM_LIST = "dcims_team_list:";
 }

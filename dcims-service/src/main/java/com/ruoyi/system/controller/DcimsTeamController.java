@@ -1,14 +1,17 @@
 package com.ruoyi.system.controller;
 
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.io.IoUtil;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 import com.ruoyi.system.service.IDcimsCompetitionService;
@@ -28,13 +31,13 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
-import com.ruoyi.common.core.validate.QueryGroup;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.system.service.IDcimsTeamService;
 import com.ruoyi.common.core.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 参赛团队
@@ -179,11 +182,12 @@ public class DcimsTeamController extends BaseController {
      * 获取批量导入模板
      */
     @SaIgnore
-    @GetMapping("/importTemplate")
-    public void importTemplate(HttpServletResponse response) {
-        File file = iDcimsTeamService.getImportTemplate();
+    @PostMapping("/importTemplate")
+    public void importTemplate(@NotNull(message = "请选择模板对应的年份") Integer annual, HttpServletResponse response) {
+        File file = iDcimsTeamService.getImportTemplate(annual);
         try {
             InputStream inputStream = new FileInputStream(file);
+            response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("竞赛信息管理系统获奖导入模板.xlsx", StandardCharsets.UTF_8.toString()));
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + ";charset=utf-8");
             IoUtil.copy(inputStream, response.getOutputStream());
             response.setContentLength((int) file.length());
@@ -192,5 +196,42 @@ public class DcimsTeamController extends BaseController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 上传批量导入压缩文件，返回文件内的数据
+     */
+    @SaIgnore
+    @PostMapping("/uploadTemplate")
+    public Map<String, Object> uploadTemplate(@RequestPart MultipartFile file) throws IOException {
+        List<DcimsTeamImportExcel> importList = iDcimsTeamService.readDataFromTemplate(file.getInputStream());
+        return iDcimsTeamService.saveDataToRedis(importList);
+    }
+
+    /**
+     * 手动修改后的批量导入信息
+     */
+    @SaIgnore
+    @PostMapping("/editImportData")
+    public Map<String, Object> editImportData(String id, @RequestBody List<DcimsTeamImportExcel> importTeamData){
+        return iDcimsTeamService.editImportData(id, importTeamData);
+    }
+
+    /**
+     * 追加批量导入信息
+     */
+    @SaIgnore
+    @PostMapping("/appendImportData")
+    public Map<String, Object> appendImportData(String id, String type, @RequestPart MultipartFile file) throws IOException {
+        return iDcimsTeamService.appendImportData(id, type, file.getInputStream());
+    }
+
+    /**
+     * 确认批量导入信息，保存进入数据库
+     */
+    @SaIgnore
+    @PostMapping("/submitImportData")
+    public R<Boolean> submitImportData(String id){
+        return iDcimsTeamService.submitImportData(id) ? R.ok("成功") : R.fail("失败");
     }
 }

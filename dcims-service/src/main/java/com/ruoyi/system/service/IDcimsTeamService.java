@@ -1,8 +1,7 @@
 package com.ruoyi.system.service;
 
-import com.ruoyi.system.domain.DcimsTeam;
-import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -12,8 +11,10 @@ import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 参赛团队Service接口
@@ -67,7 +68,32 @@ public interface IDcimsTeamService {
     /**
      * 获取批量导入模板
      */
-    public File getImportTemplate();
+    File getImportTemplate(Integer annual);
+
+    /**
+     * 读取用户上传的模板内数据
+     */
+    List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file);
+
+    /**
+     * 将数据保存在Redis中
+     */
+    Map<String, Object> saveDataToRedis(List<DcimsTeamImportExcel> importTeamData);
+
+    /**
+     * 手动修改批量导入的数据
+     */
+    Map<String, Object> editImportData(String id, List<DcimsTeamImportExcel> importTeamData);
+
+    /**
+     * 为批量导入追加数据
+     */
+    Map<String, Object> appendImportData(String id, String type, InputStream file);
+
+    /**
+     * 批量导入数据保存
+     */
+    boolean submitImportData(String ImportDataId);
 
     /**
      * 下载获奖团队信息以及附件

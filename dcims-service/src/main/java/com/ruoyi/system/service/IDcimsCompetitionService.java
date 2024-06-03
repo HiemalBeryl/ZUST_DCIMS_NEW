@@ -41,6 +41,11 @@ public interface IDcimsCompetitionService {
     List<DcimsCompetitionVo> queryList(DcimsCompetitionBo bo);
 
     /**
+     * 查询竞赛赛事基本信息列表
+     */
+    List<DcimsCompetitionVo> queryList(Integer annual);
+
+    /**
      * 根据竞赛名列表，查询竞赛赛事基本信息列表
      */
     List<DcimsCompetitionVo> queryList(List<String> CompetitionNames);

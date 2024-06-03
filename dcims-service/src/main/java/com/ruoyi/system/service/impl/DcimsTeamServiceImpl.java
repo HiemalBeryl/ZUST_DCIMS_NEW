@@ -1,30 +1,34 @@
 package com.ruoyi.system.service.impl;
 
-import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.resource.ClassPathResource;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.write.builder.ExcelWriterBuilder;
+import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysDictData;
+import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.ruoyi.common.utils.poi.ExcelUtil;
+import com.ruoyi.common.utils.redis.RedisUtils;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.DcimsTeamAudit;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.entity.OssFile;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
+import com.ruoyi.system.domain.excel.DcimsTeamImportExcelError;
 import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.handler.ExcelWriteHandler;
 import com.ruoyi.system.mapper.DcimsCompetitionMapper;
@@ -39,10 +43,11 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.mapper.DcimsTeamMapper;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -475,48 +480,135 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * 获取批量导入模板
      */
     @Override
-    public File getImportTemplate() {
-//        EasyExcel.write("./批量导入获奖团队/浙江科技大学大学生科技竞赛获奖学生及指导教师名单批量导入模板.xlsx")
-//            .registerWriteHandler(new ExcelWriteHandler()).sheet("批量导入获奖团队").doWrite(new ArrayList<>());
-        return ZipUtil.zip("./批量导入获奖团队");
+    public File getImportTemplate(Integer annual) {
+        List<String> competitionNames = competitionService.queryList(annual).stream().map(DcimsCompetitionVo::getName).collect(Collectors.toList());
+        List<String> awardLevels =  dictTypeService.selectDictDataByType("dcims_award_level").stream().map(SysDictData::getDictLabel).collect(Collectors.toList());
+
+        ExcelWriteHandler excelWriteHandler = new ExcelWriteHandler(annual, competitionNames, awardLevels);
+        ClassPathResource templateResource = new ClassPathResource("excel/批量导入获奖团队");
+        File excelTemplateFile = FileUtil.file(templateResource.getPath() + "/teamImportTemplate.xlsx");
+        File outputFile = FileUtil.copyFile(excelTemplateFile.getPath(), templateResource.getPath() + "/teamImportTemplate"+ new Date().getTime() +".xlsx");
+        System.out.println(templateResource.getPath());
+        System.out.println(outputFile.getPath());
+        List<DcimsTeamImportExcel> temp = new ArrayList<>();
+        EasyExcel.write(outputFile)
+            .registerWriteHandler(excelWriteHandler).withTemplate(excelTemplateFile).sheet("工作表1").doWrite(temp);
+//        return ZipUtil.zip(templateResource.getPath());
+        return outputFile;
     }
 
     /**
-     * 批量导入模板校验
+     * 对批量导入模板内填写的数据进行读取，格式转换
      */
-    public Object checkImportTemplate(File file){
+    public List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file){
         // 以时间戳为文件唯一标识
+        FileUtil.touch("temp");
+        ClassPathResource templateResource = new ClassPathResource("temp");
         Date now = new Date();
-        String pathName = "./" + now.getTime() + new Random().nextInt(64);
+        String pathName = templateResource.getPath() + "/" + now.getTime() + new Random().nextInt(64);
         File unzipFile = new File(pathName);
 
         // 解压文件，打开表格文件
-        File unzip = ZipUtil.unzip(file, unzipFile);
-        // 文件上传
-        List<File> oss = FileUtil.loopFiles(unzip.getPath() + "/佐证材料");
+        File unzip = ZipUtil.unzip(file, unzipFile, Charset.forName("GBK"));
+        // 解压后的所有文件，包括表格和佐证材料
+        List<File> oss = FileUtil.loopFiles(unzip.getAbsolutePath());
 
-        List<SysOssVo> ossVo = oss.stream().map(o -> ossService.upload(o, o.getName())).collect(Collectors.toList());
+        List<SysOssVo> ossVo = oss.stream().filter(e -> {
+            return !e.getName().endsWith(".xlsx") || !e.getName().endsWith(".xls") || !e.getName().endsWith(".xlsm");
+        }).map(o -> ossService.upload(o, o.getName())).collect(Collectors.toList());
+        System.out.println(ossVo);
+        System.out.println(Arrays.stream(unzip.listFiles()).map(File::getName).collect(Collectors.toList()));
+        Optional<File> optionalFile = oss.stream().filter(e -> e.getName().endsWith(".xlsx") || e.getName().endsWith(".xls") || e.getName().endsWith(".xlsm"))
+            .findFirst();
+        File excelFile = null;
+        if (optionalFile.isPresent())
+            excelFile = optionalFile.get();
+        System.out.println(excelFile);
+        try {
+            assert excelFile != null;
+            List<DcimsTeamImportExcel> importTeamData = EasyExcel.read(new FileInputStream(excelFile)).head(DcimsTeamImportExcel.class).autoCloseStream(false).sheet().headRowNumber(3).doReadSync();
 
-        Arrays.stream(FileUtil.ls(unzip.getPath())).findFirst().ifPresent(excelFile -> {
-            System.out.println(excelFile);
-            try {
-                List<DcimsTeamImportExcel> importTeamData = ExcelUtil.importExcel(new FileInputStream(excelFile), DcimsTeamImportExcel.class);
-                // 匹配oss
-                importTeamData.forEach(dcimsTeamImportExcel -> {
-                    Optional<SysOssVo> match = ossVo.stream()
-                        .filter(vo -> StrUtil.equals(vo.getFileName(), dcimsTeamImportExcel.getSupportMaterialFileName()))
-                        .findFirst();
-                    match.ifPresent(vo -> dcimsTeamImportExcel.setSupportMaterial(vo.getOssId()));
-                });
-                // 数据处理
-                handleData(importTeamData);
-                System.out.println(importTeamData);
-            } catch (FileNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        File[] files = unzip.listFiles();
-        return null;
+            // 匹配oss
+            importTeamData.forEach(dcimsTeamImportExcel -> {
+                Optional<SysOssVo> match = ossVo.stream()
+                    .filter(vo -> StrUtil.equals(vo.getOriginalName(), dcimsTeamImportExcel.getSupportMaterialFileName()))
+                    .findFirst();
+                match.ifPresent(vo -> dcimsTeamImportExcel.setSupportMaterial(vo.getOssId()));
+            });
+            // 未匹配到的添加错误信息
+            importTeamData.forEach(dcimsTeamImportExcel -> {
+                if(ObjectUtil.isNull(dcimsTeamImportExcel.getSupportMaterial())){
+                    if(ObjectUtil.isNull(dcimsTeamImportExcel.getErrors())){
+                        dcimsTeamImportExcel.setErrors(new ArrayList<>());
+                    }
+                    dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.FileNotFoundError, "未找到对应的的佐证材料，请重新上传！"));
+                }
+            });
+            // 数据处理
+            System.out.println(importTeamData);
+            handleData(importTeamData, true,true);
+            System.out.println(importTeamData);
+
+            return importTeamData;
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+
+//        Arrays.stream(FileUtil.ls(unzip.getAbsolutePath())).findFirst().ifPresent(excelFile -> {
+//            System.out.println(excelFile);
+//            try {
+//                List<DcimsTeamImportExcel> importTeamData = ExcelUtil.importExcel(new FileInputStream(excelFile), DcimsTeamImportExcel.class);
+//                // 匹配oss
+//                importTeamData.forEach(dcimsTeamImportExcel -> {
+//                    Optional<SysOssVo> match = ossVo.stream()
+//                        .filter(vo -> StrUtil.equals(vo.getFileName(), dcimsTeamImportExcel.getSupportMaterialFileName()))
+//                        .findFirst();
+//                    match.ifPresent(vo -> dcimsTeamImportExcel.setSupportMaterial(vo.getOssId()));
+//                });
+//                // 数据处理
+//                handleData(importTeamData);
+//                System.out.println(importTeamData);
+//            } catch (FileNotFoundException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//        File[] files = unzip.listFiles();
+
+        // 打开表格文件
+//        File excelFile = null;
+//        if(FileUtil.isDirectory(unzip)){
+//            List<File> fileList = FileUtil.loopFiles(unzip.getPath() + "/佐证材料");
+//            for (File f:fileList){
+//                String name = f.getName();
+//                if (name.endsWith(".xlsx") || name.endsWith(".xls") || name.endsWith(".xlsm")){
+//                    excelFile = f;
+//                    break;
+//                }
+//            }
+//        }
+//        List<DcimsTeamImportExcel> importDataList = new ArrayList<>();
+//        if (excelFile != null){
+//            EasyExcel.read(excelFile, DcimsTeamImportExcel.class, new PageReadListener<DcimsTeamImportExcel>(importDataList::addAll)).sheet().headRowNumber(3).doRead();
+//        }
+//        System.out.println(importDataList);
+//        return null;
+    }
+
+    /**
+     * 将数据保存在Redis中
+     * @param importTeamData
+     * @return data+唯一id（用于在Redis中再次查找数据）
+     */
+    public Map<String, Object> saveDataToRedis(List<DcimsTeamImportExcel> importTeamData) {
+        // 未最终确认的数据存入redis中，确认后再入库
+        String id = new Date().getTime() + RandomUtil.randomString(4);
+        RedisUtils.setCacheObject("dcims_team_list:" + id, JsonUtils.toJsonString(importTeamData));
+        // 将id与数据同时返回
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("data", importTeamData);
+        ret.put("id", id);
+        return ret;
     }
 
     /**
@@ -527,79 +619,243 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     }
 
     /**
+     * 手动修改批量导入的数据
+     */
+    public Map<String, Object> editImportData(String id, List<DcimsTeamImportExcel> importTeamData){
+        // 从redis中读取保存的数据，防止用户篡改
+        List<DcimsTeamImportExcel> redisImportTeamData = JSONUtil.toList(
+            RedisUtils.getCacheObject("dcims_team_list:" + id).toString(),
+            DcimsTeamImportExcel.class
+        );
+        if (ObjectUtil.isEmpty(redisImportTeamData))
+            return null;
+
+        Map<Integer, DcimsTeamImportExcel> origin = redisImportTeamData.stream().collect(Collectors.toMap(DcimsTeamImportExcel::getIndex, e -> e));
+        Map<Integer, DcimsTeamImportExcel> destination = importTeamData.stream().collect(Collectors.toMap(DcimsTeamImportExcel::getIndex, e -> e));
+        // 从传入数据中搜索redis数据，如果匹配到则修改redis的数据
+        redisImportTeamData.forEach(r -> {
+            DcimsTeamImportExcel d = destination.get(r.getIndex());
+            if (ObjectUtil.isNotEmpty(d))
+                BeanUtils.copyProperties(d, r, "index", "competitionId", "supportMaterial", "teacherId", "studentId", "audit", "competitionType", "errors");
+        });
+        // 遍历传入数据，如果不存在在redis中则说明是新增数据
+        for (DcimsTeamImportExcel d : importTeamData) {
+            DcimsTeamImportExcel o = origin.get(d.getIndex());
+            if(ObjectUtil.isEmpty(o)){
+                redisImportTeamData.add(o);
+            }
+        }
+        // 遍历Redis数据，如果不存在在传入数据中则说明数据被用户删除，应该在redis中也删除掉
+        List<Integer> deletedIndexList = new ArrayList<>();
+        int in = 0;
+        for(DcimsTeamImportExcel e : redisImportTeamData){
+            boolean f = false;
+            for (DcimsTeamImportExcel i : importTeamData){
+                if (i.getIndex() == e.getIndex()) {
+                    f = true;
+                    break;
+                }
+            }
+            if (!f)
+                deletedIndexList.add(new Integer(in));
+            in++;
+        }
+        for (Integer i: deletedIndexList){
+            redisImportTeamData.remove(i.intValue());
+        }
+        //TODO: 删除的检测
+
+        handleData(redisImportTeamData, false, false);
+        return saveDataToRedis(redisImportTeamData);
+    }
+
+    /**
+     * 为批量导入追加数据
+     */
+    public Map<String, Object> appendImportData(String id, String type, InputStream file){
+        // 从redis中读取保存的数据，防止用户篡改
+        List<DcimsTeamImportExcel> redisImportTeamData = JSONUtil.toList(
+            RedisUtils.getCacheObject("dcims_team_list:" + id).toString(),
+            DcimsTeamImportExcel.class
+        );
+        if (ObjectUtil.isEmpty(redisImportTeamData))
+            return null;
+
+        // 追加的类型判断
+        List<DcimsTeamImportExcel> appendList = readDataFromTemplate(file);
+        if (Objects.equals(type, "append")){
+            redisImportTeamData.addAll(appendList);
+        }else if (Objects.equals(type, "cover")){
+            redisImportTeamData = appendList;
+        }else{
+            return null;
+        }
+        RedisUtils.deleteKeys("dcims_team_list:" +id);
+        return saveDataToRedis(redisImportTeamData);
+    }
+
+    /**
      * 批量导入数据保存
      */
-    public Object saveImportData(Object data){
-        return null;
+    public boolean submitImportData(String importDataId){
+        // 从redis中读取保存的数据，防止用户篡改
+        List<DcimsTeamImportExcel> redisImportTeamData = JSONUtil.toList(
+            RedisUtils.getCacheObject("dcims_team_list:" + importDataId).toString(),
+            DcimsTeamImportExcel.class
+        );
+        if (ObjectUtil.isEmpty(redisImportTeamData))
+            return false;
+
+
+        // 判断数据中是否存在错误，如果在存在则不允许保存
+        System.out.println(redisImportTeamData.getClass());
+        boolean flag = redisImportTeamData.stream().filter(e -> e.getErrors().size() > 0).count() > 0;
+        if (flag == true)
+            return false;
+
+
+        // 将数据转换为Bean，保存到数据库，同时添加必要的与审核有关的信息
+        List<DcimsTeam> teamList = new ArrayList<>();
+        for (DcimsTeamImportExcel e : redisImportTeamData){
+            DcimsTeam team = new DcimsTeam();
+            DcimsTeamBo bo = new DcimsTeamBo();
+            BeanUtils.copyProperties(e, bo);
+            BeanUtils.copyProperties(bo, team);
+            validEntityBeforeSave(team);
+            teamList.add(team);
+        }
+
+        // 确定数据正确保存后删除redis中的缓存
+        if(baseMapper.insertBatch(teamList)){
+            RedisUtils.deleteKeys("dcims_team_list:" + importDataId);
+        }
+
+        return true;
+    }
+
+    /**
+     * 导出已保存的数据用于核对
+     */
+    public void exportRedisData(){
+
     }
 
     /**
      * 数据校验 + 数据转换
      */
-    private void handleData(List<DcimsTeamImportExcel> importTeamData){
+    private List<DcimsTeamImportExcel> handleData(List<DcimsTeamImportExcel> importTeamData, boolean editTeamName, boolean isSetId){
         // 1. 数据检验，找出不合理数据
-
+        if(isSetId){
+            for(DcimsTeamImportExcel e : importTeamData){
+                e.setIndex(RandomUtil.randomInt());
+                if(ObjectUtil.isNull(e.getErrors())){
+                    e.setErrors(new ArrayList<>());
+                    e.setEdit(false);
+                }
+            }
+        }
 
         // 根据竞赛名和年份查询对应竞赛id
-        List<String> competitionNames = importTeamData.stream().map(DcimsTeamImportExcel::getCompetitionName).collect(Collectors.toList());
+        List<String> competitionNames = importTeamData.stream().map(DcimsTeamImportExcel::getCompetitionName).distinct().collect(Collectors.toList());
         List<DcimsCompetitionVo> competitionVos = competitionService.queryList(competitionNames);
         importTeamData.forEach(dcimsTeamImportExcel -> {
             Optional<DcimsCompetitionVo> match = competitionVos.stream()
-                .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getCollegeName(), dcimsTeamImportExcel.getCompetitionName())
+                .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getName(), dcimsTeamImportExcel.getCompetitionName())
                     && StrUtil.equals(String.valueOf(dcimsExcel.getAnnual()), dcimsTeamImportExcel.getYear()))
                 .findFirst();
             match.ifPresent(dcimsExcel -> dcimsTeamImportExcel.setCompetitionId(dcimsExcel.getId()));
         });
-
-        // 设置队伍名
-        importTeamData.forEach(dcimsTeamImportExcel -> {
-            dcimsTeamImportExcel.setName(dcimsTeamImportExcel.getStudentName() + "队伍");
+        // 如果存在值为null的竞赛id，填入对应错误消息
+        importTeamData.forEach(e -> {
+            if (ObjectUtil.isNull(e.getCompetitionId()))
+                e.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.competitionNameError, "竞赛名称错误，请检查本年度是否存在该项竞赛！"));
         });
 
-        // 判断比赛类型，1个学生-个人赛50，>=2个学生-团队赛100
+        // 设置队伍名
+        if(editTeamName){
+            importTeamData.forEach(dcimsTeamImportExcel -> {
+                if (StringUtils.isBlank(dcimsTeamImportExcel.getName()))
+                    dcimsTeamImportExcel.setName(dcimsTeamImportExcel.getStudentName() + "队伍");
+            });
+        }
+
+        // 判断比赛类型，将表格中读取到的 是否为单人赛 转换为 比赛类型
         importTeamData.forEach(dcimsTeamImportExcel -> {
-            if (dcimsTeamImportExcel.getStudentName().split(",").length > 1){
+            if (dcimsTeamImportExcel.getIsSingle() == null){
+                dcimsTeamImportExcel.setIsSingle("是");
+            }
+
+            if (dcimsTeamImportExcel.getIsSingle().equals("否")){
                 dcimsTeamImportExcel.setCompetitionType("100");
-            }else {
+            }else if (dcimsTeamImportExcel.getIsSingle().equals("是")){
                 dcimsTeamImportExcel.setCompetitionType("50");
             }
         });
+        // 检查比赛类型，填入对应错误消息
+        importTeamData.forEach(e -> {
+            if (ObjectUtil.isNull(e.getCompetitionType()))
+                e.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.isSingleError, "请确认比赛类型（单人赛或团队赛），在该列填写‘是’或‘否’！"));
+        });
+
 
         // 奖项等级转换
         List<SysDictData> dcimsAwardLevel = dictTypeService.selectDictDataByType("dcims_award_level");
         importTeamData.forEach(dcimsTeamImportExcel -> {
-            Optional<SysDictData> match = dcimsAwardLevel.stream()
-                .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getDictLabel(), dcimsTeamImportExcel.getAwardLevel()))
-                .findFirst();
-            match.ifPresent(dcimsExcel -> dcimsTeamImportExcel.setAwardLevel(dcimsExcel.getDictValue()));
-            if (!match.isPresent()){
-                dcimsTeamImportExcel.setAwardLevel("100");
+            Optional<SysDictData> first = dcimsAwardLevel.stream().filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getDictValue(), dcimsTeamImportExcel.getAwardLevel())).findFirst();
+            first.ifPresent(dcimsExcel -> dcimsTeamImportExcel.setAwardLevel(dcimsExcel.getDictValue()));
+            if(!first.isPresent()){
+                Optional<SysDictData> match = dcimsAwardLevel.stream()
+                    .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getDictLabel(), dcimsTeamImportExcel.getAwardLevel()))
+                    .findFirst();
+                match.ifPresent(dcimsExcel -> dcimsTeamImportExcel.setAwardLevel(dcimsExcel.getDictValue()));
+                if (!match.isPresent()){
+                    dcimsTeamImportExcel.setAwardLevel("100");
+                }
             }
+
+        });
+        // 检查奖项等级，填入对应错误消息
+        importTeamData.forEach(e -> {
+            if (ObjectUtil.isNull(e.getAwardLevel()))
+                e.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.awardLevelError, "请选择正确的获奖等级！"));
         });
 
         // 填充教师，学生工号
         importTeamData.forEach(dcimsTeamImportExcel -> {
-            List<String> teachers = Arrays.stream(dcimsTeamImportExcel.getTeacherName().split(",")).collect(Collectors.toList());
-            List<String> students = Arrays.stream(dcimsTeamImportExcel.getStudentName().split(",")).collect(Collectors.toList());
-            dcimsTeamImportExcel.setTeacherId("");
-            dcimsTeamImportExcel.setStudentId("");
-            teachers.forEach(teacher -> {
-                TableDataInfo<DcimsTeacherVo> teacherVo = basicDataService.listTeacherDict(teacher);
-                if (teacherVo.getRows().size() == 1){
-                    dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + teacherVo.getRows().get(0).getTeacherId() + ",");
-                }else{
-                    // TODO:报错
-                }
-            });
-            students.forEach(student -> {
-                TableDataInfo<DcimsStudentVo> studentVo = basicDataService.listStudentDict(student);
-                if (studentVo.getRows().size() == 1){
-                    dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
-                }else{
-                    // TODO:报错
-                }
-            });
+            if (dcimsTeamImportExcel.getStudentName() != null && dcimsTeamImportExcel.getTeacherName() != null){
+                List<String> teachers = Arrays.stream(dcimsTeamImportExcel.getTeacherName().split(",")).collect(Collectors.toList());
+                List<String> students = Arrays.stream(dcimsTeamImportExcel.getStudentName().split(",")).collect(Collectors.toList());
+                dcimsTeamImportExcel.setTeacherId("");
+                dcimsTeamImportExcel.setStudentId("");
+                teachers.forEach(teacher -> {
+                    TableDataInfo<DcimsTeacherVo> teacherVo = basicDataService.listTeacherDict(teacher);
+                    if (teacherVo.getRows().size() == 1){
+                        dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + teacherVo.getRows().get(0).getTeacherId() + ",");
+                    }else if (teacherVo.getRows().size() == 0){
+                        // 教师不存在
+                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameNotFoundError, "教师"+ teacher +"不存在，请确认姓名是否填写正确！"));
+                    }else{
+                        // 教师存在重名
+                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameRepeatError, "教师"+ teacher +"存在重名，请选择正确的教师！"));
+                    }
+                });
+                students.forEach(student -> {
+                    TableDataInfo<DcimsStudentVo> studentVo = basicDataService.listStudentDict(student);
+                    if (studentVo.getRows().size() == 1){
+                        dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
+                    }else if (studentVo.getRows().size() == 0){
+                        // 学生不存在
+                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！"));
+                    }else{
+                        // 学生存在重名
+                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameRepeatError, "学生"+ student +"存在重名，请选择正确的学生！"));
+                    }
+                });
+            }
         });
+
+
+        return importTeamData;
     }
 
 

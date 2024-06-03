@@ -302,7 +302,7 @@ export default {
               listCompetition(params).then(response => {
                 this.optionsCompetition = response.rows;
               }).finally(() => {
-                this.loadingCompetition = false;
+
               })
             }, 200);
           } else {
