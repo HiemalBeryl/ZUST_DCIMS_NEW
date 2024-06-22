@@ -14,7 +14,7 @@
 [![JDK-8+](https://img.shields.io/badge/JDK-8-green.svg)]()
 [![JDK-11](https://img.shields.io/badge/JDK-11-green.svg)]()
 
-> RuoYi-Vue-Plus 是重写 RuoYi-Vue 针对 `分布式集群` 场景全方位升级(不兼容原框架)
+> RuoYi-Vue-Plus1 是重写 RuoYi-Vue 针对 `分布式集群` 场景全方位升级(不兼容原框架)
 
 > 项目代码、文档 均开源免费可商用 遵循开源协议在项目中保留开源协议文件即可<br>
 活到老写到老 为兴趣而开源 为学习而开源 为让大家真正可以学到技术而开源
