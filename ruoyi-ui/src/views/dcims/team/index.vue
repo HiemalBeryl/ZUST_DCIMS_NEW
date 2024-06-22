@@ -170,14 +170,16 @@
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
       <el-table-column label="佐证材料" align="center" prop="oss.url">
         <template slot-scope="scope">
-          <ImagePreview
+          <!-- <ImagePreview
             v-if="previewListResource && scope.row.oss != null && checkFileSuffix(scope.row.oss.fileSuffix)"
             :width=100 :height=100
             :src="scope.row.oss.url"
             :preview-src-list="[scope.row.oss.url]"/>
           <span v-text="scope.row.oss.url"
-                v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)"/>
-          <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
+                v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)"/> -->
+                <i class="el-icon-document" style="font-size: 20px;"></i>
+                <br/>
+                <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
