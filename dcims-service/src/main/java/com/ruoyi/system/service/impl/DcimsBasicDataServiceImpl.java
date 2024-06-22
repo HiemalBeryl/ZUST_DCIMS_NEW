@@ -1,8 +1,12 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.ObjectMapper;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.system.domain.DcimsStudent;
 import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.vo.DcimsStudentVo;
@@ -14,6 +18,7 @@ import com.ruoyi.system.service.IDcimsBasicDataService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -128,10 +133,17 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
      * 从远程同步教师信息
      */
     @Override
+    @Scheduled(cron = "0 0 1 * *")
     public void syncTeacherInfo() {
         String teacherDataUrl = "http://172.16.11.51:50027/DCSBWeb/servlets/d794626b-03e6-4d75-8775-45924495488a@1.0";
         ResponseEntity<String> exchange = restTemplate.exchange(teacherDataUrl + "?pageNum=1&pageSize=500", HttpMethod.GET, new HttpEntity<>(initRemoteAccessKey()), String.class);
         System.out.println(exchange.getBody());
+        //将返回的数据转为list实体类对象
+        List<DcimsTeacher> Teachers = JSONUtil.toList(exchange.getBody(), DcimsTeacher.class);
+        for (DcimsTeacher teacher : Teachers) {
+                teacherBaseMapper.insert(teacher);
+        }
+
     }
 
     /**
