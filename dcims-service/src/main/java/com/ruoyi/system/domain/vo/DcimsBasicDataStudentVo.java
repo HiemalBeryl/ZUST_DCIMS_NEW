@@ -1,74 +1,58 @@
 package com.ruoyi.system.domain.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**
- * 教师基本信息对象 dcims_student
+ * 学生基本信息对象 dcims_student
  *
  * @author hiemalberyl
  * @date 2023-05-09
  */
 @Data
 @ExcelIgnoreUnannotated
-public class DcimsTeacherVo {
+public class DcimsBasicDataStudentVo {
 
     private static final long serialVersionUID=1L;
 
     /**
      * 主键
      */
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     /**
-     * 工号
+     * 学号
      */
-    private Long teacherId;
-    /**
-     * 指导教师编号
-     */
-    private Long competitionTeacherId;
+    @JsonProperty("xh")
+    private String studentId;
     /**
      * 姓名
      */
+    @JsonProperty("xm")
     private String name;
     /**
      * 学院
      */
+    @JsonProperty("xymc")
     private String college;
-    /**
-     * 系部
-     */
-    private String department;
     /**
      * 专业
      */
+    @JsonProperty("zymc")
     private String major;
     /**
-     * 职称
+     * 班级
      */
-    private String title;
-    /**
-     * 学历
-     */
-    private String education;
-    /**
-     * 学位
-     */
-    private String degree;
+    @JsonProperty("bjmc")
+    private String classes;
     /**
      * 电话
      */
+    @JsonProperty("lxdh")
     private String phone;
     /**
      * 电子邮件
      */
+    @JsonProperty("dzyxdz")
     private String email;
-    /**
-     * 是否为校内教师;0-校外教师 1-校内入职教师
-     */
-    private String isZust;
 }

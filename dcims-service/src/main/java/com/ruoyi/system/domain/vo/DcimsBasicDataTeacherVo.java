@@ -1,25 +1,20 @@
-package com.ruoyi.system.domain;
+package com.ruoyi.system.domain.vo;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import java.io.Serializable;
-import java.util.Date;
-import java.math.BigDecimal;
-
-import com.ruoyi.common.core.domain.BaseEntity;
 
 /**
- * 教师信息对象 dcims_teacher
+ * 教师基本信息对象 dcims_student
  *
- * @author ruoyi
- * @date 2023-05-03
+ * @author hiemalberyl
+ * @date 2023-05-09
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-@TableName("dcims_teacher")
-public class DcimsTeacher extends BaseEntity {
+@ExcelIgnoreUnannotated
+public class DcimsBasicDataTeacherVo {
 
     private static final long serialVersionUID=1L;
 
@@ -31,10 +26,16 @@ public class DcimsTeacher extends BaseEntity {
     /**
      * 工号
      */
+    @JsonProperty("JSZGH")
     private Long teacherId;
+    /**
+     * 指导教师编号
+     */
+    private Long competitionTeacherId;
     /**
      * 姓名
      */
+    @JsonProperty("XM")
     private String name;
     /**
      * 学院
@@ -51,30 +52,30 @@ public class DcimsTeacher extends BaseEntity {
     /**
      * 职称
      */
+    @JsonProperty("ZCDM")
     private String title;
     /**
      * 学历
      */
+    @JsonProperty("XLDM")
     private String education;
     /**
      * 学位
      */
+    @JsonProperty("XWDM")
     private String degree;
     /**
      * 电话
      */
+    @JsonProperty("SJH")
     private String phone;
     /**
      * 电子邮件
      */
+    @JsonProperty("DZXX")
     private String email;
     /**
      * 是否为校内教师;0-校外教师 1-校内入职教师
      */
     private String isZust;
-    /**
-     * 逻辑删除;0-未删除 1-已删除
-     */
-    private String deleted;
-
 }
