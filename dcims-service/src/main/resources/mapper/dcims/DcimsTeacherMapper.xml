@@ -20,5 +20,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deleted" column="deleted"/>
     </resultMap>
 
+    <!--根据Id更新数据-->
+<!--    <update id="updateByTeacherIds">-->
+<!--        <foreach collection="teacherAlreadeExist" item="teacher" index="index" open="" close="" separator=";">-->
+<!--        update dcims_teacher-->
+<!--        <set>-->
+<!--            <if test="name !=null ">name = #{teacher.name},</if>-->
+<!--            <if test="college !=null ">college = #{teacher.college},</if>-->
+<!--            <if test="department !=null ">department = #{teacher.department},</if>-->
+<!--            <if test="major !=null ">major = #{teacher.major},</if>-->
+<!--            <if test="title !=null ">title = #{teacher.title},</if>-->
+<!--            <if test="education !=null ">education = #{teacher.education},</if>-->
+<!--            <if test="degree !=null ">degree = #{teacher.degree},</if>-->
+<!--            <if test="phone !=null ">phone = #{teacher.phone},</if>-->
+<!--            <if test="email !=null ">email = #{teacher.email},</if>-->
+<!--            <if test="isZust !=null ">is_zust = #{teacher.isZust},</if>-->
+<!--        </set>-->
+<!--            where teacher_id =#{teacher.teacherId}-->
+<!--        </foreach>-->
+<!--    </update>-->
+
 
 </mapper>
