@@ -68,12 +68,12 @@ public interface IDcimsTeamService {
     /**
      * 获取批量导入模板
      */
-    File getImportTemplate(Integer annual);
+    File getImportTemplate(Integer annual) throws IOException;
 
     /**
      * 读取用户上传的模板内数据
      */
-    List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file);
+    List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file) throws IOException;
 
     /**
      * 将数据保存在Redis中
@@ -88,7 +88,7 @@ public interface IDcimsTeamService {
     /**
      * 为批量导入追加数据
      */
-    Map<String, Object> appendImportData(String id, String type, InputStream file);
+    Map<String, Object> appendImportData(String id, String type, InputStream file) throws IOException;
 
     /**
      * 批量导入数据保存

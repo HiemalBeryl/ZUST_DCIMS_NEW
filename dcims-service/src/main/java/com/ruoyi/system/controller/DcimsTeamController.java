@@ -184,8 +184,8 @@ public class DcimsTeamController extends BaseController {
     @SaIgnore
     @PostMapping("/importTemplate")
     public void importTemplate(@NotNull(message = "请选择模板对应的年份") Integer annual, HttpServletResponse response) {
-        File file = iDcimsTeamService.getImportTemplate(annual);
         try {
+            File file = iDcimsTeamService.getImportTemplate(annual);
             InputStream inputStream = new FileInputStream(file);
             response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("竞赛信息管理系统获奖导入模板.xlsx", StandardCharsets.UTF_8.toString()));
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + ";charset=utf-8");
