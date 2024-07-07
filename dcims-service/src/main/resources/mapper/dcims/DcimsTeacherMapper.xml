@@ -19,6 +19,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="isZust" column="is_zust"/>
         <result property="deleted" column="deleted"/>
     </resultMap>
+<!--    根据教职工Id批量插入-->
+    <insert id="insertByTeacherIds">
+        <foreach collection="teachersNotExist" item="teacher" separator=",">
+            insert into dcims_teacher ( teacher_id,name, college, department, major, title, education, degree, phone, email)
+            values
+            (#{teacher.teacherId},#{teacher.name},#{teacher.college},#{teacher.department},#{teacher.major},#{teacher.title}
+            ,#{teacher.education},#{teacher.degree},#{teacher.phone},#{teacher.email})
+        </foreach>
+    </insert>
+
+    <!--    根据教师Id批量更新-->
+    <update id="updateByTeacherIds">
+        <foreach collection="teacherAlreadeExist" item="teacher" open="" close="" separator=",">
+            update dcims_teacher
+            <set>
+                <if test="item.name != null">name =#{item.name}, </if>
+                <if test="item.college != null">college=#{item.college},</if>
+                <if test="item.department != null">department=#{department},</if>
+                <if test="item.major != null">major=#{item.major},</if>
+                <if test="item.title != null">title=#{item.title},</if>
+                <if test="item.education != null">education=#{item.education},</if>
+                <if test="item.degree != null">degree=#{item.degree},</if>
+                <if test="item.phone != null">phone=#{item.phone},</if>
+                <if test="item.email != null">email=#{item.email},</if>
+            </set>
+            where
+                teacher_id = #{item.teacherId}
+        </foreach>
+    </update>
+
+
 
     <!--根据Id更新数据-->
 <!--    <update id="updateByTeacherIds">-->

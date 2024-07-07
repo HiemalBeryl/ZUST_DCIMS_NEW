@@ -3,6 +3,7 @@ package com.ruoyi.system.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ruoyi.common.core.mapper.BaseMapperPlus;
 import com.ruoyi.system.domain.DcimsTeacher;
+import com.ruoyi.system.domain.vo.DcimsBasicDataTeacherVo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -14,5 +15,10 @@ public interface DcimsTeacherMapper extends BaseMapperPlus<DcimsTeacherMapper, D
     /*
     * 根据教职工Id批量更新
     * */
-    void updateByTeacherIds(List<DcimsTeacherVo> teacherAlreadeExist);
+    void updateByTeacherIds(List<DcimsBasicDataTeacherVo> teachersUpdate);
+
+    /*
+    * 根据教职工Id批量插入
+    * */
+    void insertByTeacherIds(List<DcimsBasicDataTeacherVo> teachers);
 }

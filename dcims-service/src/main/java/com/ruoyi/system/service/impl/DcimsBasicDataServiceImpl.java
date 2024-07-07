@@ -140,64 +140,48 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
     @Override
     @Scheduled(cron = "0 0 1 * *")
     public void syncTeacherInfo() {
-        String teacherDataUrl = "http://172.16.11.51:50027/DCSBWeb/servlets/d794626b-03e6-4d75-8775-45924495488a@1.0";
-        //第一遍请求，拿到总记录数
-        ResponseEntity<String> exchange = restTemplate.exchange(teacherDataUrl + "?pageNum=1&pageSize=500", HttpMethod.GET, new HttpEntity<>(initRemoteAccessKey()), String.class);
-        //将返回的数据转为list实体类对象
-        List<DcimsBasicDataTeacherVo> Teachers = JSONUtil.toList(exchange.getBody(), DcimsBasicDataTeacherVo.class);
-        //使用流提取teacherid
-        List<Long> teacherIds = Teachers.stream()
-            .map(DcimsBasicDataTeacherVo::getTeacherId)
-            .collect(Collectors.toList());
-
-        //根据teacherIds从数据库中查找已有的数据
-        List<DcimsTeacherVo> teacherAlreadeExist = getTeacherNameByIds(teacherIds);
-
-        //获取数据库中已有教师的ID
-        List<Long> teacherAlreadeExistIds = teacherAlreadeExist.stream()
-            .map(DcimsTeacherVo::getTeacherId)
-            .collect(Collectors.toList());
-
-        // 过滤出Teachers中需要更新的对象
-        List<DcimsBasicDataTeacherVo> teachersToUpdate = Teachers.stream()
-            .filter(teacher -> teacherAlreadeExistIds.contains(teacher.getTeacherId()))
-            .collect(Collectors.toList());
-
-
-
-        if(!teacherAlreadeExist.isEmpty()){
-            //根据教职工ID批量更新
-            teacherBaseMapper.updateByTeacherIds(teacherAlreadeExist);
-        }
-
-        //同理，将数据库中不存在的teacherId使用流过滤出来，进行插入操作
-
-        //将响应结果转成jsonObject对象,获取数据库中总共页面数量
-        JSONObject jsonObject = new JSONObject(exchange.getBody());
-        Integer pages = jsonObject.getInt("pages");
-        Integer current = jsonObject.getInt("current");
-
-        //判断当前页面是否为最后一页,不是的话发送请求插入数据库
-        while (current<=pages){
-            current++;
-            exchange = restTemplate
-                .exchange(teacherDataUrl + "?pageNum="+current+"&pageSize=500"
-                    , HttpMethod.GET
-                    , new HttpEntity<>(initRemoteAccessKey())
-                    , String.class);
-            System.out.println(exchange.getBody());
-
-            //将返回的数据转为list实体类对象
-            Teachers = JSONUtil.toList(exchange.getBody(), DcimsBasicDataTeacherVo.class);
-            for (DcimsBasicDataTeacherVo teacher : Teachers) {
-                DcimsTeacherVo teacherNameById = getTeacherNameById(teacher.getTeacherId());
-                //如果数据库中有该名老师,跳过数据
-                if(teacherNameById!=null){
-                    continue;
-                }
-                //如果数据库中没有该名老师,插入数据
-                teacherBaseMapper.insert(BeanUtil.toBean(teacher,DcimsTeacher.class));
+        Boolean hasNext = true;
+        Integer current = 1;
+        while (hasNext) {
+            //发送请求
+            String teacherDataUrl = "http://172.16.11.51:50027/DCSBWeb/servlets/d794626b-03e6-4d75-8775-45924495488a@1.0";
+            //发送请求,拿到数据
+            ResponseEntity<String> exchange = restTemplate.exchange(teacherDataUrl + "?pageNum="+current+"&pageSize=500"
+                , HttpMethod.GET
+                , new HttpEntity<>(initRemoteAccessKey())
+                , String.class);
+            //将响应结果转成jsonObject对象,获取数据库中总共页面数量
+            JSONObject jsonObject = new JSONObject(exchange.getBody());
+            Integer pages = jsonObject.getInt("pages");
+            current = jsonObject.getInt("current");
+            //判断,如果当前页面大于总页面数,停止请求
+            if (current.equals(pages)  ) {
+                hasNext = false;
             }
+
+            //拿到全部teacher数据
+            List<DcimsBasicDataTeacherVo> Teachers = JSONUtil.toList(exchange.getBody(), DcimsBasicDataTeacherVo.class);
+            //从全部数据中拿出teacherId
+            List<Long> teacherIds = Teachers.stream()
+                .map(DcimsBasicDataTeacherVo::getTeacherId)
+                .collect(Collectors.toList());
+            //从数据库中查找已有的教师数据
+            List<DcimsTeacherVo> teacherAlreadeExist = getTeacherNameByIds(teacherIds);
+            //拉出已有教师ID
+            List<Long> teacherAlreadeExistId = teacherAlreadeExist.stream()
+                .map(DcimsTeacherVo::getTeacherId)
+                .collect(Collectors.toList());
+            //使用流将需要更新的数据提出来
+            List<DcimsBasicDataTeacherVo> teachersUpdate = Teachers.stream()
+                .filter(teacher -> teacherAlreadeExistId.contains(teacher.getTeacherId()))
+                .collect(Collectors.toList());
+            //将已有数据更新
+            teacherBaseMapper.updateByTeacherIds(teachersUpdate);
+            //将数据库中不存在的数据提出来
+            List<DcimsBasicDataTeacherVo> teachersNotExist = Teachers.stream()
+                .filter(teacher -> !teacherAlreadeExistId.contains(teacher.getTeacherId()))
+                .collect(Collectors.toList());
+            teacherBaseMapper.insertByTeacherIds(teachersNotExist);
         }
 
     }
@@ -208,45 +192,49 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
     @Override
     @Scheduled(cron = "0 0 1 * *")
     public void syncStudentInfo() {
-        String studentDataUrl = "http://172.16.11.51:50027/DCSBWeb/servlets/c1145c3d-f4f4-41c9-a4fa-7e0f00319970@1.0";
-        //第一遍请求，拿到总记录数
-        ResponseEntity<String> exchange = restTemplate.exchange(studentDataUrl + "?pageNum=1&pageSize=500"
+        Boolean hasNext = true;
+        Integer current = 1;
+        while (hasNext) {
+            //发送请求
+            String studentDataUrl = "http://172.16.11.51:50027/DCSBWeb/servlets/c1145c3d-f4f4-41c9-a4fa-7e0f00319970@1.0";
+            //发送请求,拿到数据
+            ResponseEntity<String> exchange = restTemplate.exchange(studentDataUrl + "?pageNum="+current+"&pageSize=500"
                 , HttpMethod.GET
                 , new HttpEntity<>(initRemoteAccessKey())
                 , String.class);
-
-        //将返回的数据转为list实体类对象
-        List<DcimsBasicDataStudentVo> Students = JSONUtil.toList(exchange.getBody(), DcimsBasicDataStudentVo.class);
-        for (DcimsBasicDataStudentVo student : Students) {
-            studentBaseMapper.insertOrUpdate(BeanUtil.toBean(student,DcimsStudent.class));
-        }
-
-        //将响应结果转成jsonObject对象,获取数据库中总共页面数量
-        JSONObject jsonObject = new JSONObject(exchange.getBody());
-        Integer pages = jsonObject.getInt("pages");
-        Integer current = jsonObject.getInt("current");
-
-        //判断当前页面是否为最后一页,不是的话发送请求插入数据库
-        while (current<=pages){
-            current++;
-            exchange = restTemplate.exchange(studentDataUrl + "?pageNum="+current+"&pageSize=500"
-                , HttpMethod.GET
-                , new HttpEntity<>(initRemoteAccessKey())
-                , String.class);
-            System.out.println(exchange.getBody());
-
-            //将返回的数据转为list实体类对象
-            Students = JSONUtil.toList(exchange.getBody(), DcimsBasicDataStudentVo.class);
-            for (DcimsBasicDataStudentVo student : Students) {
-                DcimsStudentVo studentNameById = getStudentNameById(student.getStudentId());
-                //如果数据库中有该名学生,跳过数据
-                if(studentNameById!=null){
-                    continue;
-                }
-                //如果数据库中没有该名学生,插入数据
-                studentBaseMapper.insert(BeanUtil.toBean(student,DcimsStudent.class));
+            //将响应结果转成jsonObject对象,获取数据库中总共页面数量
+            JSONObject jsonObject = new JSONObject(exchange.getBody());
+            Integer pages = jsonObject.getInt("pages");
+            current = jsonObject.getInt("current");
+            //判断,如果当前页面大于总页面数,停止请求
+            if (current.equals(pages)  ) {
+                hasNext = false;
             }
-        }
 
-    }
+            //拿到全部student数据
+            List<DcimsBasicDataStudentVo> Students = JSONUtil.toList(exchange.getBody(), DcimsBasicDataStudentVo.class);
+            //从全部数据中拿出StudentId
+            List<String> studentIds = Students.stream()
+                .map(DcimsBasicDataStudentVo::getStudentId)
+                .collect(Collectors.toList());
+            //从数据库中查找已有的学生数据
+            List<DcimsStudentVo> studentAlreadeExist = getStudentNameByIds(studentIds);
+            //拉出已有学生ID
+            List<String> studentExistIds = studentAlreadeExist.stream()
+                .map(DcimsStudentVo::getStudentId)
+                .collect(Collectors.toList());
+            //使用流将需要更新的数据提出来
+            List<DcimsBasicDataStudentVo> studentsUpdate = Students.stream()
+                .filter(student -> studentExistIds.contains(student.getStudentId()))
+                .collect(Collectors.toList());
+            //将已有数据更新
+            studentBaseMapper.updateByStudentIds(studentsUpdate);
+            //将数据库中不存在的数据提出来
+            List<DcimsBasicDataStudentVo> studentsNotExist = Students.stream()
+                .filter(student -> !studentExistIds.contains(student.getStudentId()))
+                .collect(Collectors.toList());
+            studentBaseMapper.insertByStudentIds(studentsNotExist);
+       }
+
+  }
 }
