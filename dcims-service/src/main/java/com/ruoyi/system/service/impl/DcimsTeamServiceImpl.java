@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
@@ -536,6 +537,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         File unzip = ZipUtil.unzip(file, unzipFile, Charset.forName("GBK"));
         // 解压后的所有文件，包括表格和佐证材料
         List<File> oss = FileUtil.loopFiles(unzip.getAbsolutePath());
+        oss = oss.stream().filter(e -> !e.getAbsolutePath().contains("__MACOSX")).collect(Collectors.toList());
 
         List<SysOssVo> ossVo = oss.stream().filter(e -> {
             return !e.getName().endsWith(".xlsx") || !e.getName().endsWith(".xls") || !e.getName().endsWith(".xlsm");

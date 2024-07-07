@@ -3,7 +3,7 @@
     <el-steps :active="stepsActive" align-center>
       <el-step title="1-下载批量导入团队模板" description=""></el-step>
       <el-step title="2-上传模板文件" description=""></el-step>
-      <el-step title="3-检查并修改数据" description=""></el-step>
+      <el-step title="3-检查并修改奖项" description=""></el-step>
       <el-step title="4-导入成功" description=""></el-step>
     </el-steps>
 
@@ -38,6 +38,8 @@
         <el-button style="margin-left: 10px;" size="small" type="success" @click="clickUploadButton()" :loading="loading">上传到服务器</el-button>
         <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于100MB</div>
       </el-upload>
+      <br/>
+      <el-button @click="minusStep">后退</el-button>
     </div>
 
     <!--  调整数据界面-->
@@ -195,11 +197,11 @@
         :limit="1"
         :auto-upload="false"
         :http-request="appendData">
-        <el-button slot="trigger" size="small" type="primary">{{this.appendType}}数据</el-button>
+        <el-button slot="trigger" size="small" type="primary">{{this.appendType}}奖项</el-button>
         <el-button style="margin-left: 10px;" size="small" type="success" @click="clickAppendButton()" :loading="loading">上传到服务器</el-button>
         <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于100MB</div>
       </el-upload>
-      <el-button @click="submit()" style="margin-top: 30px">确认数据无误，提交到学院</el-button>
+      <el-button @click="submit()" style="margin-top: 30px">确认奖项无误，点击提交</el-button>
     </div>
 
     <!--  上传成功界面-->
@@ -260,6 +262,10 @@ export default {
         this.stepsActive++;
         this.loading = false
       }
+    },
+    // 回退到上一个步骤
+    minusStep() {
+      this.stepsActive--;
     },
     // 检查上传文件是否合规
     beforeUpload(file){
