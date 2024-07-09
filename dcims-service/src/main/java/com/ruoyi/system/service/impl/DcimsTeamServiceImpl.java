@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
@@ -38,6 +39,8 @@ import com.ruoyi.system.service.*;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
@@ -48,6 +51,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -70,6 +76,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     private final ISysOssService ossService;
     private final ISysDeptService deptService;
     private final ISysDictTypeService dictTypeService;
+    private final ResourceLoader resourceLoader;
 
     /**
      * 查询参赛团队
@@ -480,38 +487,57 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * 获取批量导入模板
      */
     @Override
-    public File getImportTemplate(Integer annual) {
+    public File getImportTemplate(Integer annual) throws IOException {
         List<String> competitionNames = competitionService.queryList(annual).stream().map(DcimsCompetitionVo::getName).collect(Collectors.toList());
         List<String> awardLevels =  dictTypeService.selectDictDataByType("dcims_award_level").stream().map(SysDictData::getDictLabel).collect(Collectors.toList());
 
         ExcelWriteHandler excelWriteHandler = new ExcelWriteHandler(annual, competitionNames, awardLevels);
-        ClassPathResource templateResource = new ClassPathResource("excel/批量导入获奖团队");
-        File excelTemplateFile = FileUtil.file(templateResource.getPath() + "/teamImportTemplate.xlsx");
-        File outputFile = FileUtil.copyFile(excelTemplateFile.getPath(), templateResource.getPath() + "/teamImportTemplate"+ new Date().getTime() +".xlsx");
-        System.out.println(templateResource.getPath());
-        System.out.println(outputFile.getPath());
+//        ClassPathResource templateResource = new ClassPathResource("excel/批量导入获奖团队");
+        Resource templateResource = resourceLoader.getResource("classpath:excel/批量导入获奖团队/teamImportTemplate.xlsx");
+//        File excelTemplateFile = templateResource.getFile();
+//        File outputFile = FileUtil.copyFile(excelTemplateFile.getPath(), excelTemplateFile.getPath().substring(0, excelTemplateFile.getPath().length() - 24) + "/teamImportTemplate"+ new Date().getTime() +".xlsx");
+        String outputFilePath = "/teamImportTemplate" + new Date().getTime() + ".xlsx";
+        File outputFile = new File(outputFilePath);
+//        System.out.println(templateResource.getURI());
+//        System.out.println(outputFile.getPath());
+
+        // 使用resource InputStream
+        InputStream templateInputStream = templateResource.getInputStream();
+
+        // 创建一个临时文件来存储模板内容，用于EasyExcel
+        File tempFile = File.createTempFile("teamImportTemplate", ".xlsx");
+        Files.copy(templateInputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+        // 确保输入流关闭
+        templateInputStream.close();
+
+
         List<DcimsTeamImportExcel> temp = new ArrayList<>();
         EasyExcel.write(outputFile)
-            .registerWriteHandler(excelWriteHandler).withTemplate(excelTemplateFile).sheet("工作表1").doWrite(temp);
-//        return ZipUtil.zip(templateResource.getPath());
+            .registerWriteHandler(excelWriteHandler).withTemplate(tempFile).sheet("工作表1").doWrite(temp);
+
+        // 记得在操作完成后清理临时文件（根据实际情况决定是否删除）
+        tempFile.deleteOnExit();
         return outputFile;
     }
 
     /**
      * 对批量导入模板内填写的数据进行读取，格式转换
      */
-    public List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file){
+    public List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file) throws IOException {
         // 以时间戳为文件唯一标识
-        FileUtil.touch("temp");
-        ClassPathResource templateResource = new ClassPathResource("temp");
+        Path tempDir = Files.createTempDirectory("temp");
+        System.out.println("临时目录路径: " + tempDir);
+//        ClassPathResource templateResource = new ClassPathResource("temp");
         Date now = new Date();
-        String pathName = templateResource.getPath() + "/" + now.getTime() + new Random().nextInt(64);
+        String pathName = tempDir.getFileName() + "/" + now.getTime() + new Random().nextInt(64);
         File unzipFile = new File(pathName);
 
         // 解压文件，打开表格文件
         File unzip = ZipUtil.unzip(file, unzipFile, Charset.forName("GBK"));
         // 解压后的所有文件，包括表格和佐证材料
         List<File> oss = FileUtil.loopFiles(unzip.getAbsolutePath());
+        oss = oss.stream().filter(e -> !e.getAbsolutePath().contains("__MACOSX")).collect(Collectors.toList());
 
         List<SysOssVo> ossVo = oss.stream().filter(e -> {
             return !e.getName().endsWith(".xlsx") || !e.getName().endsWith(".xls") || !e.getName().endsWith(".xlsm");
@@ -534,6 +560,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                     .filter(vo -> StrUtil.equals(vo.getOriginalName(), dcimsTeamImportExcel.getSupportMaterialFileName()))
                     .findFirst();
                 match.ifPresent(vo -> dcimsTeamImportExcel.setSupportMaterial(vo.getOssId()));
+                match.ifPresent(dcimsTeamImportExcel::setOss);
             });
             // 未匹配到的添加错误信息
             importTeamData.forEach(dcimsTeamImportExcel -> {
@@ -672,7 +699,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     /**
      * 为批量导入追加数据
      */
-    public Map<String, Object> appendImportData(String id, String type, InputStream file){
+    public Map<String, Object> appendImportData(String id, String type, InputStream file) throws IOException {
         // 从redis中读取保存的数据，防止用户篡改
         List<DcimsTeamImportExcel> redisImportTeamData = JSONUtil.toList(
             RedisUtils.getCacheObject("dcims_team_list:" + id).toString(),

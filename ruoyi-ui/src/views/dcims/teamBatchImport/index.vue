@@ -3,26 +3,27 @@
     <el-steps :active="stepsActive" align-center>
       <el-step title="1-下载批量导入团队模板" description=""></el-step>
       <el-step title="2-上传模板文件" description=""></el-step>
-      <el-step title="3-检查并修改数据" description=""></el-step>
+      <el-step title="3-检查并修改奖项" description=""></el-step>
       <el-step title="4-导入成功" description=""></el-step>
     </el-steps>
 
     <!--  下载模板界面-->
-    <div v-show="stepsActive==0">
-      <p>请选择年份，下载模板</p>
-      <el-select v-model="selectedYear" placeholder="请选择">
-        <el-option
-          v-for="dict in dict.type.dcims_years"
-          :key="dict.value"
-          :label="dict.label"
-          :value="dict.value">
-        </el-option>
-      </el-select>
-      <el-button type="primary" @click="downloadTemplate()" :loading="loading">下载</el-button>
+    <div v-show="stepsActive==0" style="text-align: center;">
+        <p>请选择年份，下载模板</p>
+        <el-select v-model="selectedYear" placeholder="请选择">
+          <el-option
+            v-for="dict in dict.type.dcims_years"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value">
+          </el-option>
+        </el-select>
+        <br/>
+        <el-button type="primary" @click="downloadTemplate()" :loading="loading" style="margin-top: 30px">下载</el-button>
     </div>
 
     <!--  上传模板界面-->
-    <div v-show="stepsActive==1">
+    <div v-show="stepsActive==1" style="text-align: center;">
       <el-upload
         class="upload"
         ref="upload0"
@@ -37,10 +38,12 @@
         <el-button style="margin-left: 10px;" size="small" type="success" @click="clickUploadButton()" :loading="loading">上传到服务器</el-button>
         <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于100MB</div>
       </el-upload>
+      <br/>
+      <el-button @click="minusStep">后退</el-button>
     </div>
 
     <!--  调整数据界面-->
-    <div v-show="stepsActive==2">
+    <div v-show="stepsActive==2" style="text-align: center;">
       <el-table :data="team" style="width: 100%" @cell-mouse-enter="handleCellEnter" @cell-mouse-leave="handleCellLeave">
         <el-table-column prop="year" label="年份" width="180">
           <template slot-scope="scope">
@@ -146,9 +149,16 @@
 
         <el-table-column prop="supportMaterialFileName" label="获奖佐证材料" width="180">
           <template slot-scope="scope">
-<!--            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.supportMaterialFileName" placeholder="请输入内容"></el-input>-->
-<!--            <div v-else class="txt">{{scope.row.supportMaterialFileName}}</div>-->
-            <div class="txt">{{scope.row.supportMaterialFileName}}</div>
+            <ImagePreview
+              v-if="previewListResource && scope.row.oss != null && checkFileSuffix(scope.row.oss.fileSuffix)"
+              :width=100 :height=100
+              :src="scope.row.oss.url"
+              :preview-src-list="[scope.row.oss.url]"/>
+            <span v-if="(scope.row.oss != null) && (!checkFileSuffix(scope.row.oss.fileSuffix) || !previewListResource)">
+            <i class="el-icon-document" style="font-size: 20px;"></i>
+            <br/>
+          </span>
+            <el-button v-if="(scope.row.oss != null)" type="text" @click.native="openNewTab(scope.row.oss.url)">在新窗口打开</el-button>
           </template>
         </el-table-column>
 
@@ -172,7 +182,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-button style="margin-left: 10px;" type="success" @click="clickChangeButton()" :loading="loading">保存修改</el-button>
+      <el-button style="margin-left: 10px;" type="success" @click="clickChangeButton()" :loading="loading" style="margin-bottom: 30px">保存修改</el-button>
       <br>
 
       <el-radio v-model="appendType" label="追加">追加</el-radio>
@@ -187,11 +197,11 @@
         :limit="1"
         :auto-upload="false"
         :http-request="appendData">
-        <el-button slot="trigger" size="small" type="primary">{{this.appendType}}数据</el-button>
+        <el-button slot="trigger" size="small" type="primary">{{this.appendType}}奖项</el-button>
         <el-button style="margin-left: 10px;" size="small" type="success" @click="clickAppendButton()" :loading="loading">上传到服务器</el-button>
         <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于100MB</div>
       </el-upload>
-      <el-button @click="submit()">确认数据无误，提交到学院</el-button>
+      <el-button @click="submit()" style="margin-top: 30px">确认奖项无误，点击提交</el-button>
     </div>
 
     <!--  上传成功界面-->
@@ -237,6 +247,8 @@ export default {
       selectedOpen: false,
       // 可选竞赛
       optionsCompetition: [],
+      // 预览列表图片
+      previewListResource: true,
     }
   },
   created() {
@@ -250,6 +262,10 @@ export default {
         this.stepsActive++;
         this.loading = false
       }
+    },
+    // 回退到上一个步骤
+    minusStep() {
+      this.stepsActive--;
     },
     // 检查上传文件是否合规
     beforeUpload(file){
@@ -406,7 +422,18 @@ export default {
         this.loading = false
         this.$modal.msgSuccess("保存成功");
       })
-    }
+    },
+    checkFileSuffix(fileSuffix) {
+      console.log(fileSuffix)
+      let arr = ["png", "jpg", "jpeg"];
+      return arr.some(type => {
+        return fileSuffix.indexOf(type) > -1;
+      });
+    },
+    /** 打开新窗口 */
+    openNewTab(url) {
+      window.open(url, '_blank');
+    },
   }
 }
 </script>

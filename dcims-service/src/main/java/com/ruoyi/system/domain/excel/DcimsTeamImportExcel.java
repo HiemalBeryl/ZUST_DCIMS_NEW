@@ -5,6 +5,7 @@ import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
+import com.ruoyi.system.domain.vo.SysOssVo;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -97,6 +98,12 @@ public class DcimsTeamImportExcel {
      */
     @ExcelIgnore
     private Long supportMaterial;
+
+    /**
+     * 佐证材料详情
+     */
+    @ExcelIgnore
+    private SysOssVo oss;
 
     /**
      * 竞赛对应主键
