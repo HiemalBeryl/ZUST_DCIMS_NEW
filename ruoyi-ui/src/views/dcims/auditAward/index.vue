@@ -433,6 +433,23 @@ import download from '@/plugins/download.js';
           this.loading = false;
         });
       },
+
+      getListTwo() {
+        this.loading = true;
+        listTeam(this.queryParams).then(response => {
+          this.teamList = response.rows;
+          this.total = response.total;
+
+          console.log(this.teamList)
+          this.teamList.forEach(e => {
+            
+            e.teacherName = e.teacherName.join("，");
+            e.studentName = e.studentName.join("，");
+          })
+
+          this.loading = false;
+        });
+      },
       /** 修改按钮操作 */
       handleUpdate(row) {
         this.loading = true;
@@ -488,12 +505,12 @@ import download from '@/plugins/download.js';
        /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
-      this.getList();
+      this.getListTwo();
     },
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
-      this.handleQuery();
+      this.getList();
     },
      // 多选框选中数据
      handleSelectionChange(selection) {
