@@ -6,6 +6,85 @@
         <el-col :span="24" ><div class="grid-content bg-purple-light" style="height:20px"></div></el-col>
       </el-row>
     </div>
+
+
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="竞赛名称" prop="competitionName">
+        <el-input
+          v-model="queryParams.competitionName"
+          placeholder="请输入竞赛名称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      
+      <el-form-item label="队伍名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入队伍名称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="比赛类型" prop="competitionType">
+        <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_award_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="奖项等级" prop="awardLevel">
+        <el-select v-model="queryParams.awardLevel" placeholder="请选择奖项等级" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_award_level"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="指导教师工号" prop="teacherId">
+        <el-input
+          v-model="queryParams.teacherId"
+          placeholder="请输入指导教师工号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="指导教师姓名" prop="teacherName">
+        <el-input
+          v-model="queryParams.teacherName"
+          placeholder="请输入指导教师姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="参赛学生学号" prop="studentId">
+        <el-input
+          v-model="queryParams.studentId"
+          placeholder="请输入参赛学生学号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="参赛学生姓名" prop="studentName">
+        <el-input
+          v-model="queryParams.studentName"
+          placeholder="请输入参赛学生姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
     <!-- 导出相关文档-->
     <el-col :span="1.5">
       <el-button
@@ -219,7 +298,7 @@
 
 <script>
 import {listTeamAudit, permitAudit, refuseAudit} from "@/api/dcims/teamAudit";
-import {getTeam, updateTeam} from "@/api/dcims/team"
+import {getTeam, updateTeam,listTeam} from "@/api/dcims/team"
 import { listByIds } from "@/api/system/oss"
 import download from '@/plugins/download.js';
 
@@ -264,8 +343,8 @@ import download from '@/plugins/download.js';
           teacherName: undefined,
           awardTime: undefined,
           supportMaterial: undefined,
-          teacherId: this.$store.state.user.name,
-          audit: 1
+          teacherId: undefined,
+          audit: '1'
         },
         // 表单参数
         form: {},
@@ -346,6 +425,7 @@ import download from '@/plugins/download.js';
 
           console.log(this.teamList)
           this.teamList.forEach(e => {
+            
             e.teacherName = e.teacherName.join("，");
             e.studentName = e.studentName.join("，");
           })
@@ -405,6 +485,22 @@ import download from '@/plugins/download.js';
         this.resetForm("form");
         this.resetForm("form2");
       },
+       /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.pageNum = 1;
+      this.getList();
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      this.resetForm("queryForm");
+      this.handleQuery();
+    },
+     // 多选框选中数据
+     handleSelectionChange(selection) {
+      this.ids = selection.map(item => item.id)
+      this.single = selection.length!==1
+      this.multiple = !selection.length
+    },
     toggleSelection(rows) {
       if (rows) {
         rows.forEach((row) => {
