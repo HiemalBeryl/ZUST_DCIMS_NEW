@@ -6,7 +6,27 @@
         <el-col :span="24" ><div class="grid-content bg-purple-light" style="height:20px"></div></el-col>
       </el-row>
     </div>
-
+    <!-- 导出相关文档-->
+    <el-col :span="1.5">
+      <el-button
+        type="warning"
+        plain
+        icon="el-icon-download"
+        size="mini"
+        @click="handleExport"
+        v-hasPermi="['dcims:team:export']"
+      >下载获奖信息表</el-button>
+    </el-col>
+    <el-col :span="1.5">
+      <el-button
+        type="warning"
+        plain
+        icon="el-icon-download"
+        size="mini"
+        @click="handleExport2"
+        v-hasPermi="['dcims:team:export']"
+      >下载佐证材料</el-button>
+    </el-col>
 
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
@@ -201,6 +221,7 @@
 import {listTeamAudit, permitAudit, refuseAudit} from "@/api/dcims/teamAudit";
 import {getTeam, updateTeam} from "@/api/dcims/team"
 import { listByIds } from "@/api/system/oss"
+import download from '@/plugins/download.js';
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
@@ -234,7 +255,17 @@ import { listByIds } from "@/api/system/oss"
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 500
+          pageSize: 500,
+          competitionName: undefined,
+          name: undefined,
+          competitionType: undefined,
+          awardLevel: undefined,
+          studentName: undefined,
+          teacherName: undefined,
+          awardTime: undefined,
+          supportMaterial: undefined,
+          teacherId: this.$store.state.user.name,
+          audit: 1
         },
         // 表单参数
         form: {},
@@ -416,6 +447,18 @@ import { listByIds } from "@/api/system/oss"
         }
       });
     },
+    /** 导出按钮操作 */
+    handleExport() {
+      this.download('dcims/team/export', {
+        ...this.queryParams
+      }, `获奖信息表${new Date().getTime()}.xlsx`)
+    },
+    /** 导出按钮操作 */
+    handleExport2() {
+      this.download('dcims/team/download', {
+        ...this.queryParams
+      }, `获奖佐证材料附件${new Date().getTime()}.zip`)
+    },
     /** 提交审核信息按钮 */
     submitForm2() {
             this.buttonLoading = true;
@@ -551,6 +594,8 @@ this.$prompt(h(
       }
 
   },
+  
+ 
   };
 </script>
 
