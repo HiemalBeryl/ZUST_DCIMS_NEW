@@ -5,20 +5,12 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.IoUtil;
 
 
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import cn.hutool.json.ObjectMapper;
-import com.alibaba.fastjson.JSON;
-import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
@@ -28,17 +20,14 @@ import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import com.ruoyi.system.utils.WordUtil;
-import io.swagger.v3.core.util.Json;
 import lombok.RequiredArgsConstructor;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import com.ruoyi.common.annotation.RepeatSubmit;
@@ -121,20 +110,40 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/exportTeamWord")
     public void exportWord(DcimsTeamBo bo, HttpServletResponse response) {
         List<DcimsTeamVo> list = iDcimsTeamService.queryList(bo);
-        //使用流提出相应数据
-        List<String> WorksName = list.stream().map(DcimsTeamVo::getWorksName).collect(Collectors.toList());
-        List<String> awardLevel = list.stream().map(DcimsTeamVo::getAwardLevel).collect(Collectors.toList());
-        List<String> studentName = list.stream().map(DcimsTeamVo::getStudentName).collect(Collectors.toList());
-        List<String> teacherName = list.stream().map(DcimsTeamVo::getTeacherName).collect(Collectors.toList());
+        //使用流提取出国家及国际奖项
+        List<DcimsTeamVo> nationalAwards = list.stream()
+            .filter(teamVo -> {
+                try {
+                    // 尝试将awardLevel字符串转换为整数
+                    int level = Integer.parseInt(teamVo.getAwardLevel());
+                    // 如果转换成功，则检查是否小于等于9
+                    return level <= 9;
+                } catch (NumberFormatException e) {
+                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
+        //提取省级奖项
+        List<DcimsTeamVo> provincialAwards = list.stream()
+            .filter(teamVo -> {
+                try {
+                    // 尝试将awardLevel字符串转换为整数
+                    int level = Integer.parseInt(teamVo.getAwardLevel());
+                    // 如果转换成功，则检查是否小于等于9
+                    return  level <= 19 && level >=15;
+                } catch (NumberFormatException e) {
+                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
 
-        HashMap<String, Object> map = new HashMap<>();
-        String jsonString = JsonUtils.toJsonString(list);
-        map.put("worksName", WorksName);
-        map.put("awardLevel", awardLevel);
-        map.put("studentName", studentName);
-        map.put("teacherName", teacherName);
+         HashMap<String, Object> map = new HashMap<>();
+         map.put("nationalAwards", nationalAwards);
+         map.put("provincialAwards",provincialAwards);
 
-        WordUtil.exportWordByModel(response,map, "word/temp.docx","员工统计");
+        WordUtil.exportWordByModel(response,map, "word/studentProvincialAwardsImportTeam.docx","员工统计");
 
     }
 

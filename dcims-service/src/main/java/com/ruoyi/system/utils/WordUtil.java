@@ -8,9 +8,13 @@ import cn.hutool.core.io.FileUtil;
 
 import com.deepoove.poi.XWPFTemplate;
 import com.deepoove.poi.config.Configure;
+import com.deepoove.poi.config.ConfigureBuilder;
+
+
 import com.deepoove.poi.plugin.table.LoopRowTableRenderPolicy;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.springframework.util.ResourceUtils;
 
@@ -21,6 +25,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -32,15 +37,20 @@ public class WordUtil {
      * @param modelFileName
      * @param outFileName
      */
-    public static void exportWordByModel(HttpServletResponse response, Map<String, Object> map, String modelFileName, String outFileName) {
+    public  static <T> void exportWordByModel(HttpServletResponse response, HashMap<String, Object> map, String modelFileName, String outFileName) {
         try {
             // 1.获取模板文件路径 - 重点
             //XWPFDocument word = WordExportUtil.exportWord07(modelFileName, map);）
             File file = filePath(modelFileName);
             FileInputStream inputStream = new FileInputStream(file);
+            Configure configure = Configure
+                .builder()
+                .bind("nationalAwards", new LoopRowTableRenderPolicy())
+                .bind("provincialAwards", new LoopRowTableRenderPolicy())
+                .build();
 
-            XWPFDocument document = new XWPFDocument(inputStream);
-            XWPFTemplate compile = XWPFTemplate.compile(document);
+           XWPFDocument document = new XWPFDocument(inputStream);
+            XWPFTemplate compile = XWPFTemplate.compile(document,configure);
             XWPFTemplate template = compile.render(map);
             OutputStream out = response.getOutputStream();
             template.write(out);
