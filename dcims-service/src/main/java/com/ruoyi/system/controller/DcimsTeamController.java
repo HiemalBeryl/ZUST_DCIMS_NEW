@@ -3,12 +3,22 @@ package com.ruoyi.system.controller;
 import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.IoUtil;
+
+
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.ObjectMapper;
+import com.alibaba.fastjson.JSON;
+import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
@@ -17,11 +27,18 @@ import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
+import com.ruoyi.system.utils.WordUtil;
+import io.swagger.v3.core.util.Json;
 import lombok.RequiredArgsConstructor;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import com.ruoyi.common.annotation.RepeatSubmit;
@@ -39,6 +56,8 @@ import com.ruoyi.system.service.IDcimsTeamService;
 import com.ruoyi.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.springframework.boot.actuate.health.Health.down;
+
 /**
  * 参赛团队
  *
@@ -51,6 +70,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/dcims/team")
 public class DcimsTeamController extends BaseController {
 
+    private static final Logger log = LoggerFactory.getLogger(DcimsTeamController.class);
     private final IDcimsTeamService iDcimsTeamService;
     private final IDcimsTeamAuditService iDcimsTeamAuditService;
     private final IDcimsGlobalSettingService globalSettingService;
@@ -92,6 +112,30 @@ public class DcimsTeamController extends BaseController {
     public void export(DcimsTeamBo bo, HttpServletResponse response) {
         List<DcimsTeamVo> list = iDcimsTeamService.queryList(bo);
         ExcelUtil.exportExcel(list, "参赛团队", DcimsTeamVo.class, response);
+    }
+
+    /*
+    * 导出参赛团队word
+    * */
+    @SaCheckPermission("dcims:team:export")
+    @PostMapping("/exportTeamWord")
+    public void exportWord(DcimsTeamBo bo, HttpServletResponse response) {
+        List<DcimsTeamVo> list = iDcimsTeamService.queryList(bo);
+        //使用流提出相应数据
+        List<String> WorksName = list.stream().map(DcimsTeamVo::getWorksName).collect(Collectors.toList());
+        List<String> awardLevel = list.stream().map(DcimsTeamVo::getAwardLevel).collect(Collectors.toList());
+        List<String> studentName = list.stream().map(DcimsTeamVo::getStudentName).collect(Collectors.toList());
+        List<String> teacherName = list.stream().map(DcimsTeamVo::getTeacherName).collect(Collectors.toList());
+
+        HashMap<String, Object> map = new HashMap<>();
+        String jsonString = JsonUtils.toJsonString(list);
+        map.put("worksName", WorksName);
+        map.put("awardLevel", awardLevel);
+        map.put("studentName", studentName);
+        map.put("teacherName", teacherName);
+
+        WordUtil.exportWordByModel(response,map, "word/temp.docx","员工统计");
+
     }
 
 

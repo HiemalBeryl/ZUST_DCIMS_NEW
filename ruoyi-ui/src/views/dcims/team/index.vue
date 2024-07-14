@@ -1,4 +1,5 @@
 <template>
+  
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="竞赛名称" prop="competitionName">
@@ -9,6 +10,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      
       <el-form-item label="赛事年份" prop="annual">
         <el-input
           v-model="queryParams.annual"
@@ -94,6 +96,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
+      
       <!-- <el-col :span="1.5">
         <el-button
           type="primary"
@@ -146,6 +149,17 @@
           v-hasPermi="['dcims:team:export']"
         >下载佐证材料</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport4"
+          v-hasPermi="['dcims:team:export']"
+        >下载获奖信息表Word</el-button>
+      </el-col>
+      
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -519,6 +533,13 @@ export default {
         ...this.queryParams
       }, `获奖佐证材料附件${new Date().getTime()}.zip`)
     },
+    /** 导出按钮操作 */
+    handleExport4() {
+      this.download('dcims/team/exportTeamWord', {
+        ...this.queryParams
+      }, `获奖信息表${new Date().getTime()}.docx`)
+    },
+
     /** 是否填写作品名称 */
     changeWorksName(){
       this.worksNameIsNull = !this.worksNameIsNull;

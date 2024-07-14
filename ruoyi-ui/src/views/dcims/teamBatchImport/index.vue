@@ -182,7 +182,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-button style="margin-left: 10px;" type="success" @click="clickChangeButton()" :loading="loading" style="margin-bottom: 30px">保存修改</el-button>
+      <el-button style="margin-left: 10px;" type="success" @click="clickChangeButton()" :loading="loading" >保存修改</el-button>
       <br>
 
       <el-radio v-model="appendType" label="追加">追加</el-radio>

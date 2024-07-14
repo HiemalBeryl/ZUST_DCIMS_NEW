@@ -107,6 +107,7 @@
       >下载佐证材料</el-button>
     </el-col>
 
+    
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
       <h2>待提交列表</h2>
@@ -344,6 +345,7 @@ import download from '@/plugins/download.js';
           awardTime: undefined,
           supportMaterial: undefined,
           teacherId: undefined,
+          next_audit_id: this.$store.state.user.name,
           audit: '1'
         },
         // 表单参数
@@ -562,6 +564,7 @@ import download from '@/plugins/download.js';
     },
     /** 导出按钮操作 */
     handleExport() {
+      
       this.download('dcims/team/export', {
         ...this.queryParams
       }, `获奖信息表${new Date().getTime()}.xlsx`)

@@ -309,6 +309,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.like(StringUtils.isNotBlank(bo.getTeacherName()), DcimsTeam::getTeacherName, bo.getTeacherName());
         lqw.like(StringUtils.isNotBlank(bo.getStudentId()), DcimsTeam::getStudentId, bo.getStudentId());
         lqw.like(StringUtils.isNotBlank(bo.getStudentName()), DcimsTeam::getStudentName, bo.getStudentName());
+        lqw.like(StringUtils.isNotBlank(bo.getNext_audit_id()), DcimsTeam::getNextAuditId, bo.getNext_audit_id());
         lqw.eq(bo.getAudit() != null, DcimsTeam::getAudit, bo.getAudit());
         return lqw;
     }
