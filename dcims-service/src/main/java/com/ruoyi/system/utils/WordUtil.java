@@ -16,6 +16,7 @@ import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.ResourceUtils;
 
 import javax.servlet.ServletOutputStream;
@@ -41,8 +42,8 @@ public class WordUtil {
         try {
             // 1.获取模板文件路径 - 重点
             //XWPFDocument word = WordExportUtil.exportWord07(modelFileName, map);）
-            File file = filePath(modelFileName);
-            FileInputStream inputStream = new FileInputStream(file);
+            ClassPathResource resource = new ClassPathResource(modelFileName);
+            InputStream inputStream = resource.getInputStream();
             Configure configure = Configure
                 .builder()
                 .bind("nationalAwards", new LoopRowTableRenderPolicy())
