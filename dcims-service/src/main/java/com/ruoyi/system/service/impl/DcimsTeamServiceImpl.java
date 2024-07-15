@@ -980,6 +980,77 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
     }
 
+    /*
+     *查询获奖情况并处理数据
+     * */
+    public HashMap<String, Object> queryAward(DcimsTeamBo bo) {
+        List<DcimsTeamVo> list = queryList(bo);
+
+
+        // 创建一个Map来存储字典项的映射（例如，字典项的值作为键，字典项的标签作为值）
+        Map<Object, String> dictMap = new HashMap<>();
+
+        // 查询奖项等级对应的字典项
+        List<SysDictData> dictDataList = dictTypeService.selectDictDataByType("dcims_award_level");
+        for (SysDictData dictData : dictDataList) {
+            dictMap.put(dictData.getDictValue(), dictData.getDictLabel());
+        }
+
+        //使用流提取出国家及国际奖项
+        List<DcimsTeamVo> nationalAwards = list.stream()
+            .filter(teamVo -> {
+                try {
+                    // 尝试将awardLevel字符串转换为整数
+                    int level = Integer.parseInt(teamVo.getAwardLevel());
+                    // 如果转换成功，则检查是否小于等于9
+                    return level <= 9;
+                } catch (NumberFormatException e) {
+                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
+        //提取省级奖项
+        List<DcimsTeamVo> provincialAwards = list.stream()
+            .filter(teamVo -> {
+                try {
+                    // 尝试将awardLevel字符串转换为整数
+                    int level = Integer.parseInt(teamVo.getAwardLevel());
+                    // 如果转换成功，则检查是否小于等于9
+                    return  level <= 19 && level >=15;
+                } catch (NumberFormatException e) {
+                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
+
+        // 遍历列表并替换awardLevel
+        for (DcimsTeamVo teamVo : nationalAwards) {
+            // 假设awardLevel是一个String或Integer，这里需要根据实际情况进行调整
+            String originalAwardLevel = String.valueOf(teamVo.getAwardLevel()); // 可能需要转换
+            if (dictMap.containsKey(originalAwardLevel)) {
+                // 如果存在，则替换
+                teamVo.setAwardLevel(dictMap.get(originalAwardLevel));
+            }
+        }
+
+        // 遍历列表并替换awardLevel
+        for (DcimsTeamVo teamVo : provincialAwards) {
+            // 假设awardLevel是一个String或Integer，这里需要根据实际情况进行调整
+            String originalAwardLevel = String.valueOf(teamVo.getAwardLevel()); // 可能需要转换
+            if (dictMap.containsKey(originalAwardLevel)) {
+                // 如果存在，则替换
+                teamVo.setAwardLevel(dictMap.get(originalAwardLevel));
+            }
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("nationalAwards", nationalAwards);
+        map.put("provincialAwards",provincialAwards);
+        return map;
+    }
+
     /**
      * 从字典中翻译获奖等级
      */

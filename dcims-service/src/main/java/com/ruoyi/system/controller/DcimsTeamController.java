@@ -109,40 +109,7 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:export")
     @PostMapping("/exportTeamWord")
     public void exportWord(DcimsTeamBo bo, HttpServletResponse response) {
-        List<DcimsTeamVo> list = iDcimsTeamService.queryList(bo);
-        //使用流提取出国家及国际奖项
-        List<DcimsTeamVo> nationalAwards = list.stream()
-            .filter(teamVo -> {
-                try {
-                    // 尝试将awardLevel字符串转换为整数
-                    int level = Integer.parseInt(teamVo.getAwardLevel());
-                    // 如果转换成功，则检查是否小于等于9
-                    return level <= 9;
-                } catch (NumberFormatException e) {
-                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
-                    return false;
-                }
-            })
-            .collect(Collectors.toList());
-        //提取省级奖项
-        List<DcimsTeamVo> provincialAwards = list.stream()
-            .filter(teamVo -> {
-                try {
-                    // 尝试将awardLevel字符串转换为整数
-                    int level = Integer.parseInt(teamVo.getAwardLevel());
-                    // 如果转换成功，则检查是否小于等于9
-                    return  level <= 19 && level >=15;
-                } catch (NumberFormatException e) {
-                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
-                    return false;
-                }
-            })
-            .collect(Collectors.toList());
-
-         HashMap<String, Object> map = new HashMap<>();
-         map.put("nationalAwards", nationalAwards);
-         map.put("provincialAwards",provincialAwards);
-
+        HashMap<String, Object> map =iDcimsTeamService.queryAward(bo);
         WordUtil.exportWordByModel(response,map, "word/studentProvincialAwardsImportTeam.docx","员工统计");
 
     }

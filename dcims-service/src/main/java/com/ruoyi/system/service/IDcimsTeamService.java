@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -99,4 +100,9 @@ public interface IDcimsTeamService {
      * 下载获奖团队信息以及附件
      */
     void download(DcimsTeamBo bo, HttpServletResponse response) throws IOException;
+
+    /*
+    *查询获奖情况并处理数据
+    * */
+    HashMap<String, Object> queryAward(DcimsTeamBo bo);
 }
