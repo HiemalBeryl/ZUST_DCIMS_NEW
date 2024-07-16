@@ -42,17 +42,4 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="delFlag" column="del_flag"/>
     </resultMap>
 
-    <!--
-    根据竞赛ID批量查询竞赛名称
-    -->
-    <select id="selectCompetitionNameByCompetitionIds"
-            resultType="com.ruoyi.system.domain.vo.DcimsCompetitionVo">
-            select id,name from dcims_competition
-            where id in
-            <foreach collection="competitionIds" item="competitionId" separator="," open="(" close=")">
-                #{competitionId}
-            </foreach>
-    </select>
-
-
 </mapper>

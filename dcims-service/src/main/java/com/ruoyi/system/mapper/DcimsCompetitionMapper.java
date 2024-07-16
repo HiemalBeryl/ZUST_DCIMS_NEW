@@ -20,6 +20,4 @@ import java.util.List;
 public interface DcimsCompetitionMapper extends BaseMapperPlus<DcimsCompetitionMapper, DcimsCompetition, DcimsCompetitionVo> {
 
 
-    List<DcimsCompetitionVo> selectCompetitionNameByCompetitionIds(@Param("competitionIds") List<Long> competitionIds);
-
 }

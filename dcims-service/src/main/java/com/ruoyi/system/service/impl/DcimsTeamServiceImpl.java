@@ -86,12 +86,15 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     @Override
     public DcimsTeamVoV2 queryById(Long id){
         DcimsTeamVo vo = baseMapper.selectVoById(id);
+
+        DcimsCompetitionVo competition = competitionService.queryById(vo.getCompetitionId());
         DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
         BeanUtils.copyProperties(vo, voV2);
         voV2.setStudentId(vo.getStudentId().split(","));
         voV2.setStudentName(vo.getStudentName().split(","));
         voV2.setTeacherId(vo.getTeacherId().split(","));
         voV2.setTeacherName(vo.getTeacherName().split(","));
+        voV2.setCompetitionName(competition.getName());
         return voV2;
     }
 
@@ -404,6 +407,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
         teacherName = teacherName.substring(0,teacherName.length() - 1);
         update.setTeacherName(teacherName);
+
 
         return baseMapper.updateById(update) > 0;
     }
@@ -999,8 +1003,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             .map(DcimsTeamBo::getCompetitionId)
             .collect(Collectors.toList());
 
-        //查询出需要的竞赛名称和id，id供后边替换使用
-        List<DcimsCompetitionVo> dcimsCompetitionVos=dcimsCompetitionMapper.selectCompetitionNameByCompetitionIds(competitionIds);
+        //// 翻译id为竞赛名
+        List<DcimsCompetitionVo> dcimsCompetitionVos=competitionService.listById(competitionIds);
 
         //将对应的id和name放在map中
         Map<Long, String> competitionNameMap = dcimsCompetitionVos.stream()

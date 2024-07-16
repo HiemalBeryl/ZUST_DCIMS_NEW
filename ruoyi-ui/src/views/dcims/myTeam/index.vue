@@ -83,6 +83,9 @@
           <el-form-item label="竞赛id" prop="competitionId">
             <el-input v-model="form.competitionId" placeholder="请输入竞赛id" />
           </el-form-item>
+          <el-form-item label="竞赛名称" prop="competitionName">
+            <el-input v-model="form.competitionName" placeholder="请输入竞赛名称" />
+          </el-form-item>
           <el-form-item label="队伍名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入队伍名称" />
           </el-form-item>
