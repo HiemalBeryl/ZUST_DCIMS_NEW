@@ -12,6 +12,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysDictData;
@@ -24,6 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.redis.RedisUtils;
 import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsCompetitionAudit;
 import com.ruoyi.system.domain.DcimsTeamAudit;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
@@ -985,7 +987,32 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * */
     public HashMap<String, Object> queryAward(DcimsTeamBo bo) {
         List<DcimsTeamVo> list = queryList(bo);
+        List<DcimsTeamBo> dcimsTeamBos = new ArrayList<>();
+        //将DcimsTeamVo中的属性拷贝到DcimsTeamBo中去
+        for (DcimsTeamVo team : list) {
+            DcimsTeamBo teamBo = new DcimsTeamBo();
+            BeanUtils.copyProperties(team, teamBo);
+            dcimsTeamBos.add(teamBo);
+        }
 
+        List<Long> competitionIds = dcimsTeamBos.stream()
+            .map(DcimsTeamBo::getCompetitionId)
+            .collect(Collectors.toList());
+
+        //查询出需要的竞赛名称和id，id供后边替换使用
+        List<DcimsCompetitionVo> dcimsCompetitionVos=dcimsCompetitionMapper.selectCompetitionNameByCompetitionIds(competitionIds);
+
+        //将对应的id和name放在map中
+        Map<Long, String> competitionNameMap = dcimsCompetitionVos.stream()
+            .collect(Collectors.toMap(DcimsCompetitionVo::getId, DcimsCompetitionVo::getName));
+
+        // 然后，遍历dcimsTeamBos，并使用上面创建的Map来更新competitionName
+        dcimsTeamBos.forEach(teamBo -> {
+            Long competitionId = teamBo.getCompetitionId();
+            if (competitionNameMap.containsKey(competitionId)) {
+                teamBo.setCompetitionName(competitionNameMap.get(competitionId));
+            }
+        });
 
         // 创建一个Map来存储字典项的映射（例如，字典项的值作为键，字典项的标签作为值）
         Map<Object, String> dictMap = new HashMap<>();
@@ -997,7 +1024,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
 
         //使用流提取出国家及国际奖项
-        List<DcimsTeamVo> nationalAwards = list.stream()
+        List<DcimsTeamBo> nationalAwards = dcimsTeamBos.stream()
             .filter(teamVo -> {
                 try {
                     // 尝试将awardLevel字符串转换为整数
@@ -1011,7 +1038,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             })
             .collect(Collectors.toList());
         //提取省级奖项
-        List<DcimsTeamVo> provincialAwards = list.stream()
+        List<DcimsTeamBo> provincialAwards = dcimsTeamBos.stream()
             .filter(teamVo -> {
                 try {
                     // 尝试将awardLevel字符串转换为整数
@@ -1026,7 +1053,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             .collect(Collectors.toList());
 
         // 遍历列表并替换awardLevel
-        for (DcimsTeamVo teamVo : nationalAwards) {
+        for (DcimsTeamBo teamVo : nationalAwards) {
             // 假设awardLevel是一个String或Integer，这里需要根据实际情况进行调整
             String originalAwardLevel = String.valueOf(teamVo.getAwardLevel()); // 可能需要转换
             if (dictMap.containsKey(originalAwardLevel)) {
@@ -1036,7 +1063,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
 
         // 遍历列表并替换awardLevel
-        for (DcimsTeamVo teamVo : provincialAwards) {
+        for (DcimsTeamBo teamVo : provincialAwards) {
             // 假设awardLevel是一个String或Integer，这里需要根据实际情况进行调整
             String originalAwardLevel = String.valueOf(teamVo.getAwardLevel()); // 可能需要转换
             if (dictMap.containsKey(originalAwardLevel)) {

@@ -110,7 +110,7 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/exportTeamWord")
     public void exportWord(DcimsTeamBo bo, HttpServletResponse response) {
         HashMap<String, Object> map =iDcimsTeamService.queryAward(bo);
-        WordUtil.exportWordByModel(response,map, "word/studentProvincialAwardsImportTeam.docx","员工统计");
+        WordUtil.exportWordByModel(response,map, "word/studentProvincialAwardsImportTeam.docx");
 
     }
 

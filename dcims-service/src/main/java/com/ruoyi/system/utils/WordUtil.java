@@ -36,9 +36,9 @@ public class WordUtil {
      * 根据模板导出Word
      * @param map
      * @param modelFileName
-     * @param outFileName
+     *
      */
-    public  static <T> void exportWordByModel(HttpServletResponse response, HashMap<String, Object> map, String modelFileName, String outFileName) {
+    public  static <T> void exportWordByModel(HttpServletResponse response, HashMap<String, Object> map, String modelFileName) {
         try {
             // 1.获取模板文件路径 - 重点
             //XWPFDocument word = WordExportUtil.exportWord07(modelFileName, map);）
