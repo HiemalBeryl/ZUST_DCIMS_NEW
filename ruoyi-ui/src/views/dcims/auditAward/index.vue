@@ -17,6 +17,15 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+
+      <el-form-item label="赛事年份" prop="annual">
+        <el-input
+          v-model="queryParams.annual"
+          placeholder="请输入赛事年份（如2024）"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       
       <el-form-item label="队伍名称" prop="name">
         <el-input
@@ -107,10 +116,13 @@
       >下载佐证材料</el-button>
     </el-col>
 
+    <el-tag>下方复选框无效,如需筛选前选择上方的筛选条件</el-tag>
+
     
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
       <h2>待提交列表</h2>
+      
       <!-- <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content "></div></el-col>
 
@@ -155,6 +167,8 @@
 
           <el-col :span="2"><div class="grid-content"></div></el-col>
       </el-row>-->
+
+      
 
       <!-- 用于存放勾选需要审核的获奖信息 -->
       <div>
@@ -337,6 +351,7 @@ import download from '@/plugins/download.js';
           pageNum: 1,
           pageSize: 500,
           competitionName: undefined,
+          annual: undefined,
           name: undefined,
           competitionType: undefined,
           awardLevel: undefined,
@@ -469,6 +484,7 @@ import download from '@/plugins/download.js';
           id: undefined,
           deptId: undefined,
           userId: undefined,
+          annual: undefined,
           orderNum: undefined,
           name: undefined,
           level: undefined,
