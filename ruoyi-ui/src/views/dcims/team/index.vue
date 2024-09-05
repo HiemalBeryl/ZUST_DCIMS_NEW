@@ -159,6 +159,10 @@
           v-hasPermi="['dcims:team:export']"
         >下载获奖信息表Word</el-button>
       </el-col>
+
+      <el-col>
+        <el-tag :span="1"  type="danger">如需筛选,请在上方进行筛选条件选择(下方复选框无效)</el-tag>
+      </el-col>
       
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>

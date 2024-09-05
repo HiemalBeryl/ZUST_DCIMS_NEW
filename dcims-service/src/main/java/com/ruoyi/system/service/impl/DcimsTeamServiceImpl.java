@@ -119,7 +119,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         pq.setPageNum(0);
         pq.setPageSize(10000);
         TableDataInfo<DcimsCompetitionVo> competitionList = competitionService.queryPageList(new DcimsCompetitionBo(), pq, true, false);
-        List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+        List<Long> competitionIds0 = competitionList.getRows().stream().filter(e ->
+            e.getAnnual().equals(bo.getAnnual())
+        ).map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+        //List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
         if (competitionIds0.size() > 0) {
             lqw.in(DcimsTeam::getCompetitionId, competitionIds0);
         }
