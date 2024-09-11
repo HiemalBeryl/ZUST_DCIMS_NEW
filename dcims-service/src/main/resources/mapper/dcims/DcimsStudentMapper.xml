@@ -15,6 +15,30 @@
         <result property="email" column="email"/>
         <result property="deleted" column="deleted"/>
     </resultMap>
+<!--    根据学号批量插入-->
+    <insert id="insertByStudentIds">
+        <foreach collection="studentsInsert" item="sutdent" separator=",">
+            insert into dcims_student (student_id, name, college, major, classes, phone, email)
+            values (#{student.studentId},#{student.name},#{student.college},#{student.major},#{student.classes},#{student.phone},#{student.email})
+        </foreach>
+    </insert>
+
+    <!--    根据学号批量更新-->
+    <update id="updateByStudentIds">
+        <foreach collection="studentsUpdate" item="student" open="" close="" separator=",">
+            update dcims_student
+            <set>
+                <if test="name != null">name=#{student.name}</if>
+                <if test="college != null">college=#{student.college}</if>
+                <if test="major != null">major=#{student.major}</if>
+                <if test="classes != null">classes=#{student.classes}</if>
+                <if test="phone != null">phone=#{student.phone}</if>
+                <if test="email != null">email=#{student.email}</if>
+            </set>
+            where
+                student_id =#{student.studentId}
+        </foreach>
+    </update>
 
 
 </mapper>
