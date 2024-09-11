@@ -177,7 +177,28 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/export")
     public void export(DcimsTeamBo bo, HttpServletResponse response) {
         List<DcimsTeamVo> list = iDcimsTeamService.queryList(bo);
-        ExcelUtil.exportExcel(list, "参赛团队", DcimsTeamVo.class, response);
+        List<DcimsTeamVoV2> result = new ArrayList<>();
+
+        List<DcimsCompetitionVo> competitions = competitionService.listById(
+            list.stream().map(DcimsTeamVo::getCompetitionId).collect(Collectors.toList())
+        );
+
+        list.forEach(e -> {
+            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+            BeanUtils.copyProperties(e, voV2);
+            voV2.setCompetition(
+                competitions.stream().filter(com -> com.getId().equals(voV2.getCompetitionId())).findFirst().get()
+            );
+            voV2.setCompetitionName(voV2.getCompetition().getName());
+            voV2.setTeacherName(e.getTeacherName().split(","));
+            voV2.setTeacherId(e.getTeacherId().split(","));
+            voV2.setStudentName(e.getStudentName().split(","));
+            voV2.setStudentId(e.getStudentId().split(","));
+            System.out.println(e);
+            System.out.println(voV2);
+            result.add(voV2);
+        });
+        ExcelUtil.exportExcel(result, "参赛团队", DcimsTeamVoV2.class, response);
     }
 
     /*
@@ -212,10 +233,28 @@ public class DcimsTeamController extends BaseController {
             tempResult.add(t);
         });
         List<TempDcimsComAndTeam> data1 = tempResult.stream().filter(e -> Integer.parseInt(e.getAwardLevel()) <= 9).collect(Collectors.toList());
+        List<TempDcimsComAndTeam> data2 = tempResult.stream().filter(e -> Integer.parseInt(e.getAwardLevel()) <= 19 && Integer.parseInt(e.getAwardLevel()) >= 10).collect(Collectors.toList());
 
+        List<TempDcimsComAndTeam> blank = new ArrayList<>();
+        blank.add(new TempDcimsComAndTeam());
+        blank.add(new TempDcimsComAndTeam());
+
+        data1.addAll(data2);
+        data1.stream().forEach(t -> {
+            t.setAwardLevel(
+                awardDict.stream().filter(d -> StringUtils.equals(d.getDictValue(), t.getAwardLevel()))
+                    .findFirst().get().getDictLabel()
+            );
+        });
 
         ExcelUtil.exportExcel(data1, "参赛团队", TempDcimsComAndTeam.class, response);
 
+        // 下面的代码暂时没用
+//        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+//        response.setHeader("Content-Disposition", "attachment; filename=example.docx");
+//
+//        OutputStream outputStream = response.getOutputStream();
+//        outputStream = os;
     }
 
 

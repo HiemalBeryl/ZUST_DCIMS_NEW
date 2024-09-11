@@ -106,7 +106,6 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      */
     @Override
     public TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
-        // TODO：特殊查询条件-竞赛名&年份，筛选有问题以后再改，如果没有查询到限制条件的竞赛，那么展示所有，年份还没加进去
         List<Long> cIds = new ArrayList<>();
         if (bo.getCompetitionName() != null && !bo.getCompetitionName().trim().equals("")){
             LambdaQueryWrapper<DcimsCompetition> l = new LambdaQueryWrapper<>();
@@ -548,7 +547,18 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         File unzipFile = new File(pathName);
 
         // 解压文件，打开表格文件
-        File unzip = ZipUtil.unzip(file, unzipFile, Charset.forName("GBK"));
+//        File unzip = ZipUtil.unzip(file, unzipFile, Charset.forName("GBK"));
+        // 处理zip以外文件的解压，比如rar
+        try {
+            Extractor extractor = CompressUtil.createExtractor(
+                CharsetUtil.defaultCharset(),
+                file
+            );
+            extractor.extract(unzipFile);
+        } catch (Exception e) {
+            throw new ArchiveException("文件格式错误，请上传正确的附带模板与佐证材料的压缩文件！");
+        }
+        File unzip = unzipFile;
         // 解压后的所有文件，包括表格和佐证材料
         List<File> oss = FileUtil.loopFiles(unzip.getAbsolutePath());
         oss = oss.stream().filter(e -> !e.getAbsolutePath().contains("__MACOSX")).collect(Collectors.toList());
@@ -868,36 +878,66 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 填充教师，学生工号
         importTeamData.forEach(dcimsTeamImportExcel -> {
             if (dcimsTeamImportExcel.getStudentName() != null && dcimsTeamImportExcel.getTeacherName() != null){
+                // 先对教师和学生工号进行判断，如果包括-1表示该工号需要进行修改，重新进行异常检测；如果不包括则跳过异常检测
+                boolean isFillName1 = true;
+                boolean isFillName2 = true;
+                if (dcimsTeamImportExcel.getTeacherId() != null && !dcimsTeamImportExcel.getTeacherId().contains("-1")){
+                    isFillName1 = false;
+                }else{
+                    dcimsTeamImportExcel.setTeacherId("");
+                }
+                if (dcimsTeamImportExcel.getStudentId() != null && !dcimsTeamImportExcel.getStudentId().contains("-1")){
+                    isFillName2 = false;
+                }else{
+                    dcimsTeamImportExcel.setStudentId("");
+                }
                 List<String> teachers = Arrays.stream(dcimsTeamImportExcel.getTeacherName().split(",")).collect(Collectors.toList());
                 List<String> students = Arrays.stream(dcimsTeamImportExcel.getStudentName().split(",")).collect(Collectors.toList());
-                dcimsTeamImportExcel.setTeacherId("");
-                dcimsTeamImportExcel.setStudentId("");
-                teachers.forEach(teacher -> {
-                    TableDataInfo<DcimsTeacherVo> teacherVo = basicDataService.listTeacherDict(teacher, true);
-                    if (teacherVo.getRows().size() == 1){
-                        dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + teacherVo.getRows().get(0).getTeacherId() + ",");
-                    }else if (teacherVo.getRows().size() == 0){
-                        // 教师不存在
-                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameNotFoundError, "教师"+ teacher +"不存在，请确认姓名是否填写正确！"));
-                    }else{
-                        // 教师存在重名
-                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameRepeatError, "教师"+ teacher +"存在重名，请选择正确的教师！"));
-                    }
-                });
-                students.forEach(student -> {
-                    TableDataInfo<DcimsStudentVo> studentVo = basicDataService.listStudentDict(student, true);
-                    if (studentVo.getRows().size() == 1){
-                        dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
-                    }else if (studentVo.getRows().size() == 0){
-                        // 学生不存在
-                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！"));
-                    }else{
-                        // 学生存在重名
-                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameRepeatError, "学生"+ student +"存在重名，请选择正确的学生！"));
-                    }
-                });
+
+
+                if(isFillName1){
+                    teachers.forEach(teacher -> {
+                        TableDataInfo<DcimsTeacherVo> teacherVo = basicDataService.listTeacherDict(teacher, true);
+                        if (teacherVo.getRows().size() == 1){
+                            dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + teacherVo.getRows().get(0).getTeacherId() + ",");
+                        }else if (teacherVo.getRows().size() == 0){
+                            // 教师不存在
+                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameNotFoundError, "教师"+ teacher +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！"));
+                        }else{
+                            // 教师存在重名
+                            dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + "-1" + ",");
+                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameRepeatError, "教师"+ teacher +"存在重名，请选择正确的教师！"));
+                        }
+                    });
+                }
+
+                if(isFillName2){
+                    students.forEach(student -> {
+                        TableDataInfo<DcimsStudentVo> studentVo = basicDataService.listStudentDict(student, true);
+                        if (studentVo.getRows().size() == 1){
+                            dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
+                        }else if (studentVo.getRows().size() == 0){
+                            // 学生不存在
+                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！"));
+                        }else{
+                            // 学生存在重名
+                            dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + "-1" + ",");
+                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameRepeatError, "学生"+ student +"存在重名，请选择正确的学生！"));
+                        }
+                    });
+                }
             }
         });
+        // 是否存在单人赛但是填写了多名学生的情况
+        importTeamData.forEach(dcimsTeamImportExcel -> {
+            if (dcimsTeamImportExcel.getIsSingle().equals("是") && dcimsTeamImportExcel.getStudentId().split(",").length > 1){
+                dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.tooMuchStudentError, "单人赛只能填写一名学生！请在导入表格中分开填写！"));
+            }
+        });
+
+
+        // 将审核状态修改为待审核
+
 
 
         return importTeamData;
