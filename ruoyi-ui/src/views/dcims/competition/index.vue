@@ -14,6 +14,8 @@
   }
 }
 
+
+
 .define-append{
   width: 40px;
   display: inline-block;
@@ -309,7 +311,7 @@
           v-hasPermi="['dcims:competition:export']"
         >批量下载申报书</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <el-col :span="1">
         <el-button
           type="warning"
           plain
@@ -319,6 +321,10 @@
           v-hasPermi="['dcims:competition:export']"
         >批量下载集中授课安排表</el-button>
       </el-col>
+      <el-col>
+        <el-tag :span="1" type="danger">请在上方进行筛选条件选择(下方复选框无效)</el-tag>
+      </el-col>
+      
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 

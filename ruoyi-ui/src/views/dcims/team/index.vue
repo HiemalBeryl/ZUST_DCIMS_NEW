@@ -1,4 +1,5 @@
 <template>
+
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="竞赛名称" prop="competitionName">
@@ -9,6 +10,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+
       <el-form-item label="赛事年份" prop="annual">
         <el-input
           v-model="queryParams.annual"
@@ -94,6 +96,7 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
+
       <!-- <el-col :span="1.5">
         <el-button
           type="primary"
@@ -146,6 +149,31 @@
           v-hasPermi="['dcims:team:export']"
         >下载佐证材料</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport3"
+          v-hasPermi="['dcims:team:export']"
+        >下载省级及以上科技竞赛获奖学生情况登记表（xls）</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport4"
+          v-hasPermi="['dcims:team:export']"
+        >下载省级以上科技竞赛获奖学生情况登记表（doc）</el-button>
+      </el-col>
+
+      <el-col>
+        <el-tag :span="1"  type="danger">如需筛选,请在上方进行筛选条件选择(下方复选框无效)</el-tag>
+      </el-col>
+
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -509,7 +537,12 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('dcims/team/export', {
+      if (this.queryParams.annual === undefined || this.queryParams.annual === ""){
+        this.$message.warning("请在上方输入年份后再进行导出操作！")
+        return null;
+      }
+
+      this.download('dcims/team/exportHuiZongBiao', {
         ...this.queryParams
       }, `获奖信息表${new Date().getTime()}.xlsx`)
     },
@@ -519,6 +552,19 @@ export default {
         ...this.queryParams
       }, `获奖佐证材料附件${new Date().getTime()}.zip`)
     },
+    /** 导出按钮操作 */
+    handleExport3() {
+      this.download('dcims/team/exportDengjiBiao', {
+        ...this.queryParams
+      }, `省级及以上科技竞赛获奖学生情况登记表.xlsx`)
+    },
+    /** 导出按钮操作 */
+    handleExport4() {
+      this.download('dcims/team/exportTeamWord', {
+        ...this.queryParams
+      }, `省级及以上科技竞赛获奖学生情况登记表.docx`)
+    },
+
     /** 是否填写作品名称 */
     changeWorksName(){
       this.worksNameIsNull = !this.worksNameIsNull;

@@ -8,6 +8,117 @@
     </div>
 
 
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="竞赛名称" prop="competitionName">
+        <el-input
+          v-model="queryParams.competitionName"
+          placeholder="请输入竞赛名称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+
+      <el-form-item label="赛事年份" prop="annual">
+        <el-input
+          v-model="queryParams.annual"
+          placeholder="请输入赛事年份"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+
+      <el-form-item label="队伍名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入队伍名称"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="比赛类型" prop="competitionType">
+        <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_award_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="奖项等级" prop="awardLevel">
+        <el-select v-model="queryParams.awardLevel" placeholder="请选择奖项等级" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_award_level"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="指导教师工号" prop="teacherId">
+        <el-input
+          v-model="queryParams.teacherId"
+          placeholder="请输入指导教师工号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="指导教师姓名" prop="teacherName">
+        <el-input
+          v-model="queryParams.teacherName"
+          placeholder="请输入指导教师姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="参赛学生学号" prop="studentId">
+        <el-input
+          v-model="queryParams.studentId"
+          placeholder="请输入参赛学生学号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="参赛学生姓名" prop="studentName">
+        <el-input
+          v-model="queryParams.studentName"
+          placeholder="请输入参赛学生姓名"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <!-- 导出相关文档-->
+    <el-col :span="1.5">
+      <el-button
+        type="warning"
+        plain
+        icon="el-icon-download"
+        size="mini"
+        @click="handleExport"
+        v-hasPermi="['dcims:team:export']"
+      >下载获奖信息表</el-button>
+    </el-col>
+    <el-col :span="1.5">
+      <el-button
+        type="warning"
+        plain
+        icon="el-icon-download"
+        size="mini"
+        @click="handleExport2"
+        v-hasPermi="['dcims:team:export']"
+      >下载佐证材料</el-button>
+    </el-col>
+    <el-col>
+      <el-tag :span="1" type="danger">请在上方进行筛选条件选择(下方复选框无效)</el-tag>
+    </el-col>
+
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
       <h2>待提交列表</h2>
@@ -132,6 +243,69 @@
       </div>
   </div>
 
+
+    <!-- 流程跟踪列表，下方的表格 -->
+    <div class="juZhong" style="margin-top: 50px">
+      <h2>流程跟踪</h2>
+      <div>
+        <el-row :gutter="20">
+          <el-col :span="2"><div class="grid-content"></div></el-col>
+          <!-- table 用于勾选项目 -->
+          <el-col :span="20"
+          ><div class="grid-content">
+            <el-table
+              v-loading="loading"
+              ref="multipleTable"
+              :data="teamProcessingList"
+              tooltip-effect="dark"
+              style="width: 100%"
+              max-height="600px"
+              @selection-change="handleSelectionChange"
+            >
+              <el-table-column type="selection" width="55"> </el-table-column>
+              <el-table-column prop="competition.name" label="赛事名称" width="200">
+              </el-table-column>
+              <el-table-column prop="name" label="团队名称" width="100">
+              </el-table-column>
+              <el-table-column prop="competitionType" label="比赛类型" width="80">
+                <template slot-scope="scope">
+                  <dict-tag :options="dict.type.dcims_award_type" :value="scope.row.competitionType"/>
+                </template>
+              </el-table-column>
+              <el-table-column prop="awardLevel" label="获奖等级" width="110">
+                <template slot-scope="scope">
+                  <dict-tag :options="dict.type.dcims_award_level" :value="scope.row.awardLevel"/>
+                </template>
+              </el-table-column>
+              <el-table-column prop="studentName" label="参赛学生" width="130">
+              </el-table-column>
+              <el-table-column prop="teacherName" label="指导教师" width="130">
+              </el-table-column>
+<!--              <el-table-column prop="" label="退回原因" width="130">-->
+<!--              </el-table-column>-->
+              <el-table-column label="提交状态" align="center" fixed="right" prop="audit">
+                <template slot-scope="scope">
+                  <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                  <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
+                  <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
+                  <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
+                <template slot-scope="scope">
+                  <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div></el-col>
+          <el-col :span="2"><div class="grid-content"></div></el-col>
+        </el-row>
+      </div>
+    </div>
+
+
+
+
   <!-- 提交和退回审核信息对话框-->
   <div>
     <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
@@ -198,9 +372,11 @@
 </template>
 
 <script>
-import {listTeamAudit, permitAudit, refuseAudit} from "@/api/dcims/teamAudit";
-import {getTeam, updateTeam} from "@/api/dcims/team"
+import {listTeamAudit, listTeamInProcessing, permitAudit, refuseAudit} from "@/api/dcims/teamAudit";
+import {getTeam, updateTeam,listTeam} from "@/api/dcims/team"
 import { listByIds } from "@/api/system/oss"
+import {listCompetitionInProcessing} from "@/api/dcims/competitionAudit";
+import download from '@/plugins/download.js';
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
@@ -221,8 +397,12 @@ import { listByIds } from "@/api/system/oss"
       showSearch: true,
       // 总条数
       total: 0,
+        // 第二个表格数据总数
+        totalProcessing: 0,
       // 竞赛赛事基本信息表格数据
       teamList: [],
+      // 第二个表格的数据
+      teamProcessingList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层1
@@ -234,7 +414,19 @@ import { listByIds } from "@/api/system/oss"
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 500
+          pageSize: 500,
+          competitionName: undefined,
+          name: undefined,
+          annual: undefined,
+          competitionType: undefined,
+          awardLevel: undefined,
+          studentName: undefined,
+          teacherName: undefined,
+          awardTime: undefined,
+          supportMaterial: undefined,
+          teacherId: undefined,
+          next_audit_id: this.$store.state.user.name,
+          audit: '1'
         },
         // 表单参数
         form: {},
@@ -303,6 +495,7 @@ import { listByIds } from "@/api/system/oss"
     },
     created() {
       this.getList();
+      this.getListInProcessing();
       console.log(this.teamList);
     },
     methods: {
@@ -315,12 +508,45 @@ import { listByIds } from "@/api/system/oss"
 
           console.log(this.teamList)
           this.teamList.forEach(e => {
+
             e.teacherName = e.teacherName.join("，");
             e.studentName = e.studentName.join("，");
           })
 
           this.loading = false;
         });
+      },
+
+      getListTwo() {
+        this.loading = true;
+        listTeam(this.queryParams).then(response => {
+          this.teamList = response.rows;
+          this.total = response.total;
+
+          console.log(this.teamList)
+          this.teamList.forEach(e => {
+
+            e.teacherName = e.teacherName.join("，");
+            e.studentName = e.studentName.join("，");
+          })
+
+          this.loading = false;
+        });
+      },
+      /** 查询已经通过审核的获奖信息，现在的状态 **/
+      getListInProcessing() {
+        this.loading = true;
+        listTeamInProcessing(this.queryParams).then(response => {
+          this.teamProcessingList = response.rows;
+          this.totalProcessing = response.total;
+
+          this.teamProcessingList.forEach(e => {
+            e.teacherName = e.teacherName.join("，");
+            e.studentName = e.studentName.join("，");
+          })
+
+          this.loading = false;
+        })
       },
       /** 修改按钮操作 */
       handleUpdate(row) {
@@ -374,6 +600,22 @@ import { listByIds } from "@/api/system/oss"
         this.resetForm("form");
         this.resetForm("form2");
       },
+       /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.pageNum = 1;
+      this.getListTwo();
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      this.resetForm("queryForm");
+      this.getList();
+    },
+     // 多选框选中数据
+     handleSelectionChange(selection) {
+      this.ids = selection.map(item => item.id)
+      this.single = selection.length!==1
+      this.multiple = !selection.length
+    },
     toggleSelection(rows) {
       if (rows) {
         rows.forEach((row) => {
@@ -415,6 +657,19 @@ import { listByIds } from "@/api/system/oss"
           }
         }
       });
+    },
+    /** 导出按钮操作 */
+    handleExport() {
+
+      this.download('dcims/team/export', {
+        ...this.queryParams
+      }, `获奖信息表${new Date().getTime()}.xlsx`)
+    },
+    /** 导出按钮操作 */
+    handleExport2() {
+      this.download('dcims/team/download', {
+        ...this.queryParams
+      }, `获奖佐证材料附件${new Date().getTime()}.zip`)
     },
     /** 提交审核信息按钮 */
     submitForm2() {
@@ -551,6 +806,8 @@ this.$prompt(h(
       }
 
   },
+
+
   };
 </script>
 
