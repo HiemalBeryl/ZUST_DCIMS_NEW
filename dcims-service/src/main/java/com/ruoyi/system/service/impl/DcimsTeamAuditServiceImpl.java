@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,9 +10,12 @@ import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.domain.DcimsTeamAudit;
+import com.ruoyi.system.domain.DcimsTeamWithCompetition;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
@@ -23,9 +27,17 @@ import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -202,5 +214,77 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         team.setAudit(3);
         team.setNextAuditId(-1L);
         return teamBaseMapper.updateById(team) > 0;
+    }
+
+
+    public List<DcimsTeamWithCompetition> queryListWithCompetition(DcimsTeamBo bo){
+        List<DcimsTeamWithCompetition> result = teamBaseMapper.selectTeamWithCompetition(bo.getAnnual());
+        if (bo.getCompetitionName() != null && !bo.getCompetitionName().isEmpty()) {
+            System.out.println(bo.getCompetitionName());
+            result = result.stream().filter(e -> {
+                return e.getName().contains(bo.getCompetitionName());
+            }).collect(Collectors.toList());
+        }
+        return result;
+    }
+
+    public OutputStream getHuoJiangBiao(List<DcimsTeam> data) throws IOException {
+        return getHuoJiangBiao();
+
+//        File file = ResourceUtils.getFile("classpath:excel/HuoJiangDengJiBiao.docx");
+//        Path tempFile = Files.createTempFile("temp", ".docx");
+//
+//        try (InputStream is = Files.newInputStream(file.toPath())) {
+//            Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING);
+//
+//            try (XWPFDocument document = new XWPFDocument(Files.newInputStream(tempFile))) {
+//
+//                List<DcimsTeam> data1 = data.stream().filter(e -> Integer.parseInt(e.getAwardLevel()) <= 9).collect(Collectors.toList());
+//                List<DcimsTeam> data2 = data.stream().filter(e -> Integer.parseInt(e.getAwardLevel()) <= 19 && Integer.parseInt(e.getAwardLevel()) >= 10).collect(Collectors.toList());
+//
+//
+//                List<XWPFTable> tables = document.getTables();
+//
+//                System.out.println(tables.get(0).getText());
+//                XWPFTableRow headerRow = tables.get(0).getRow(0);
+//                fillTableWithData(tables.get(0), data1);
+//                if ("项  目".equals(headerRow.getCell(0).getText())) {
+//                    fillTableWithData(tables.get(0), data1);
+//                }
+//                System.out.println(tables.get(0).getText());
+//
+//                System.out.println(tables.get(1).getText());
+//                headerRow = tables.get(1).getRow(0);
+//                if ("项  目".equals(headerRow.getCell(0).getText())) {
+//                    fillTableWithData(tables.get(1), data2);
+//                }
+//                System.out.println(tables.get(1).getText());
+//
+//                try (OutputStream os = Files.newOutputStream(tempFile)) {
+//                    document.write(os);
+//                    System.out.println(os.toString());
+//                }
+//
+//
+//                return Files.newOutputStream(tempFile);
+//            }
+//        }
+    }
+
+    public OutputStream getHuoJiangBiao() throws IOException {
+        return null;
+    }
+
+
+    private static void fillTableWithData(XWPFTable table, List<DcimsTeam> teamList) {
+        for (DcimsTeam team : teamList) {
+            XWPFTableRow row = table.createRow();
+//            row.getCell(0).setText(((DcimsCompetition)team).getName()); // 填充项目列
+            row.getCell(1).setText(team.getAwardLevel());  // 填充获奖级别列
+            row.getCell(2).setText(team.getStudentName()); // 填充学生名单列
+            row.getCell(3).setText(team.getTeacherName());  // 填充指导教师列
+            System.out.println();
+        }
+        System.out.println(teamList);
     }
 }

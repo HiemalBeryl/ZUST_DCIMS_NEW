@@ -33,7 +33,7 @@ public class DcimsBasicDataController {
     //@SaCheckPermission("dcims:basicData:listStudentDict")
     @GetMapping("/listStudentDict")
     public TableDataInfo<DcimsStudentVo> listStudentDict(String name) {
-        return iDcimsBasicDataService.listStudentDict(name);
+        return iDcimsBasicDataService.listStudentDict(name, false);
     }
 
     /**
@@ -42,7 +42,7 @@ public class DcimsBasicDataController {
     //@SaCheckPermission("dcims:basicData:listTeacherDict")
     @GetMapping("/listTeacherDict")
     public TableDataInfo<DcimsTeacherVo> listTeacherDict(String name) {
-        return iDcimsBasicDataService.listTeacherDict(name);
+        return iDcimsBasicDataService.listTeacherDict(name, false);
     }
 
     /**

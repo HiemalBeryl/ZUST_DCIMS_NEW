@@ -7,12 +7,14 @@ import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
+import org.apache.commons.compress.archivers.ArchiveException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +75,7 @@ public interface IDcimsTeamService {
     /**
      * 读取用户上传的模板内数据
      */
-    List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file) throws IOException;
+    List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file) throws IOException, ArchiveException;
 
     /**
      * 将数据保存在Redis中
@@ -88,7 +90,7 @@ public interface IDcimsTeamService {
     /**
      * 为批量导入追加数据
      */
-    Map<String, Object> appendImportData(String id, String type, InputStream file) throws IOException;
+    Map<String, Object> appendImportData(String id, String type, InputStream file) throws IOException, ArchiveException;
 
     /**
      * 批量导入数据保存
@@ -99,4 +101,9 @@ public interface IDcimsTeamService {
      * 下载获奖团队信息以及附件
      */
     void download(DcimsTeamBo bo, HttpServletResponse response) throws IOException;
+
+    /*
+    *查询获奖情况并处理数据
+    * */
+    HashMap<String, Object> queryAward(DcimsTeamBo bo);
 }

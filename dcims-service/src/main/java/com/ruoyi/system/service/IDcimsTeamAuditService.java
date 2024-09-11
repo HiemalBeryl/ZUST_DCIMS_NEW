@@ -2,12 +2,20 @@ package com.ruoyi.system.service;
 
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsTeam;
+import com.ruoyi.system.domain.DcimsTeamWithCompetition;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
+import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 团队获奖审核Service接口
@@ -47,4 +55,10 @@ public interface IDcimsTeamAuditService {
      */
     Boolean deleteOneById(Long id);
 
+    /*
+     * 查询省级以上获奖信息，附带竞赛信息返回
+     */
+    List<DcimsTeamWithCompetition> queryListWithCompetition(DcimsTeamBo bo);
+
+    OutputStream getHuoJiangBiao(List<DcimsTeam> data) throws IOException;
 }

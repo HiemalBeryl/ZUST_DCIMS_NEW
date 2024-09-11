@@ -17,13 +17,15 @@ public interface IDcimsBasicDataService {
     /**
      * 查询学生姓名学号字典
      */
-    TableDataInfo<DcimsStudentVo> listStudentDict(String name);
+    TableDataInfo<DcimsStudentVo> listStudentDict(String name, boolean exactMatch);
 
 
     /**
      * 查询教师姓名工号字典
      */
-    TableDataInfo<DcimsTeacherVo> listTeacherDict(String name);
+    TableDataInfo<DcimsTeacherVo> listTeacherDict(String name, boolean exactMatch);
+
+
 
     /**
      * 根据工号查教师姓名
@@ -34,7 +36,6 @@ public interface IDcimsBasicDataService {
      * 根据工号查学生姓名
      */
     DcimsStudentVo getStudentNameById(String studentId);
-
     /**
      * 根据工号查教师姓名
      */
