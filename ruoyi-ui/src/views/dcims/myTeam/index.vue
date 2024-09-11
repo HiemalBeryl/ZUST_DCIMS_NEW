@@ -43,10 +43,11 @@
       </el-table-column>
       <el-table-column label="评估状态" align="center" fixed="right" prop="audit">
         <template slot-scope="scope">
-          <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
-            <dict-tag :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
-          </el-tooltip>
-          <dict-tag v-if="scope.row.auditDetail == null" :options="dict.type.dcims_declare_award_status" :value="scope.row.audit"/>
+          <el-tag type="primary" v-if="scope.row.audit == 0">等待添加佐证材料</el-tag>
+          <el-tag type="primary" v-if="scope.row.audit == 1 && scope.row.nextAuditId != 102099">学院评估中</el-tag>
+          <el-tag type="primary" v-if="scope.row.audit == 1 && scope.row.nextAuditId == 102099">教务处评估中</el-tag>
+          <el-tag type="success" v-if="scope.row.audit == 2">通过评估</el-tag>
+          <el-tag type="danger" v-if="scope.row.audit == 3">评估不通过</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
@@ -82,6 +83,9 @@
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
           <el-form-item label="竞赛id" prop="competitionId">
             <el-input v-model="form.competitionId" placeholder="请输入竞赛id" />
+          </el-form-item>
+          <el-form-item label="竞赛名称" prop="competitionName">
+            <el-input v-model="form.competitionName" placeholder="请输入竞赛名称" />
           </el-form-item>
           <el-form-item label="队伍名称" prop="name">
             <el-input v-model="form.name" placeholder="请输入队伍名称" />
@@ -146,6 +150,9 @@
               placeholder="请选择比赛时间">
             </el-date-picker>
           </el-form-item>
+        <el-form-item label="佐证材料" prop="supportMaterial">
+          <file-upload v-model="form.supportMaterial"/>
+        </el-form-item>
 
         </el-form>
       <div slot="footer" class="dialog-footer">
@@ -348,6 +355,7 @@ export default {
       getTeam(id).then(response => {
         this.loading = false;
         this.form = response.data;
+        this.form.competitionName = response.data.competition.name;
         this.open = true;
         this.title = "修改参赛团队";
         // 调用姓名查询回显用

@@ -20,6 +20,7 @@
         </el-select>
         <br/>
         <el-button type="primary" @click="downloadTemplate()" :loading="loading" style="margin-top: 30px">下载</el-button>
+        <el-button type="primary" @click="nextActive()" :loading="loading" style="margin-top: 30px">我已下载模板，直接进行下一步</el-button>
     </div>
 
     <!--  上传模板界面-->
@@ -36,7 +37,7 @@
         :http-request="handleFileUpload">
         <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
         <el-button style="margin-left: 10px;" size="small" type="success" @click="clickUploadButton()" :loading="loading">上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于100MB</div>
+        <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，支持rar/zip格式的压缩包，文件大小需小于500MB</div>
       </el-upload>
       <br/>
       <el-button @click="minusStep">后退</el-button>
@@ -61,7 +62,16 @@
 
         <el-table-column prop="competitionName" label="竞赛名称" width="180">
           <template slot-scope="scope">
-            <el-select v-if="scope.row.edit" v-model="scope.row.competitionName" placeholder="请选择竞赛名称" @focus="handleSelectOpened()" @blur="handleSelectClosed()">
+            <el-tooltip placement="right"
+                        v-show="scope.row.hasOwnProperty('competitionNameError') && scope.row.competitionNameError.length > 0">
+              <div slot="content">
+                <div v-for="(error, index) in scope.row.competitionNameError" style="margin-bottom: 5px;margin-top: 5px;">
+                  {{ error.errorMessage }}
+                </div>
+              </div>
+              <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+            </el-tooltip>
+            <el-select v-if="scope.row.edit" v-model="scope.row.competitionName" placeholder="请选择竞赛名称" @focus="handleSelectOpened()" @blur="handleSelectClosed()" @change="removeError(scope.row, 'competitionNameError')">
               <el-option
                 v-for="item in optionsCompetition"
                 :key="item.name"
@@ -90,9 +100,30 @@
         </el-table-column>
 
         <el-table-column prop="teacherName" label="指导教师名单" width="180">
+
           <template slot-scope="scope">
             <!--            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.teacherName" placeholder="请输入内容"></el-input>-->
             <!--            <div v-else class="txt">{{scope.row.teacherName}}</div>-->
+            <div @click="OpenDuplicateWindow('检查教师重名情况', '', scope.row.teacherName, scope.row.teacherId, scope.row.index)">
+              <el-tooltip placement="right"
+                          v-show="scope.row.hasOwnProperty('teacherNameRepeatError') && scope.row.teacherNameRepeatError.length > 0">
+                <div slot="content">
+                  <div v-for="(error, index) in scope.row.teacherNameRepeatError" style="margin-bottom: 5px;margin-top: 5px;">
+                    {{ error.errorMessage }}
+                  </div>
+                </div>
+                <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+              </el-tooltip>
+            </div>
+            <el-tooltip placement="right"
+                        v-show="scope.row.hasOwnProperty('teacherNameNotFoundError') && scope.row.teacherNameNotFoundError.length > 0">
+              <div slot="content">
+                <div v-for="(error, index) in scope.row.teacherNameNotFoundError" style="margin-bottom: 5px;margin-top: 5px;">
+                  {{ error.errorMessage }}
+                </div>
+              </div>
+              <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+            </el-tooltip>
             <div class="txt">{{scope.row.teacherName}}</div>
           </template>
         </el-table-column>
@@ -101,6 +132,26 @@
           <template slot-scope="scope">
 <!--            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.studentName" placeholder="请输入内容"></el-input>-->
 <!--            <div v-else class="txt">{{scope.row.studentName}}</div>-->
+            <div @click="OpenDuplicateWindow('检查学生重名情况', '', scope.row.studentName, scope.row.studentId, scope.row.index)">
+              <el-tooltip placement="right"
+                          v-show="scope.row.hasOwnProperty('studentNameRepeatError') && scope.row.studentNameRepeatError.length > 0">
+                <div slot="content">
+                  <div v-for="(error, index) in scope.row.studentNameRepeatError" style="margin-bottom: 5px;margin-top: 5px;">
+                    {{ error.errorMessage }}
+                  </div>
+                </div>
+                <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+              </el-tooltip>
+            </div>
+            <el-tooltip placement="right"
+                        v-show="scope.row.hasOwnProperty('studentNameNotFoundError') && scope.row.studentNameNotFoundError.length > 0">
+              <div slot="content">
+                <div v-for="(error, index) in scope.row.studentNameNotFoundError" style="margin-bottom: 5px;margin-top: 5px;">
+                  {{ error.errorMessage }}
+                </div>
+              </div>
+              <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+            </el-tooltip>
             <div class="txt">{{scope.row.studentName}}</div>
           </template>
         </el-table-column>
@@ -124,12 +175,12 @@
             <el-date-picker clearable
                             v-if="scope.row.edit"
                             v-model="scope.row.competitionTime"
-                            type="datetime"
-                            value-format="yyyy-MM-dd HH:mm:ss"
+                            type="date"
+                            value-format="yyyy-MM-dd"
                             placeholder="请选择获奖时间"
                             @focus="handleSelectOpened()" @blur="handleSelectClosed()">
             </el-date-picker>
-            <div v-else class="txt">{{scope.row.competitionTime}}</div>
+            <div v-else class="txt">{{new Date(scope.row.competitionTime).getFullYear() + '-' + (new Date(scope.row.competitionTime).getMonth() + 1) + '-' +  new Date(scope.row.competitionTime).getDate()}}</div>
           </template>
         </el-table-column>
 
@@ -138,17 +189,26 @@
             <el-date-picker clearable
                             v-if="scope.row.edit"
                             v-model="scope.row.awardTime"
-                            type="datetime"
-                            value-format="yyyy-MM-dd HH:mm:ss"
+                            type="date"
+                            value-format="yyyy-MM-dd"
                             placeholder="请选择获奖时间"
                             @focus="handleSelectOpened()" @blur="handleSelectClosed()">
             </el-date-picker>
-            <div v-else class="txt">{{scope.row.awardTime}}</div>
+            <div v-else class="txt">{{new Date(scope.row.awardTime).getFullYear() + '-' + (new Date(scope.row.awardTime).getMonth() + 1) + '-' +  new Date(scope.row.awardTime).getDate() }}</div>
           </template>
         </el-table-column>
 
         <el-table-column prop="supportMaterialFileName" label="获奖佐证材料" width="180">
           <template slot-scope="scope">
+            <el-tooltip placement="right"
+                        v-show="scope.row.hasOwnProperty('fileNotFoundError') && scope.row.fileNotFoundError.length > 0">
+              <div slot="content">
+                <div v-for="(error, index) in scope.row.fileNotFoundError" style="margin-bottom: 5px;margin-top: 5px;">
+                  {{ error.errorMessage }}
+                </div>
+              </div>
+              <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+            </el-tooltip>
             <ImagePreview
               v-if="previewListResource && scope.row.oss != null && checkFileSuffix(scope.row.oss.fileSuffix)"
               :width=100 :height=100
@@ -166,6 +226,15 @@
           <template slot-scope="scope">
 <!--            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.isSingle" placeholder="请输入内容"></el-input>-->
 <!--            <div v-else class="txt">{{scope.row.isSingle}}</div>-->
+            <el-tooltip placement="right"
+                        v-show="scope.row.hasOwnProperty('tooMuchStudentError') && scope.row.tooMuchStudentError.length > 0">
+              <div slot="content">
+                <div v-for="(error, index) in scope.row.tooMuchStudentError" style="margin-bottom: 5px;margin-top: 5px;">
+                  {{ error.errorMessage }}
+                </div>
+              </div>
+              <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+            </el-tooltip>
             <div class="txt">{{scope.row.isSingle}}</div>
           </template>
         </el-table-column>
@@ -182,7 +251,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-button style="margin-left: 10px;" type="success" @click="clickChangeButton()" :loading="loading" style="margin-bottom: 30px">保存修改</el-button>
+      <el-button style="margin-left: 10px;" type="success" @click="clickChangeButton()" :loading="loading" >保存修改</el-button>
       <br>
 
       <el-radio v-model="appendType" label="追加">追加</el-radio>
@@ -199,7 +268,7 @@
         :http-request="appendData">
         <el-button slot="trigger" size="small" type="primary">{{this.appendType}}奖项</el-button>
         <el-button style="margin-left: 10px;" size="small" type="success" @click="clickAppendButton()" :loading="loading">上传到服务器</el-button>
-        <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于100MB</div>
+        <div slot="tip" class="el-upload__tip">请上传附带填写好的模板以及附带获奖材料的压缩包，文件大小小于500MB</div>
       </el-upload>
       <el-button @click="submit()" style="margin-top: 30px">确认奖项无误，点击提交</el-button>
     </div>
@@ -212,11 +281,50 @@
         <!--      </template>-->
       </el-result>
     </div>
+
+    <!-- 重名修改界面-->
+    <el-dialog :title="DuplicatedDetail.title" :visible.sync="DuplicatedNameChangeWindowIsVisible" :before-close="CloseDuplicateWindow" style="text-align: center;">
+      <el-table :data="DuplicatedDetail.entity" style="width: 100%">
+        <el-table-column prop="name" label="名称" width="250">
+          <template slot-scope="scope">
+            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入内容"></el-input>
+            <div v-else class="txt">{{scope.row.name}}</div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="number" label="学号/工号" width="250">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.number" placeholder="请选择">
+              <el-option
+                v-for="item in scope.row.options"
+                :key="item.id"
+                :label="item.id + '   ' + item.name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="number" label="修改提示" width="400">
+          <template slot-scope="scope">
+            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入内容"></el-input>
+            <div v-if="scope.row.options.length > 1" class="txt">
+              <i class="el-icon-warning" style="font-size: 18px; color: red">请从重名老师/学生中选择一位</i>
+            </div>
+            <div v-else class="txt"></div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-button type="primary" @click="saveDuplicateWindow()" :loading="loading" style="margin-top: 30px">确定并保存</el-button>
+      <el-button @click="CloseDuplicateWindow()" :loading="loading" style="margin-top: 30px">取消</el-button>
+    </el-dialog>
+
   </div>
 </template>
 <script>
 import {uploadTemplate, editImportData, appendImportData, submitImportData} from '@/api/dcims/team'
 import {listCompetition} from "@/api/dcims/competition";
+import {listStudentDict, listTeacherDict} from "@/api/dcims/basicData";
 export default {
   name: 'TeamBatchImport',
   dicts: ['dcims_years', 'dcims_award_level', 'dcims_award_level'],
@@ -249,6 +357,15 @@ export default {
       optionsCompetition: [],
       // 预览列表图片
       previewListResource: true,
+      // 展示重名修改窗口
+      DuplicatedNameChangeWindowIsVisible: false,
+      // 重名修改窗口内容
+      DuplicatedDetail:{
+        index: -1,
+        title: "教师/学生重名核验窗口",
+        errMsg: "我是错误信息",
+        entity: []
+      }
     }
   },
   created() {
@@ -269,10 +386,10 @@ export default {
     },
     // 检查上传文件是否合规
     beforeUpload(file){
-      // 必须是压缩文件，大小小于100MB
+      // 必须是压缩文件，大小小于500MB
       const fileExtensionRegex = /\.(zip|rar|7z|tar\.gz|tar\.bz2|tar\.xz|tar|gz|bz2|xz)$/i;
       const isCompressedFile = fileExtensionRegex.test(file.name);
-      const fileSize = file.size / 1024 / 1024 < 100;
+      const fileSize = file.size / 1024 / 1024 < 500;
 
       if(!isCompressedFile){
         this.$message.warning("请检查文件类型是否是压缩文件！")
@@ -312,6 +429,8 @@ export default {
         this.$message.error(e.message);
       }).finally(() => {
         this.uploadFile = []
+        this.classifyErrorType()
+        console.log(this.team)
         this.loading = false
       })
     },
@@ -340,6 +459,7 @@ export default {
           this.$message.error(e.message);
         }).finally(() => {
           this.appendFile = []
+          this.classifyErrorType()
           this.loading = false
         })
       }else{
@@ -360,6 +480,7 @@ export default {
     /** 鼠标移入cell */
     handleCellEnter (row, column, cell, event) {
       row.edit = true
+      console.log(row)
     },
     /** 鼠标移出cell */
     handleCellLeave (row, column, cell, event) {
@@ -408,7 +529,7 @@ export default {
       }
       this.team = new_arr
       console.log(this.team)
-      this.$modal.msgSuccess("删除成功");
+      this.clickChangeButton();
     },
     /** 保存对表格的修改 */
     clickChangeButton(){
@@ -419,12 +540,12 @@ export default {
         this.$message.error(e.message);
       }).finally(() => {
         this.appendFile = []
+        this.classifyErrorType()
         this.loading = false
-        this.$modal.msgSuccess("保存成功");
+        this.$modal.msgSuccess("修改成功");
       })
     },
     checkFileSuffix(fileSuffix) {
-      console.log(fileSuffix)
       let arr = ["png", "jpg", "jpeg"];
       return arr.some(type => {
         return fileSuffix.indexOf(type) > -1;
@@ -434,6 +555,183 @@ export default {
     openNewTab(url) {
       window.open(url, '_blank');
     },
+    /** 对错误类型进行分类 */
+    classifyErrorType() {
+      this.team.forEach(entity => {
+        for(let i = 0; i < entity.errors.length; i++){
+          let err = entity.errors[i]
+          switch (err.errorType){
+            case "teacherNameRepeatError":
+              if (!entity.hasOwnProperty("teacherNameRepeatError")){
+                entity["teacherNameRepeatError"] = []
+              }
+              entity.teacherNameRepeatError.push(err)
+              break;
+            case "teacherNameNotFoundError":
+              if (!entity.hasOwnProperty("teacherNameNotFoundError")){
+                entity["teacherNameNotFoundError"] = []
+              }
+              entity.teacherNameNotFoundError.push(err)
+              break;
+            case "studentNameRepeatError":
+              if (!entity.hasOwnProperty("studentNameRepeatError")){
+                entity["studentNameRepeatError"] = []
+              }
+              entity.studentNameRepeatError.push(err)
+              break;
+            case "studentNameNotFoundError":
+              if (!entity.hasOwnProperty("studentNameNotFoundError")){
+                entity["studentNameNotFoundError"] = []
+              }
+              entity.studentNameNotFoundError.push(err)
+              break;
+            case "competitionNameError":
+              if (!entity.hasOwnProperty("competitionNameError")){
+                entity["competitionNameError"] = []
+              }
+              entity.competitionNameError.push(err)
+              break;
+            case "isSingleError":
+              if (!entity.hasOwnProperty("isSingleError")){
+                entity["isSingleError"] = []
+              }
+              entity.isSingleError.push(err)
+              break;
+            case "awardLevelError":
+              if (!entity.hasOwnProperty("awardLevelError")){
+                entity["awardLevelError"] = []
+              }
+              entity.awardLevelError.push(err)
+              break;
+            case "fileNotFoundError":
+              if (!entity.hasOwnProperty("fileNotFoundError")){
+                entity["fileNotFoundError"] = []
+              }
+              entity.fileNotFoundError.push(err)
+              break;
+            case "tooMuchStudentError":
+              if (!entity.hasOwnProperty("tooMuchStudentError")){
+                entity["tooMuchStudentError"] = []
+              }
+              entity.tooMuchStudentError.push(err)
+              break;
+          }
+        }
+      })
+    },
+    /** 打开重名核验窗口 */
+    OpenDuplicateWindow(title, errMsg, names, ids, index) {
+      this.DuplicatedNameChangeWindowIsVisible = true;
+      this.DuplicatedDetail.index = index;
+      this.DuplicatedDetail.title = title;
+      this.DuplicatedDetail.errMsg = errMsg;
+
+      const NamesArray = names.split(',');
+      const idsArray = ids.split(',');
+      for (let i = 0; i < NamesArray.length; i++){
+        let tmp = {
+          name: NamesArray[i],
+          number: idsArray[i],
+          options: {}
+        }
+
+        this.DuplicatedDetail.entity.push(tmp)
+        if (title === "检查教师重名情况"){
+          this.queryTeacher(NamesArray[i], i)
+        }else{
+          this.queryStudent(NamesArray[i], i)
+        }
+      }
+      console.log(this.DuplicatedDetail.entity)
+    },
+
+    /** 关闭重名核验窗口 */
+    CloseDuplicateWindow() {
+      this.DuplicatedDetail.title = "";
+      this.DuplicatedDetail.index = -1;
+      this.DuplicatedDetail.errMsg = "";
+      this.DuplicatedDetail.entity = [];
+
+      this.DuplicatedNameChangeWindowIsVisible = false;
+    },
+
+    /** 远程搜索教师工号 */
+    queryTeacher(query, index) {
+      var optionsTeacher = undefined;
+      if (query !== '') {
+        listTeacherDict(query).then(response => {
+          optionsTeacher = response.rows;
+        }).finally(() => {
+          for(let i = 0; i<optionsTeacher.length; i++){
+            optionsTeacher[i]['id'] = optionsTeacher[i].teacherId
+          }
+          this.DuplicatedDetail.entity[index].options = optionsTeacher
+        })
+      } else {
+        optionsTeacher = [];
+      }
+    },
+
+    /** 远程搜索学生学号 */
+    queryStudent(query, index) {
+      var optionsStudent = undefined
+      if (query !== '') {
+        listStudentDict(query).then(response => {
+          optionsStudent = response.rows;
+        }).finally(() => {
+          for(let i = 0; i<optionsStudent.length; i++){
+            optionsStudent[i]['id'] = optionsStudent[i].studentId
+          }
+          this.DuplicatedDetail.entity[index].options = optionsStudent
+        })
+      } else {
+        optionsStudent = [];
+      }
+    },
+    /** 保存重名核验窗口内容 */
+    saveDuplicateWindow(){
+      // 检查是否都修改正确
+      for (let i = 0; i< this.DuplicatedDetail.entity.length; i++){
+        if (this.DuplicatedDetail.entity[i].number == "-1"){
+          console.log(this.DuplicatedDetail.entity[i].number)
+          console.log(typeof this.DuplicatedDetail.entity[i].number)
+          this.$message.warning("请全部按照提示修改后再进行保存！")
+          return false;
+        }
+      }
+
+
+
+      for (let i = 0; i< this.team.length; i++){
+        if (this.team[i].index === this.DuplicatedDetail.index){
+          let n = ""
+          let v = ""
+          for(let j = 0; j<this.DuplicatedDetail.entity.length; j++){
+            let e = this.DuplicatedDetail.entity[j]
+            n = n + e.name + ","
+            v = v + e.number + ","
+          }
+
+          if (this.DuplicatedDetail.title === "检查教师重名情况"){
+            this.team[i].teacherName = n.slice(0, n.length - 1)
+            this.team[i].teacherId = v.slice(0, v.length - 1)
+          }else{
+            this.team[i].studentName = n.slice(0, n.length - 1)
+            this.team[i].studentId = v.slice(0, v.length - 1)
+          }
+          this.CloseDuplicateWindow();
+          break;
+        }
+      }
+
+
+      this.clickChangeButton();
+    },
+    /** 前端移除某条错误,也就是移除row对象中的错误属性 */
+    removeError(row, errorType){
+      this.$delete(row, errorType)
+    }
+
   }
 }
 </script>

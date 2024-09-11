@@ -6,12 +6,13 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.resource.ClassPathResource;
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.util.ZipUtil;
+import cn.hutool.core.util.*;
+import cn.hutool.extra.compress.CompressUtil;
+import cn.hutool.extra.compress.extractor.Extractor;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.exception.ExcelDataConvertException;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import com.ruoyi.common.core.domain.entity.SysDictData;
@@ -24,6 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ruoyi.common.utils.redis.RedisUtils;
 import com.ruoyi.system.domain.DcimsCompetition;
+import com.ruoyi.system.domain.DcimsCompetitionAudit;
 import com.ruoyi.system.domain.DcimsTeamAudit;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
@@ -38,6 +40,7 @@ import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.*;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -84,12 +87,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     @Override
     public DcimsTeamVoV2 queryById(Long id){
         DcimsTeamVo vo = baseMapper.selectVoById(id);
+        DcimsCompetitionVo dcimsCompetitionVo = dcimsCompetitionMapper.selectVoById(vo.getCompetitionId());
+
+        DcimsCompetitionVo competition = competitionService.queryById(vo.getCompetitionId());
         DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
         BeanUtils.copyProperties(vo, voV2);
         voV2.setStudentId(vo.getStudentId().split(","));
         voV2.setStudentName(vo.getStudentName().split(","));
         voV2.setTeacherId(vo.getTeacherId().split(","));
         voV2.setTeacherName(vo.getTeacherName().split(","));
+        voV2.setCompetition(dcimsCompetitionVo);
+        voV2.setCompetitionName(competition.getName());
         return voV2;
     }
 
@@ -114,7 +122,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         pq.setPageNum(0);
         pq.setPageSize(10000);
         TableDataInfo<DcimsCompetitionVo> competitionList = competitionService.queryPageList(new DcimsCompetitionBo(), pq, true, false);
-        List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+        List<Long> competitionIds0 = competitionList.getRows().stream().filter(e ->
+            e.getAnnual().equals(bo.getAnnual())
+        ).map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+        //List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
         if (competitionIds0.size() > 0) {
             lqw.in(DcimsTeam::getCompetitionId, competitionIds0);
         }
@@ -199,6 +210,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.in( ids.size() > 0, DcimsTeam::getCompetitionId, ids);
         lqw.or(ids.size() > 0);
         lqw.eq(AccountUtils.getAccount().getTeacherId() != null, DcimsTeam::getCreateBy, AccountUtils.getAccount().getTeacherId());
+        lqw.orderBy(true, false, DcimsTeam::getId);
         Page<DcimsTeamVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         TableDataInfo<DcimsTeamVo> build = TableDataInfo.build(result);
 
@@ -309,6 +321,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.like(StringUtils.isNotBlank(bo.getTeacherName()), DcimsTeam::getTeacherName, bo.getTeacherName());
         lqw.like(StringUtils.isNotBlank(bo.getStudentId()), DcimsTeam::getStudentId, bo.getStudentId());
         lqw.like(StringUtils.isNotBlank(bo.getStudentName()), DcimsTeam::getStudentName, bo.getStudentName());
+        lqw.like(StringUtils.isNotBlank(bo.getNext_audit_id()), DcimsTeam::getNextAuditId, bo.getNext_audit_id());
         lqw.eq(bo.getAudit() != null, DcimsTeam::getAudit, bo.getAudit());
         return lqw;
     }
@@ -401,6 +414,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
         teacherName = teacherName.substring(0,teacherName.length() - 1);
         update.setTeacherName(teacherName);
+
 
         return baseMapper.updateById(update) > 0;
     }
@@ -524,7 +538,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     /**
      * 对批量导入模板内填写的数据进行读取，格式转换
      */
-    public List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file) throws IOException {
+    public List<DcimsTeamImportExcel> readDataFromTemplate(InputStream file) throws IOException, ArchiveException {
         // 以时间戳为文件唯一标识
         Path tempDir = Files.createTempDirectory("temp");
         System.out.println("临时目录路径: " + tempDir);
@@ -568,17 +582,19 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                     if(ObjectUtil.isNull(dcimsTeamImportExcel.getErrors())){
                         dcimsTeamImportExcel.setErrors(new ArrayList<>());
                     }
-                    dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.FileNotFoundError, "未找到对应的的佐证材料，请重新上传！"));
+                    dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.fileNotFoundError, "未找到对应的的佐证材料，请重新上传！"));
                 }
             });
             // 数据处理
             System.out.println(importTeamData);
-            handleData(importTeamData, true,true);
+            handleData(importTeamData, true,true ,true);
             System.out.println(importTeamData);
 
             return importTeamData;
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
+        } catch (ExcelDataConvertException e){
+            throw new RuntimeException("表格数据格式读取错误，请检查模板表格文件内容是否正确填写！");
         }
 
 
@@ -663,7 +679,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         redisImportTeamData.forEach(r -> {
             DcimsTeamImportExcel d = destination.get(r.getIndex());
             if (ObjectUtil.isNotEmpty(d))
-                BeanUtils.copyProperties(d, r, "index", "competitionId", "supportMaterial", "teacherId", "studentId", "audit", "competitionType", "errors");
+                BeanUtils.copyProperties(d, r, "index", "competitionId", "supportMaterial", "audit", "competitionType", "errors");
+            r.setErrors(new ArrayList<>());
         });
         // 遍历传入数据，如果不存在在redis中则说明是新增数据
         for (DcimsTeamImportExcel d : importTeamData) {
@@ -692,21 +709,21 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
         //TODO: 删除的检测
 
-        handleData(redisImportTeamData, false, false);
+        handleData(redisImportTeamData, false, false, false);
         return saveDataToRedis(redisImportTeamData);
     }
 
     /**
      * 为批量导入追加数据
      */
-    public Map<String, Object> appendImportData(String id, String type, InputStream file) throws IOException {
+    public Map<String, Object> appendImportData(String id, String type, InputStream file) throws IOException, ArchiveException {
         // 从redis中读取保存的数据，防止用户篡改
         List<DcimsTeamImportExcel> redisImportTeamData = JSONUtil.toList(
             RedisUtils.getCacheObject("dcims_team_list:" + id).toString(),
             DcimsTeamImportExcel.class
         );
         if (ObjectUtil.isEmpty(redisImportTeamData))
-            return null;
+            throw new NullPointerException("未找到对应的数据，请检查压缩包格式是否正确！");
 
         // 追加的类型判断
         List<DcimsTeamImportExcel> appendList = readDataFromTemplate(file);
@@ -749,6 +766,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             BeanUtils.copyProperties(e, bo);
             BeanUtils.copyProperties(bo, team);
             validEntityBeforeSave(team);
+            team.setAudit(1);
             teamList.add(team);
         }
 
@@ -770,7 +788,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     /**
      * 数据校验 + 数据转换
      */
-    private List<DcimsTeamImportExcel> handleData(List<DcimsTeamImportExcel> importTeamData, boolean editTeamName, boolean isSetId){
+    private List<DcimsTeamImportExcel> handleData(List<DcimsTeamImportExcel> importTeamData, boolean editTeamName, boolean isSetId, boolean isFillName){
         // 1. 数据检验，找出不合理数据
         if(isSetId){
             for(DcimsTeamImportExcel e : importTeamData){
@@ -795,7 +813,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 如果存在值为null的竞赛id，填入对应错误消息
         importTeamData.forEach(e -> {
             if (ObjectUtil.isNull(e.getCompetitionId()))
-                e.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.competitionNameError, "竞赛名称错误，请检查本年度是否存在该项竞赛！"));
+                e.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.competitionNameError, "竞赛名称错误，请检查年份与竞赛名称是否正确填写！"));
         });
 
         // 设置队伍名
@@ -855,7 +873,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 dcimsTeamImportExcel.setTeacherId("");
                 dcimsTeamImportExcel.setStudentId("");
                 teachers.forEach(teacher -> {
-                    TableDataInfo<DcimsTeacherVo> teacherVo = basicDataService.listTeacherDict(teacher);
+                    TableDataInfo<DcimsTeacherVo> teacherVo = basicDataService.listTeacherDict(teacher, true);
                     if (teacherVo.getRows().size() == 1){
                         dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + teacherVo.getRows().get(0).getTeacherId() + ",");
                     }else if (teacherVo.getRows().size() == 0){
@@ -867,7 +885,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                     }
                 });
                 students.forEach(student -> {
-                    TableDataInfo<DcimsStudentVo> studentVo = basicDataService.listStudentDict(student);
+                    TableDataInfo<DcimsStudentVo> studentVo = basicDataService.listStudentDict(student, true);
                     if (studentVo.getRows().size() == 1){
                         dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
                     }else if (studentVo.getRows().size() == 0){
@@ -911,8 +929,9 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         for (DcimsTeamVo team : dataInfo) {
             ossFileList.stream().filter(ossFile -> Objects.equals(ossFile.getSysOssVo().getOssId(), team.getSupportMaterial())).forEach(ossFile -> {
                 String subDirectory = String.valueOf(team.getCompetitionId());
-                String fileName = translateAwardLevel(team.getAwardLevel()) + team.getId() + ossFile.getSysOssVo().getFileSuffix();
+                String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ team.getStudentName() + ossFile.getSysOssVo().getFileSuffix();
                 try{
+                    // 如果同名文件已经存在，则不进行创建
                     File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
 
                     BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
@@ -977,6 +996,111 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }catch (Exception e){
             throw new RuntimeException(e);
         }
+    }
+
+    /*
+     *查询获奖情况并处理数据
+     * */
+    public HashMap<String, Object> queryAward(DcimsTeamBo bo) {
+        List<DcimsTeamVo> list = queryList(bo);
+        List<DcimsTeamBo> dcimsTeamBos = new ArrayList<>();
+        //将DcimsTeamVo中的属性拷贝到DcimsTeamBo中去
+        for (DcimsTeamVo team : list) {
+            DcimsTeamBo teamBo = new DcimsTeamBo();
+            BeanUtils.copyProperties(team, teamBo);
+            dcimsTeamBos.add(teamBo);
+        }
+
+        List<Long> competitionIds = dcimsTeamBos.stream()
+            .map(DcimsTeamBo::getCompetitionId)
+            .collect(Collectors.toList());
+
+        //// 翻译id为竞赛名
+        List<DcimsCompetitionVo> competitions = competitionService.listById(
+            list.stream().map(DcimsTeamVo::getCompetitionId).collect(Collectors.toList())
+        );
+
+        // 然后，遍历dcimsTeamBos，并使用上面创建的Map来更新competitionName
+        dcimsTeamBos.forEach(teamBo -> {
+            teamBo.setCompetitionName(
+                competitions.stream().filter(com -> com.getId().equals(teamBo.getCompetitionId())).findFirst().get().getName()
+            );
+            teamBo.setAnnual(
+                competitions.stream().filter(com -> com.getId().equals(teamBo.getCompetitionId())).findFirst().get().getAnnual()
+            );
+        });
+        System.out.println(dcimsTeamBos);
+
+        // 判断年份与竞赛名是否符合筛选条件
+        if (bo.getAnnual() != null){
+            dcimsTeamBos = dcimsTeamBos.stream().filter(e -> Objects.equals(e.getAnnual(), bo.getAnnual())).collect(Collectors.toList());
+        }
+        if (bo.getCompetitionName() != null){
+            dcimsTeamBos = dcimsTeamBos.stream().filter(e -> e.getCompetitionName().contains(bo.getCompetitionName())).collect(Collectors.toList());
+        }
+
+        // 创建一个Map来存储字典项的映射（例如，字典项的值作为键，字典项的标签作为值）
+        Map<Object, String> dictMap = new HashMap<>();
+
+        // 查询奖项等级对应的字典项
+        List<SysDictData> dictDataList = dictTypeService.selectDictDataByType("dcims_award_level");
+        for (SysDictData dictData : dictDataList) {
+            dictMap.put(dictData.getDictValue(), dictData.getDictLabel());
+        }
+
+        //使用流提取出国家及国际奖项
+        List<DcimsTeamBo> nationalAwards = dcimsTeamBos.stream()
+            .filter(teamVo -> {
+                try {
+                    // 尝试将awardLevel字符串转换为整数
+                    int level = Integer.parseInt(teamVo.getAwardLevel());
+                    // 如果转换成功，则检查是否小于等于9
+                    return level <= 9;
+                } catch (NumberFormatException e) {
+                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
+        //提取省级奖项
+        List<DcimsTeamBo> provincialAwards = dcimsTeamBos.stream()
+            .filter(teamVo -> {
+                try {
+                    // 尝试将awardLevel字符串转换为整数
+                    int level = Integer.parseInt(teamVo.getAwardLevel());
+                    // 如果转换成功，则检查是否小于等于9
+                    return  level <= 19 && level >=15;
+                } catch (NumberFormatException e) {
+                    // 如果转换失败，则默认不满足条件（可以记录日志或抛出异常，这里选择忽略）
+                    return false;
+                }
+            })
+            .collect(Collectors.toList());
+
+        // 遍历列表并替换awardLevel
+        for (DcimsTeamBo teamVo : nationalAwards) {
+            // 假设awardLevel是一个String或Integer，这里需要根据实际情况进行调整
+            String originalAwardLevel = String.valueOf(teamVo.getAwardLevel()); // 可能需要转换
+            if (dictMap.containsKey(originalAwardLevel)) {
+                // 如果存在，则替换
+                teamVo.setAwardLevel(dictMap.get(originalAwardLevel));
+            }
+        }
+
+        // 遍历列表并替换awardLevel
+        for (DcimsTeamBo teamVo : provincialAwards) {
+            // 假设awardLevel是一个String或Integer，这里需要根据实际情况进行调整
+            String originalAwardLevel = String.valueOf(teamVo.getAwardLevel()); // 可能需要转换
+            if (dictMap.containsKey(originalAwardLevel)) {
+                // 如果存在，则替换
+                teamVo.setAwardLevel(dictMap.get(originalAwardLevel));
+            }
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("nationalAwards", nationalAwards);
+        map.put("provincialAwards",provincialAwards);
+        return map;
     }
 
     /**

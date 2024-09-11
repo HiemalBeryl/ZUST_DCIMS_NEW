@@ -9,6 +9,15 @@ export function listTeamAudit(query) {
   })
 }
 
+// 查询流程中的获奖信息列表
+export function  listTeamInProcessing(query) {
+  return request({
+    url: 'dcims/team/audit/listInProcessing',
+    method: 'get',
+    params: query
+  })
+}
+
 // 通过团队审核
 export function permitAudit(params) {
   return request({

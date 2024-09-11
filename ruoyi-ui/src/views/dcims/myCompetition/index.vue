@@ -1,4 +1,4 @@
-<style lang="scss" scoped>
+  <style lang="scss" scoped>
 
 /* 自定义数字输入框append  */
 .mo-input--number {

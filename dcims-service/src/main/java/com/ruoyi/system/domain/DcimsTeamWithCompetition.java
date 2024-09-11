@@ -3,24 +3,13 @@ package com.ruoyi.system.domain;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import java.io.Serializable;
-import java.util.Date;
-import java.math.BigDecimal;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.ruoyi.common.core.domain.BaseEntity;
 
-/**
- * 参赛团队对象 dcims_team
- *
- * @author hiemalberyl
- * @date 2023-05-01
- */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("dcims_team")
-public class DcimsTeam extends BaseEntity{
+public class DcimsTeamWithCompetition extends DcimsCompetition{
 
     private static final long serialVersionUID=1L;
 

@@ -42,5 +42,4 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="delFlag" column="del_flag"/>
     </resultMap>
 
-
 </mapper>

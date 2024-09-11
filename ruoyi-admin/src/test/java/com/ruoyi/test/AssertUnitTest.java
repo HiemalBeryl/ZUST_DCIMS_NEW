@@ -1,8 +1,11 @@
 package com.ruoyi.test;
 
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /**
  * 断言单元测试案例
@@ -41,5 +44,8 @@ public class AssertUnitTest {
         Assertions.assertNull(null);
         Assertions.assertNotNull(null);
     }
+
+
+
 
 }
