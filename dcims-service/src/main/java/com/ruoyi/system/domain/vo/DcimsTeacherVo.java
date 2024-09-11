@@ -3,6 +3,7 @@ package com.ruoyi.system.domain.vo;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 /**

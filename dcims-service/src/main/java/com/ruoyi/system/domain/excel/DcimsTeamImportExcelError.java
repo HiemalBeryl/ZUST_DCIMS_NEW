@@ -2,9 +2,11 @@ package com.ruoyi.system.domain.excel;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class DcimsTeamImportExcelError {
     /**
      * 错误类型
@@ -15,12 +17,13 @@ public class DcimsTeamImportExcelError {
         awardLevelError,
         competitionTimeError,
         awardTimeError,
-        FileNotFoundError,
+        fileNotFoundError,
         isSingleError,
         studentNameRepeatError,
         studentNameNotFoundError,
         teacherNameRepeatError,
         teacherNameNotFoundError,
+        tooMuchStudentError,
     }
 
     private ErrorType errorType;

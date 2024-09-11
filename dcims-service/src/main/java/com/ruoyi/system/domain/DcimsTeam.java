@@ -20,7 +20,7 @@ import com.ruoyi.common.core.domain.BaseEntity;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("dcims_team")
-public class DcimsTeam extends BaseEntity {
+public class DcimsTeam extends BaseEntity{
 
     private static final long serialVersionUID=1L;
 

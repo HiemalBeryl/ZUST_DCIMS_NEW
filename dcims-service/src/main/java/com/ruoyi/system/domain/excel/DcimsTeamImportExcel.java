@@ -3,6 +3,9 @@ package com.ruoyi.system.domain.excel;
 import cn.dev33.satoken.util.SaResult;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.system.domain.vo.SysOssVo;
@@ -131,6 +134,7 @@ public class DcimsTeamImportExcel {
     /**
      * 导入时不正确的数据提示
      */
+    @JSONField(deserialize = false)
     private List<DcimsTeamImportExcelError> errors;
 
     /**

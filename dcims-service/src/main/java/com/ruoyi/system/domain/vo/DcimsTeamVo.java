@@ -121,7 +121,7 @@ public class DcimsTeamVo {
     /**
      * 下一级审核人工号
      */
-    private Integer nextAuditId;
+    private Long nextAuditId;
 
     /**
      * 审核状态详细

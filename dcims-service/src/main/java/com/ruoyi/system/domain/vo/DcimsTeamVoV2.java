@@ -1,14 +1,13 @@
 package com.ruoyi.system.domain.vo;
 
 import java.util.Date;
-import com.fasterxml.jackson.annotation.JsonFormat;
+
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
+import com.ruoyi.system.converter.StringArrayConverter;
 import lombok.Data;
-import java.util.Date;
-
 
 
 /**
@@ -26,7 +25,6 @@ public class DcimsTeamVoV2 {
     /**
      * 主键
      */
-    @ExcelProperty(value = "主键")
     private Long id;
 
     /**
@@ -34,6 +32,12 @@ public class DcimsTeamVoV2 {
      */
     @ExcelProperty(value = "竞赛id")
     private Long competitionId;
+
+    /**
+     * 竞赛名称
+     */
+    @ExcelProperty(value = "竞赛名称")
+    private String competitionName;
 
     /**
      * 竞赛详情
@@ -69,25 +73,25 @@ public class DcimsTeamVoV2 {
     /**
      * 指导教师工号
      */
-    @ExcelProperty(value = "指导教师工号")
+    @ExcelProperty(value = "指导教师工号", converter = StringArrayConverter.class)
     private String[] teacherId;
 
     /**
      * 指导教师姓名
      */
-    @ExcelProperty(value = "指导教师姓名")
+    @ExcelProperty(value = "指导教师姓名", converter = StringArrayConverter.class)
     private String[] teacherName;
 
     /**
      * 参赛学生学号
      */
-    @ExcelProperty(value = "参赛学生学号")
+    @ExcelProperty(value = "参赛学生学号", converter = StringArrayConverter.class)
     private String[] studentId;
 
     /**
      * 参赛学生姓名
      */
-    @ExcelProperty(value = "参赛学生姓名")
+    @ExcelProperty(value = "参赛学生姓名", converter = StringArrayConverter.class)
     private String[] studentName;
 
     /**
@@ -131,7 +135,7 @@ public class DcimsTeamVoV2 {
     /**
      * 下一级审核人工号
      */
-    private Integer nextAuditId;
+    private Long nextAuditId;
 
     /**
      * 创建人
