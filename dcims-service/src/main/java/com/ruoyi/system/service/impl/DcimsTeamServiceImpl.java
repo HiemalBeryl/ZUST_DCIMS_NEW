@@ -994,9 +994,24 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * */
     public HashMap<String, Object> queryAward(DcimsTeamBo bo) {
         List<DcimsTeamVo> list = queryList(bo);
+
+        Integer annual = bo.getAnnual();
+        LambdaQueryWrapper<DcimsCompetition> wrapper = new LambdaQueryWrapper<>();
+
+        if(annual !=null ){
+            wrapper.eq(DcimsCompetition::getAnnual,annual);
+        }
+
+        //查询出该年份的竞赛Id列表
+        List<DcimsCompetitionVo> dcimsCompetitionByYear = dcimsCompetitionMapper.selectVoList(wrapper);
+        List<Long> cIds = dcimsCompetitionByYear.stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+        HashSet set = new HashSet();
+        set.addAll(cIds);
+        List<DcimsTeamVo> collect = list.stream().filter(e -> set.contains(e.getCompetitionId())).collect(Collectors.toList());
+
         List<DcimsTeamBo> dcimsTeamBos = new ArrayList<>();
         //将DcimsTeamVo中的属性拷贝到DcimsTeamBo中去
-        for (DcimsTeamVo team : list) {
+        for (DcimsTeamVo team : collect) {
             DcimsTeamBo teamBo = new DcimsTeamBo();
             BeanUtils.copyProperties(team, teamBo);
             dcimsTeamBos.add(teamBo);
@@ -1080,6 +1095,11 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
 
         HashMap<String, Object> map = new HashMap<>();
+        if(annual != null){
+            map.put("Annual",annual);
+        }else {
+            map.put("Annual","全部");
+        }
         map.put("nationalAwards", nationalAwards);
         map.put("provincialAwards",provincialAwards);
         return map;
