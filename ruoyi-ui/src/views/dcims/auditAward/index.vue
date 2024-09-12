@@ -116,7 +116,7 @@
       >下载佐证材料</el-button>
     </el-col>
     <el-col>
-      <el-tag :span="1" type="danger">请在上方进行筛选条件选择(下方复选框无效)</el-tag>
+      <el-tag :span="1" type="danger">该界面请在下方复选框中选择</el-tag>
     </el-col>
 
     <!-- 用于存放第一行的筛选按钮 -->
