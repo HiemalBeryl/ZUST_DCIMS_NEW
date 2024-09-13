@@ -78,7 +78,6 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         lqw.eq(DcimsTeam::getAudit,1);
 
         Page<DcimsTeamVo> result = teamBaseMapper.selectVoPage(pageQuery.build(), lqw);
-        System.out.println(result);
 
         //添加竞赛名称
         Set<Long> competitionIds = new HashSet<>();
@@ -183,13 +182,22 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
             DcimsTeamAudit add1 = BeanUtil.toBean(bo, DcimsTeamAudit.class);
             DcimsTeam add2 = teamBaseMapper.selectById(bo.getTeamId());
             if(add2 == null)   add2 = new DcimsTeam();
+            // 正常判断是否该审核人进行操作
             if(add1.getTeacherId().equals(add2.getNextAuditId())){
                 comAuditList.add(add1);
                 add2.setNextAuditId(bo.getNextTeacherId());
                 teamList.add(add2);
-                add1.setNextTeacherId(-1L);
-                add2.setNextAuditId(-1L);
+                // 教务处退回时，获取学院负责人的工号，审核人更改为学院负责人
+                Long collegeNum = competitionService.queryById(add2.getCompetitionId()).getCollege();
+                add1.setNextTeacherId(getCollegeLeaderId(collegeNum));
+                add2.setNextAuditId(getCollegeLeaderId(collegeNum));
                 add2.setAudit(3);
+                // 学院退回时，检查审核人和当前登录用户的工号是否相同，如果相容则填写-1，待老师修改后重新提交
+                if (add2.getNextAuditId().equals(AccountUtils.getAccount().getTeacherId())) {
+                    add1.setNextTeacherId(-1L);
+                    add2.setNextAuditId(-1L);
+                    add2.setAudit(3);
+                }
             }
         }
         boolean flag;
@@ -286,5 +294,20 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
             System.out.println();
         }
         System.out.println(teamList);
+    }
+
+    /**
+     * 根据学院id获取学院负责人的工号
+     */
+    public Long getCollegeLeaderId(Long college){
+        LambdaQueryWrapper<SysDept> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(SysDept::getParentId,100);
+        lqw.eq(SysDept::getOrderNum, college);
+        SysDept sysDept = sysDeptMapper.selectOne(lqw);
+        System.out.println("传入学院："+ college + "结果：" + sysDept.getLeaderTeacherId());
+        if (sysDept != null){
+            return sysDept.getLeaderTeacherId();
+        }
+        return null;
     }
 }

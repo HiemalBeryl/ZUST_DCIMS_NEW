@@ -100,7 +100,7 @@ public interface IDcimsTeamService {
     /**
      * 下载获奖团队信息以及附件
      */
-    void download(DcimsTeamBo bo, HttpServletResponse response) throws IOException;
+    void download(List<DcimsTeamVoV2> downloadList, HttpServletResponse response) throws IOException;
 
     /*
     *查询获奖情况并处理数据

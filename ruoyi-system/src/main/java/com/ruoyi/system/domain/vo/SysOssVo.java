@@ -2,6 +2,7 @@ package com.ruoyi.system.domain.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Date;
  * @author Lion Li
  */
 @Data
-public class SysOssVo {
+public class SysOssVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

@@ -6,9 +6,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 @Data
-public class OssFile {
+public class OssFile implements Serializable {
     /**
      * OSS对象存储对象
      */
