@@ -143,6 +143,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
             BeanUtils.copyProperties(e, voV2);
             // 添加教师和学生信息数组
+            System.out.println(e);
             voV2.setStudentId(e.getStudentId().split(","));
             voV2.setStudentName(e.getStudentName().split(","));
             voV2.setTeacherId(e.getTeacherId().split(","));
@@ -753,8 +754,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
         // 判断数据中是否存在错误，如果在存在则不允许保存
         System.out.println(redisImportTeamData.getClass());
-        boolean flag = redisImportTeamData.stream().filter(e -> e.getErrors().size() > 0).count() > 0;
-        if (flag == true)
+        boolean flag = redisImportTeamData.stream().anyMatch(e -> e.getErrors().size() > 0);
+        if (flag)
             return false;
 
 
@@ -868,6 +869,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 填充教师，学生工号
         importTeamData.forEach(dcimsTeamImportExcel -> {
             if (dcimsTeamImportExcel.getStudentName() != null && dcimsTeamImportExcel.getTeacherName() != null){
+                dcimsTeamImportExcel.setTeacherName(dcimsTeamImportExcel.getTeacherName().replace(" ", "").replace("，", ",").replace("、", ",").replace(";", ",").replace("；", ","));
+                dcimsTeamImportExcel.setStudentName(dcimsTeamImportExcel.getStudentName().replace(" ", "").replace("，", ",").replace("、", ",").replace(";", ",").replace("；", ","));
+                dcimsTeamImportExcel.setTeacherName(dcimsTeamImportExcel.getTeacherName().trim());
+                dcimsTeamImportExcel.setStudentName(dcimsTeamImportExcel.getStudentName().trim());
                 List<String> teachers = Arrays.stream(dcimsTeamImportExcel.getTeacherName().split(",")).collect(Collectors.toList());
                 List<String> students = Arrays.stream(dcimsTeamImportExcel.getStudentName().split(",")).collect(Collectors.toList());
                 dcimsTeamImportExcel.setTeacherId("");
