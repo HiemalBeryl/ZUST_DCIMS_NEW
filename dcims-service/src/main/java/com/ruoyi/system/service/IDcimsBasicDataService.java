@@ -36,6 +36,7 @@ public interface IDcimsBasicDataService {
      * 根据工号查学生姓名
      */
     DcimsStudentVo getStudentNameById(String studentId);
+
     /**
      * 根据工号查教师姓名
      */

@@ -535,7 +535,9 @@ export default {
     clickChangeButton(){
       editImportData(this.teamIndex, this.team).then(resp => {
         this.team = resp.data
+        this.$set(this, 'team', resp.data)
         this.teamIndex = resp.id
+        this.$set(this, 'teamIndex', resp.id)
       }).catch((e) => {
         this.$message.error(e.message);
       }).finally(() => {
@@ -618,6 +620,7 @@ export default {
           }
         }
       })
+      this.$set(this, 'team', this.team)
     },
     /** 打开重名核验窗口 */
     OpenDuplicateWindow(title, errMsg, names, ids, index) {
@@ -659,7 +662,7 @@ export default {
     queryTeacher(query, index) {
       var optionsTeacher = undefined;
       if (query !== '') {
-        listTeacherDict(query).then(response => {
+        listTeacherDict(query, true).then(response => {
           optionsTeacher = response.rows;
         }).finally(() => {
           for(let i = 0; i<optionsTeacher.length; i++){
@@ -676,7 +679,7 @@ export default {
     queryStudent(query, index) {
       var optionsStudent = undefined
       if (query !== '') {
-        listStudentDict(query).then(response => {
+        listStudentDict(query, true).then(response => {
           optionsStudent = response.rows;
         }).finally(() => {
           for(let i = 0; i<optionsStudent.length; i++){

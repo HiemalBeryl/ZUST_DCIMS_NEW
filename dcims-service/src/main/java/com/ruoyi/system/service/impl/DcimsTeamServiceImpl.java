@@ -763,8 +763,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
         // 判断数据中是否存在错误，如果在存在则不允许保存
         System.out.println(redisImportTeamData.getClass());
-        boolean flag = redisImportTeamData.stream().filter(e -> e.getErrors().size() > 0).count() > 0;
-        if (flag == true)
+        boolean flag = redisImportTeamData.stream().anyMatch(e -> e.getErrors().size() > 0);
+        if (flag)
             return false;
 
 
@@ -891,6 +891,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 }else{
                     dcimsTeamImportExcel.setStudentId("");
                 }
+                dcimsTeamImportExcel.setTeacherName(dcimsTeamImportExcel.getTeacherName().replace(" ", "").replace("，", ",").replace("、", ",").replace(";", ",").replace("；", ","));
+                dcimsTeamImportExcel.setStudentName(dcimsTeamImportExcel.getStudentName().replace(" ", "").replace("，", ",").replace("、", ",").replace(";", ",").replace("；", ","));
+                dcimsTeamImportExcel.setTeacherName(dcimsTeamImportExcel.getTeacherName().trim());
+                dcimsTeamImportExcel.setStudentName(dcimsTeamImportExcel.getStudentName().trim());
                 List<String> teachers = Arrays.stream(dcimsTeamImportExcel.getTeacherName().split(",")).collect(Collectors.toList());
                 List<String> students = Arrays.stream(dcimsTeamImportExcel.getStudentName().split(",")).collect(Collectors.toList());
 

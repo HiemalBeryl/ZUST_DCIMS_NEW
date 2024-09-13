@@ -397,8 +397,8 @@ import download from '@/plugins/download.js';
       showSearch: true,
       // 总条数
       total: 0,
-        // 第二个表格数据总数
-        totalProcessing: 0,
+      // 第二个表格数据总数
+      totalProcessing: 0,
       // 竞赛赛事基本信息表格数据
       teamList: [],
       // 第二个表格的数据
@@ -610,21 +610,6 @@ import download from '@/plugins/download.js';
       this.resetForm("queryForm");
       this.getList();
     },
-     // 多选框选中数据
-     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
-    },
-    toggleSelection(rows) {
-      if (rows) {
-        rows.forEach((row) => {
-          this.$refs.multipleTable.toggleRowSelection(row);
-        });
-      } else {
-        this.$refs.multipleTable.clearSelection();
-      }
-    },
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
@@ -806,8 +791,6 @@ this.$prompt(h(
       }
 
   },
-
-
   };
 </script>
 

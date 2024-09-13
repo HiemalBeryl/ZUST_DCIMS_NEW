@@ -314,7 +314,7 @@ export default {
           if (query !== '') {
             this.loadingTeacher = true;
             setTimeout(() => {
-              listTeacherDict(query).then(response => {
+              listTeacherDict(query, false).then(response => {
                 this.optionsTeacher = response.rows;
               }).finally(() => {
                 this.loadingTeacher = false;
@@ -329,7 +329,7 @@ export default {
           if (query !== '') {
             this.loadingStudent = true;
             setTimeout(() => {
-              listStudentDict(query).then(response => {
+              listStudentDict(query, false).then(response => {
                 this.optionsStudent = response.rows;
               }).finally(() => {
                 this.loadingStudent = false;

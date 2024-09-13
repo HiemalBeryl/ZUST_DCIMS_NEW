@@ -500,7 +500,7 @@
         if (query !== '') {
           this.loadingTeacher = true;
           setTimeout(() => {
-            listTeacherDict(query).then(response => {
+            listTeacherDict(query, false).then(response => {
               this.options = response.rows;
             }).finally(() => {
               this.loadingTeacher = false;
