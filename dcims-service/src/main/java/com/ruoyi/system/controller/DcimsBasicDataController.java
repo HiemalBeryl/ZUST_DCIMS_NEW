@@ -32,8 +32,8 @@ public class DcimsBasicDataController {
      */
     //@SaCheckPermission("dcims:basicData:listStudentDict")
     @GetMapping("/listStudentDict")
-    public TableDataInfo<DcimsStudentVo> listStudentDict(String name, boolean exactMatch) {
-        return iDcimsBasicDataService.listStudentDict(name, exactMatch);
+    public TableDataInfo<DcimsStudentVo> listStudentDict(String name, boolean exact) {
+        return iDcimsBasicDataService.listStudentDict(name, exact);
     }
 
     /**
@@ -41,8 +41,8 @@ public class DcimsBasicDataController {
      */
     //@SaCheckPermission("dcims:basicData:listTeacherDict")
     @GetMapping("/listTeacherDict")
-    public TableDataInfo<DcimsTeacherVo> listTeacherDict(String name, boolean exactMatch) {
-        return iDcimsBasicDataService.listTeacherDict(name, exactMatch);
+    public TableDataInfo<DcimsTeacherVo> listTeacherDict(String name, boolean exact) {
+        return iDcimsBasicDataService.listTeacherDict(name, exact);
     }
 
     /**

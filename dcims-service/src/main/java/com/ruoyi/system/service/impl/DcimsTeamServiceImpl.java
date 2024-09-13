@@ -581,7 +581,12 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             // 匹配oss
             importTeamData.forEach(dcimsTeamImportExcel -> {
                 Optional<SysOssVo> match = ossVo.stream()
-                    .filter(vo -> StrUtil.equals(vo.getOriginalName(), dcimsTeamImportExcel.getSupportMaterialFileName()))
+                    .filter(vo -> {
+                        // 删除文件后缀名
+                        String originFileName = vo.getOriginalName().trim().replace(vo.getFileSuffix(),"");
+                        String supportFileName = dcimsTeamImportExcel.getSupportMaterialFileName().trim().replace(vo.getFileSuffix(),"");
+                        return StrUtil.equals(originFileName, supportFileName);
+                    })
                     .findFirst();
                 match.ifPresent(vo -> dcimsTeamImportExcel.setSupportMaterial(vo.getOssId()));
                 match.ifPresent(dcimsTeamImportExcel::setOss);
@@ -592,7 +597,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                     if(ObjectUtil.isNull(dcimsTeamImportExcel.getErrors())){
                         dcimsTeamImportExcel.setErrors(new ArrayList<>());
                     }
-                    dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.fileNotFoundError, "未找到对应的的佐证材料，请重新上传！"));
+                    dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.fileNotFoundError, "未找到对应的的佐证材料，请确认表格中的文件名与实际是否一致，如果多次匹配失败请采用简单的文件名，如：1.jpg！"));
                 }
             });
             // 数据处理
@@ -689,8 +694,19 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         redisImportTeamData.forEach(r -> {
             DcimsTeamImportExcel d = destination.get(r.getIndex());
             if (ObjectUtil.isNotEmpty(d))
-                BeanUtils.copyProperties(d, r, "index", "competitionId", "supportMaterial", "audit", "competitionType", "errors");
-            r.setErrors(new ArrayList<>());
+                BeanUtils.copyProperties(d, r, "index", "competitionId", "supportMaterial", "audit", "competitionType");
+            // 对redis中保留的异常进行处理，保留佐证材料不匹配的异常，其它异常重新检测
+            Optional<DcimsTeamImportExcelError> first = r.getErrors().stream()
+                .filter(error -> error.getErrorType().equals(DcimsTeamImportExcelError.ErrorType.fileNotFoundError)).findFirst();
+            List<DcimsTeamImportExcelError> errorList = new ArrayList<>();
+            if (first.isPresent()){
+                DcimsTeamImportExcelError tempFileNotFoundError = first.get();
+                errorList.add(tempFileNotFoundError);
+                r.setErrors(errorList);
+                System.out.println(r.getErrors());
+            }else{
+                r.setErrors(errorList);
+            }
         });
         // 遍历传入数据，如果不存在在redis中则说明是新增数据
         for (DcimsTeamImportExcel d : importTeamData) {

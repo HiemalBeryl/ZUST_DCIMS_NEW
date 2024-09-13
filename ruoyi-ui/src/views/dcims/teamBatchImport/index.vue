@@ -535,14 +535,15 @@ export default {
     clickChangeButton(){
       editImportData(this.teamIndex, this.team).then(resp => {
         this.team = resp.data
-        this.$set(this, 'team', resp.data)
         this.teamIndex = resp.id
-        this.$set(this, 'teamIndex', resp.id)
       }).catch((e) => {
         this.$message.error(e.message);
       }).finally(() => {
         this.appendFile = []
         this.classifyErrorType()
+        let tempTeam = this.team
+        this.$set(this, 'team', [])
+        this.$set(this, 'team', tempTeam)
         this.loading = false
         this.$modal.msgSuccess("修改成功");
       })
@@ -565,55 +566,55 @@ export default {
           switch (err.errorType){
             case "teacherNameRepeatError":
               if (!entity.hasOwnProperty("teacherNameRepeatError")){
-                entity["teacherNameRepeatError"] = []
+                this.$set(entity, "teacherNameRepeatError", [])
               }
               entity.teacherNameRepeatError.push(err)
               break;
             case "teacherNameNotFoundError":
               if (!entity.hasOwnProperty("teacherNameNotFoundError")){
-                entity["teacherNameNotFoundError"] = []
+                this.$set(entity, "teacherNameNotFoundError", [])
               }
               entity.teacherNameNotFoundError.push(err)
               break;
             case "studentNameRepeatError":
               if (!entity.hasOwnProperty("studentNameRepeatError")){
-                entity["studentNameRepeatError"] = []
+                this.$set(entity, "studentNameRepeatError", [])
               }
               entity.studentNameRepeatError.push(err)
               break;
             case "studentNameNotFoundError":
               if (!entity.hasOwnProperty("studentNameNotFoundError")){
-                entity["studentNameNotFoundError"] = []
+                this.$set(entity, "studentNameNotFoundError", [])
               }
               entity.studentNameNotFoundError.push(err)
               break;
             case "competitionNameError":
               if (!entity.hasOwnProperty("competitionNameError")){
-                entity["competitionNameError"] = []
+                this.$set(entity, "competitionNameError", [])
               }
               entity.competitionNameError.push(err)
               break;
             case "isSingleError":
               if (!entity.hasOwnProperty("isSingleError")){
-                entity["isSingleError"] = []
+                this.$set(entity, "isSingleError", [])
               }
               entity.isSingleError.push(err)
               break;
             case "awardLevelError":
               if (!entity.hasOwnProperty("awardLevelError")){
-                entity["awardLevelError"] = []
+                this.$set(entity, "awardLevelError", [])
               }
               entity.awardLevelError.push(err)
               break;
             case "fileNotFoundError":
               if (!entity.hasOwnProperty("fileNotFoundError")){
-                entity["fileNotFoundError"] = []
+                this.$set(entity, "fileNotFoundError", [])
               }
               entity.fileNotFoundError.push(err)
               break;
             case "tooMuchStudentError":
               if (!entity.hasOwnProperty("tooMuchStudentError")){
-                entity["tooMuchStudentError"] = []
+                this.$set(entity, "tooMuchStudentError", [])
               }
               entity.tooMuchStudentError.push(err)
               break;
