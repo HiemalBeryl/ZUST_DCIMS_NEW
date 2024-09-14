@@ -39,6 +39,7 @@ import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.*;
 import com.ruoyi.system.utils.AccountUtils;
+import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.springframework.beans.BeanUtils;
@@ -398,8 +399,18 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         String[] splitStudentIds = studentIds.split(",");
         List<String> studentIdsString = new ArrayList<>(Arrays.asList(splitStudentIds));
         List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdsString);
+        // 根据studentIdsString的顺序与students.getId()的顺序对应，将students的顺序排序
+        List<DcimsStudentVo> studentsSorted = new ArrayList<>();
+        for(String id : studentIdsString){
+            for(DcimsStudentVo student : students){
+                if(student.getStudentId().equals(id)){
+                    studentsSorted.add(student);
+                }
+            }
+        }
+
         String studentName = "";
-        for(DcimsStudentVo student : students){
+        for(DcimsStudentVo student : studentsSorted){
             studentName = studentName.concat(student.getName() + ',');
         }
         studentName = studentName.substring(0,studentName.length() - 1);
@@ -412,8 +423,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             teacherIdsLong.add(Long.parseLong(id));
         }
         List<DcimsTeacherVo> teachers = basicDataService.getTeacherNameByIds(teacherIdsLong);
+        // 同样对教师也进行排序
+        List<DcimsTeacherVo> teachersSorted = new ArrayList<>();
+        for(Long id : teacherIdsLong){
+            for(DcimsTeacherVo teacher : teachers){
+                if(teacher.getTeacherId().equals(id)){
+                    teachersSorted.add(teacher);
+                }
+            }
+        }
         String teacherName = "";
-        for(DcimsTeacherVo teacher : teachers){
+        for(DcimsTeacherVo teacher : teachersSorted){
             teacherName = teacherName.concat(teacher.getName() + ',');
         }
         teacherName = teacherName.substring(0,teacherName.length() - 1);
@@ -916,7 +936,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                             dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
                         }else if (studentVo.getRows().size() == 0){
                             // 学生不存在
-                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！"));
+                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！(只统计本科生数据，研究生请不要导入)"));
                         }else{
                             // 学生存在重名
                             dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + "-1" + ",");
@@ -934,8 +954,16 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 }
             }
         });
+        // 检查教师，学生姓名是否存在为空的情况，新建一个防止空指针异常
+        importTeamData.forEach(e -> {
+            if (StringUtil.isBlank(e.getTeacherId()))
+                e.setTeacherId("-1,");
+            if (StringUtil.isBlank(e.getStudentId()))
+                e.setStudentId("-1,");
+        });
         // 是否存在单人赛但是填写了多名学生的情况
         importTeamData.forEach(dcimsTeamImportExcel -> {
+            System.out.println(dcimsTeamImportExcel.getIsSingle() + " " + dcimsTeamImportExcel.getStudentId());
             if (dcimsTeamImportExcel.getIsSingle().equals("是") && dcimsTeamImportExcel.getStudentId().split(",").length > 1){
                 dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.tooMuchStudentError, "单人赛只能填写一名学生！请在导入表格中分开填写！"));
             }
@@ -975,52 +1003,52 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 定义基础路径
         String basePath = String.valueOf(timestamp);
         for (DcimsTeamVoV2 team : downloadList) {
-            int index = 0;
-            OssFile newOssFile = null;
-            for (; index < ossFileList.size(); index++){
-                OssFile ossFile = ossFileList.get(index);
-                if(ossFile.getSysOssVo().getOssId().equals(team.getSupportMaterial())){
-                    String subDirectory = String.valueOf(team.getCompetitionId());
-                    String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()) + ossFile.getSysOssVo().getFileSuffix();
-                    try{
-                        // 如果同名文件已经存在，则不进行创建
-                        File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
-                        // 使用oss文件前先复制一份，避免oss文件流被关闭
-                        newOssFile = ObjectUtil.clone(ossFile);
-
-                        BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
-                        BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-                        long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
-
-                        ossFileList.add(newOssFile);
-                        break;
-                    }catch (IORuntimeException e){
-                        System.out.println(e.getMessage());
-                    }catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-            ossFileList.remove(--index);
-
-
-//            ossFileList.stream().filter(ossFile -> Objects.equals(ossFile.getSysOssVo().getOssId(), team.getSupportMaterial())).forEach(ossFile -> {
-//                String subDirectory = String.valueOf(team.getCompetitionId());
-//                String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()) + ossFile.getSysOssVo().getFileSuffix();
-//                try{
-//                    // 如果同名文件已经存在，则不进行创建
-//                    File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
-//                    // 使用oss文件前先复制一份，避免oss文件流被关闭
+//            int index = 0;
+//            OssFile newOssFile = null;
+//            for (; index < ossFileList.size(); index++){
+//                OssFile ossFile = ossFileList.get(index);
+//                if(ossFile.getSysOssVo().getOssId().equals(team.getSupportMaterial())){
+//                    String subDirectory = String.valueOf(team.getCompetitionId());
+//                    String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()) + ossFile.getSysOssVo().getFileSuffix();
+//                    try{
+//                        // 如果同名文件已经存在，则不进行创建
+//                        File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
+//                        // 使用oss文件前先复制一份，避免oss文件流被关闭
+//                        newOssFile = ObjectUtil.clone(ossFile);
 //
-//                    BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
-//                    BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-//                    long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
-//                }catch (IORuntimeException e){
-//                    System.out.println(e.getMessage());
-//                }catch (FileNotFoundException e) {
-//                    throw new RuntimeException(e);
+//                        BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
+//                        BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+//                        long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
+//
+//                        ossFileList.add(newOssFile);
+//                        break;
+//                    }catch (IORuntimeException e){
+//                        System.out.println(e.getMessage());
+//                    }catch (FileNotFoundException e) {
+//                        throw new RuntimeException(e);
+//                    }
 //                }
-//            });
+//            }
+//            ossFileList.remove(--index);
+
+
+            ossFileList.stream().filter(ossFile -> Objects.equals(ossFile.getSysOssVo().getOssId(), team.getSupportMaterial())).forEach(ossFile -> {
+                String subDirectory = String.valueOf(team.getCompetitionId());
+                String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()) + ossFile.getSysOssVo().getFileSuffix();
+                try{
+                    // 如果同名文件已经存在，则不进行创建
+                    File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
+                    // 使用oss文件前先复制一份，避免oss文件流被关闭
+
+                    BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
+                    BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
+                    long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
+                }catch (IORuntimeException e){
+                    System.out.println(e.getMessage());
+                }catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         try{
             // 翻译id为竞赛名
@@ -1095,7 +1123,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             );
         }
         List<Long> listIds = queryresult.getRows().stream().map(DcimsTeamVoV2::getId).collect(Collectors.toList());
-        List<DcimsTeamVo> list = queryList(bo);
+        List<DcimsTeamVo> list = queryList(new DcimsTeamBo());
         list = list.stream().filter(e -> listIds.contains(e.getId())).collect(Collectors.toList());
         List<DcimsTeamBo> dcimsTeamBos = new ArrayList<>();
         //将DcimsTeamVo中的属性拷贝到DcimsTeamBo中去

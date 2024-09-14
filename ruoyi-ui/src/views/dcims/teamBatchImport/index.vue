@@ -25,6 +25,7 @@
 
     <!--  上传模板界面-->
     <div v-show="stepsActive==1" style="text-align: center;">
+      <h1>本系统仅统计本科生获奖数据，请勿上传研究生及校外学生数据！</h1>
       <el-upload
         class="upload"
         ref="upload0"

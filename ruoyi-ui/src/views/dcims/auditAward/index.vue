@@ -8,120 +8,123 @@
     </div>
 
 
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="竞赛名称" prop="competitionName">
-        <el-input
-          v-model="queryParams.competitionName"
-          placeholder="请输入竞赛名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-
-      <el-form-item label="赛事年份" prop="annual">
-        <el-input
-          v-model="queryParams.annual"
-          placeholder="请输入赛事年份"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-
-      <el-form-item label="队伍名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入队伍名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="比赛类型" prop="competitionType">
-        <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
-          <el-option
-            v-for="dict in dict.type.dcims_award_type"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+    <div style="margin-left: 100px;">
+      <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+        <el-form-item label="竞赛名称" prop="competitionName">
+          <el-input
+            v-model="queryParams.competitionName"
+            placeholder="请输入竞赛名称"
+            clearable
+            @keyup.enter.native="handleQuery"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="奖项等级" prop="awardLevel">
-        <el-select v-model="queryParams.awardLevel" placeholder="请选择奖项等级" clearable>
-          <el-option
-            v-for="dict in dict.type.dcims_award_level"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+        </el-form-item>
+
+        <el-form-item label="赛事年份" prop="annual">
+          <el-input
+            v-model="queryParams.annual"
+            placeholder="请输入赛事年份"
+            clearable
+            @keyup.enter.native="handleQuery"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="指导教师工号" prop="teacherId">
-        <el-input
-          v-model="queryParams.teacherId"
-          placeholder="请输入指导教师工号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="指导教师姓名" prop="teacherName">
-        <el-input
-          v-model="queryParams.teacherName"
-          placeholder="请输入指导教师姓名"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="参赛学生学号" prop="studentId">
-        <el-input
-          v-model="queryParams.studentId"
-          placeholder="请输入参赛学生学号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="参赛学生姓名" prop="studentName">
-        <el-input
-          v-model="queryParams.studentName"
-          placeholder="请输入参赛学生姓名"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+        </el-form-item>
 
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+        <el-form-item label="队伍名称" prop="name">
+          <el-input
+            v-model="queryParams.name"
+            placeholder="请输入队伍名称"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="比赛类型" prop="competitionType">
+          <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
+            <el-option
+              v-for="dict in dict.type.dcims_award_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="奖项等级" prop="awardLevel">
+          <el-select v-model="queryParams.awardLevel" placeholder="请选择奖项等级" clearable>
+            <el-option
+              v-for="dict in dict.type.dcims_award_level"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="指导教师工号" prop="teacherId">
+          <el-input
+            v-model="queryParams.teacherId"
+            placeholder="请输入指导教师工号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="指导教师姓名" prop="teacherName">
+          <el-input
+            v-model="queryParams.teacherName"
+            placeholder="请输入指导教师姓名"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="参赛学生学号" prop="studentId">
+          <el-input
+            v-model="queryParams.studentId"
+            placeholder="请输入参赛学生学号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="参赛学生姓名" prop="studentName">
+          <el-input
+            v-model="queryParams.studentName"
+            placeholder="请输入参赛学生姓名"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
 
-    <!-- 导出相关文档-->
-    <el-col :span="1.5">
-      <el-button
-        type="warning"
-        plain
-        icon="el-icon-download"
-        size="mini"
-        @click="handleExport"
-        v-hasPermi="['dcims:team:export']"
-      >下载获奖信息表</el-button>
-    </el-col>
-    <el-col :span="1.5">
-      <el-button
-        type="warning"
-        plain
-        icon="el-icon-download"
-        size="mini"
-        @click="handleExport2"
-        v-hasPermi="['dcims:team:export']"
-      >下载佐证材料</el-button>
-    </el-col>
-    <el-col>
-      <el-tag :span="1" type="danger">请在上方进行筛选条件选择(下方复选框无效)</el-tag>
-    </el-col>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 导出相关文档-->
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport"
+          v-hasPermi="['dcims:team:export']"
+        >下载获奖信息表</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport2"
+          v-hasPermi="['dcims:team:export']"
+        >下载佐证材料</el-button>
+      </el-col>
+      <el-col>
+        <el-tag :span="1" type="danger">请在上方进行筛选条件选择(下方复选框无效)</el-tag>
+      </el-col>
+    </div>
 
     <!-- 用于存放第一行的筛选按钮 -->
     <div class="juZhong">
-      <h2>待提交列表</h2>
+<!--      让下面的h2标签居中-->
+      <h1 style="text-align: center;">待提交列表</h1>
       <!-- <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content "></div></el-col>
 
@@ -250,7 +253,7 @@
 
     <!-- 流程跟踪列表，下方的表格 -->
     <div class="juZhong" style="margin-top: 50px">
-      <h2>流程跟踪</h2>
+      <h1 style="text-align: center;">流程跟踪</h1>
       <div>
         <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content"></div></el-col>
@@ -265,7 +268,6 @@
               max-height="600px"
               @selection-change="handleSelectionChange"
             >
-              <el-table-column type="selection" width="55"> </el-table-column>
               <el-table-column prop="competition.name" label="赛事名称" width="200">
               </el-table-column>
               <el-table-column prop="name" label="团队名称" width="100">

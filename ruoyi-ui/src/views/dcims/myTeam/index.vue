@@ -52,13 +52,16 @@
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['dcims:team:edit']"
-          >修改</el-button>
+          <el-tooltip class="item" effect="dark" content="已经通过评估的获奖信息不允许修改，如需修改，请选择删除或联系管理员" placement="top" :disabled="scope.row.audit == 0 || scope.row.audit == 1 || scope.row.audit == 3">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-edit"
+              @click="handleUpdate(scope.row)"
+              :disabled="scope.row.audit == 2"
+              v-hasPermi="['dcims:competition:edit']"
+            >修改</el-button>
+          </el-tooltip>
           <el-button
             size="mini"
             type="text"
