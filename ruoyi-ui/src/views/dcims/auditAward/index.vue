@@ -225,11 +225,15 @@
                   </div>
 
                   <div style="float: right">
-                    <el-button type="primary" @click="submitOrRefuse(1)">通过并提交</el-button>
+                    <el-tooltip class="item" effect="dark" content="请先勾选需要通过并提交的竞赛" placement="top" :disabled="!ids.length == 0">
+                      <el-button type="primary" :disabled="ids.length == 0" @click="submitOrRefuse(1)">通过并提交</el-button>
+                    </el-tooltip>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
-                    <el-button type="warning" @click="submitOrRefuse(0)">退回修改</el-button>
+                    <el-tooltip class="item" effect="dark" content="请先勾选需要退回修改的竞赛" placement="top" :disabled="!ids.length == 0">
+                      <el-button type="warning" :disabled="ids.length == 0" @click="submitOrRefuse(0)">退回修改</el-button>
+                    </el-tooltip>
                   </div>
                   <div style="float: right"><p style="width: 20px">&nbsp;</p></div>
                   <div style="float: right">
@@ -255,7 +259,6 @@
           ><div class="grid-content">
             <el-table
               v-loading="loading"
-              ref="multipleTable"
               :data="teamProcessingList"
               tooltip-effect="dark"
               style="width: 100%"
@@ -310,7 +313,7 @@
   <div>
     <el-dialog :title="title" :visible.sync="open2" width="500px" append-to-body>
     <el-form ref="form2" :model="submitt" label-width="100px">
-        <el-input v-model="submitt.reason" type="textArea" placeholder="备注原因" />
+        <el-input v-model="submitt.reason" type="textArea" placeholder="备注提交或退回原因（非必填）" />
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button :loading="buttonLoading" type="primary" @click="submitForm2">确 定</el-button>
@@ -322,7 +325,8 @@
   <!-- 查看详情对话框 -->
   <el-dialog title="查看详情" :visible.sync="openDetail" width="500px" append-to-body>
     <el-descriptions title="团队信息">
-    <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition.name }}</el-descriptions-item>
+<!--    <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition.name }}</el-descriptions-item>-->
+      <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition ? this.detailForm.competition.name : '' }}</el-descriptions-item>
     <el-descriptions-item label="队伍名称">{{ this.detailForm.name }}</el-descriptions-item>
     <el-descriptions-item label="作品名称">
       <span v-if="this.detailForm.worksName != null">
@@ -444,7 +448,7 @@ import download from '@/plugins/download.js';
         detailForm: {
           fileSuffix: [],
           competition: {
-            name: undefined
+            name: "我是竞赛名称占位符"
           }
         },
         dateOptions: {
@@ -620,10 +624,14 @@ import download from '@/plugins/download.js';
     cancel() {
       this.open1 = false;
       this.open2 = false;
-      this.openDetail = false;
       this.reset();
       this.detailForm = {};
     },
+      // 取消查看详情
+      cancelDetailPanel() {
+        this.openDetail = false;
+        this.detailForm = {};
+      },
     /** 提交竞赛信息按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
@@ -669,7 +677,7 @@ import download from '@/plugins/download.js';
             if(this.flag){
               // 执行通过审核逻辑
               permitAudit(this.submittForm).then(response => {
-                this.$modal.msgSuccess("通过选中竞赛成功");
+                this.$modal.msgSuccess("通过选中的获奖条目成功");
                 this.submittForm = [];
                 this.open2 = false;
                 this.getList();
@@ -681,7 +689,7 @@ import download from '@/plugins/download.js';
             }else{
               // 执行退回审核逻辑
               refuseAudit(this.submittForm).then(response => {
-                this.$modal.msgError("退回选中竞赛成功");
+                this.$modal.msgError("退回选中的获奖条目成功");
                 this.submittForm = [];
                 this.open2 = false;
                 this.getList();
@@ -729,6 +737,15 @@ import download from '@/plugins/download.js';
     openNewTab(url) {
       window.open(url, '_blank');
     },
+      toggleSelection(rows) {
+        if (rows) {
+          rows.forEach((row) => {
+            this.$refs.multipleTable.toggleRowSelection(row);
+          });
+        } else {
+          this.$refs.multipleTable.clearSelection();
+        }
+      },
      returnWarn() {
 const h = this.$createElement;
 this.$prompt(h(
