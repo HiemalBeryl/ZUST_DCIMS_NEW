@@ -982,13 +982,6 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      * 批量下载团队信息以及佐证材料
      */
     public void download(List<DcimsTeamVoV2> downloadList, HttpServletResponse response){
-        // 查询竞赛赛事基本信息列表，获取附件id
-//        List<DcimsTeamVo> dataInfo = queryList(bo);
-//        PageQuery pq = new PageQuery();
-//        pq.setPageNum(0);
-//        pq.setPageSize(10000);
-//        List<Long> attachmentIds = queryPageList(bo, pq).getRows().stream().map(DcimsTeamVoV2::getSupportMaterial).collect(Collectors.toList());
-//        List<Long> attachmentIds = dataInfo.stream().map(DcimsTeamBo::getAttachment).collect(Collectors.toList());
         // 根据附件id查询oss文件
         List<Long> attachmentIds = downloadList.stream().map(DcimsTeamVoV2::getSupportMaterial).collect(Collectors.toList());
         System.out.println("附件id列表：" + attachmentIds);
@@ -1003,50 +996,34 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 定义基础路径
         String basePath = String.valueOf(timestamp);
         for (DcimsTeamVoV2 team : downloadList) {
-//            int index = 0;
-//            OssFile newOssFile = null;
-//            for (; index < ossFileList.size(); index++){
-//                OssFile ossFile = ossFileList.get(index);
-//                if(ossFile.getSysOssVo().getOssId().equals(team.getSupportMaterial())){
-//                    String subDirectory = String.valueOf(team.getCompetitionId());
-//                    String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()) + ossFile.getSysOssVo().getFileSuffix();
-//                    try{
-//                        // 如果同名文件已经存在，则不进行创建
-//                        File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
-//                        // 使用oss文件前先复制一份，避免oss文件流被关闭
-//                        newOssFile = ObjectUtil.clone(ossFile);
-//
-//                        BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
-//                        BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
-//                        long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
-//
-//                        ossFileList.add(newOssFile);
-//                        break;
-//                    }catch (IORuntimeException e){
-//                        System.out.println(e.getMessage());
-//                    }catch (FileNotFoundException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                }
-//            }
-//            ossFileList.remove(--index);
-
-
             ossFileList.stream().filter(ossFile -> Objects.equals(ossFile.getSysOssVo().getOssId(), team.getSupportMaterial())).forEach(ossFile -> {
                 String subDirectory = String.valueOf(team.getCompetitionId());
-                String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()) + ossFile.getSysOssVo().getFileSuffix();
+                String fileName = translateAwardLevel(team.getAwardLevel()) + "-"+ Arrays.toString(team.getStudentName()).substring(
+                    1,
+                    Arrays.toString(team.getStudentName()).length() - 1
+                ) + ossFile.getSysOssVo().getFileSuffix();
                 try{
                     // 如果同名文件已经存在，则不进行创建
                     File f = FileUtil.touch(basePath + "/" + subDirectory + "/" + fileName);
-                    // 使用oss文件前先复制一份，避免oss文件流被关闭
 
-                    BufferedInputStream is = new BufferedInputStream(ossFile.getFileContent());
+                    // 检查文件流是否已经关闭，如果已经关闭，那么重新打开
+                    InputStream is = ossFile.getFileContent();
+                    if (!is.markSupported()) {
+                        is = new BufferedInputStream(is);
+                    }
+                    is.mark(Integer.MAX_VALUE);  // Mark the current position in the stream
+
+                    // 使用oss文件前先复制一份，避免oss文件流被关闭
                     BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(f));
                     long copySize = IoUtil.copy(is, os, IoUtil.DEFAULT_BUFFER_SIZE);
+
+                    is.reset();  // Reset the stream to the marked position
                 }catch (IORuntimeException e){
                     System.out.println(e.getMessage());
                 }catch (FileNotFoundException e) {
                     throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException("Error resetting the input stream", e);
                 }
             });
         }
@@ -1118,7 +1095,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             queryresult = downloadList;
         }else{
             queryresult = TableDataInfo.build(
-                queryresult.getRows().stream()
+                downloadList.getRows().stream()
                     .filter(e -> bo.getAnnual().intValue() == e.getCompetition().getAnnual().intValue()).collect(Collectors.toList())
             );
         }
@@ -1132,6 +1109,21 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             BeanUtils.copyProperties(team, teamBo);
             dcimsTeamBos.add(teamBo);
         }
+        // 预处理，将区域奖视为省奖
+        dcimsTeamBos.forEach(teamBo -> {
+            if (teamBo.getAwardLevel().equals("10")){
+                teamBo.setAwardLevel("15");
+            } else if (teamBo.getAwardLevel().equals("11")){
+                teamBo.setAwardLevel("16");
+            } else if (teamBo.getAwardLevel().equals("12")){
+                teamBo.setAwardLevel("17");
+            } else if (teamBo.getAwardLevel().equals("13")){
+                teamBo.setAwardLevel("18");
+            } else if (teamBo.getAwardLevel().equals("14")){
+                teamBo.setAwardLevel("19");
+
+            }
+        });
 
         List<Long> competitionIds = dcimsTeamBos.stream()
             .map(DcimsTeamBo::getCompetitionId)
