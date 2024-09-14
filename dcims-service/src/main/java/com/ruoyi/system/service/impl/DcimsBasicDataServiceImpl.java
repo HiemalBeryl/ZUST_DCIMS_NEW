@@ -2,6 +2,7 @@ package com.ruoyi.system.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.json.ObjectMapper;
@@ -168,10 +169,12 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
         httpHeaders.set("requestTime", String.valueOf(requestTime));
         httpHeaders.set("sign", SecureUtil.md5(appKey+appSecret+requestTime));
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
-        String url = "http://172.16.11.51:50027/token/refreshtoken";
+        String url = "http://172.16.11.51:50027/token/requesttoken";
         //发送请求获得token
         ResponseEntity<String> exchange = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        return exchange.getBody();
+        JSONObject jsonObject = new JSONObject(exchange.getBody());
+        String token = jsonObject.getStr("token");
+        return token;
     }
 
     /**
@@ -192,6 +195,8 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
                 , String.class);
             //将响应结果转成jsonObject对象,获取数据库中总共页面数量
             JSONObject jsonObject = new JSONObject(exchange.getBody());
+            //拿到全部教师数据
+            List<DcimsBasicDataTeacherVo> Teachers = jsonObject.getBeanList("data", DcimsBasicDataTeacherVo.class);
             Integer pages = jsonObject.getInt("pages");
             current = jsonObject.getInt("current");
             //判断,如果当前页面大于总页面数,停止请求
@@ -199,8 +204,6 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
                 hasNext = false;
             }
 
-            //拿到全部teacher数据
-            List<DcimsBasicDataTeacherVo> Teachers = JSONUtil.toList(exchange.getBody(), DcimsBasicDataTeacherVo.class);
             //从全部数据中拿出teacherId
             List<Long> teacherIds = Teachers.stream()
                 .map(DcimsBasicDataTeacherVo::getTeacherId)
@@ -244,6 +247,8 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
                 , String.class);
             //将响应结果转成jsonObject对象,获取数据库中总共页面数量
             JSONObject jsonObject = new JSONObject(exchange.getBody());
+            //拿到全部学生数据
+            List<DcimsBasicDataStudentVo> Students = jsonObject.getBeanList("data", DcimsBasicDataStudentVo.class);
             Integer pages = jsonObject.getInt("pages");
             current = jsonObject.getInt("current");
             //判断,如果当前页面大于总页面数,停止请求
@@ -251,8 +256,6 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
                 hasNext = false;
             }
 
-            //拿到全部student数据
-            List<DcimsBasicDataStudentVo> Students = JSONUtil.toList(exchange.getBody(), DcimsBasicDataStudentVo.class);
             //从全部数据中拿出StudentId
             List<String> studentIds = Students.stream()
                 .map(DcimsBasicDataStudentVo::getStudentId)

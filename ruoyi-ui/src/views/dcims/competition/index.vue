@@ -91,10 +91,10 @@
           <el-input v-model="form.organizer" placeholder="请输入主办单位" />
         </el-form-item>
         <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="true"/>
+          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="false"/>
         </el-form-item>
         <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
+          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="false"/>
         </el-form-item>
         <el-form-item label="校内选拔时间" prop="innerTime">
           <el-date-picker clearable
@@ -150,8 +150,24 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
 
-
-
+      
+      <!-- <el-dialog title="修改竞赛负责人" :visible.sync="editvisible2" width="500px" append-to-body>
+          <el-form ref="form" :model="form" label-width="80px">
+            <div>
+              <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
+                <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
+              </el-form-item>
+              <el-form-item label="竞赛负责人" prop="responsiblePersonName">
+                <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
+              </el-form-item>
+            </div>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button :loading="buttonLoading" type="primary" @click="submitForm2">确 定</el-button>
+            <el-button @click="cancel">取 消</el-button>
+          </div>
+      </el-dialog> -->
+      
       <!-- 二次确认是否修改竞赛信息 -->
       <el-dialog
         title="提示"
@@ -390,6 +406,12 @@
             icon="el-icon-edit"
             @click="xiugaileibie(scope.row, 1)"
           >修改信息</el-button>
+          <!-- <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="xiugaileibie(scope.row, 2)"
+          >修改竞赛负责人</el-button> -->
           <el-button
             size="mini"
             type="text"
@@ -413,7 +435,7 @@
 <script>
 import { listCompetition, getCompetition, delCompetition} from "@/api/dcims/competition";
 import download from '@/plugins/download.js';
-import {refuseAudit, updateAuditCompetition} from "@/api/dcims/competitionAudit";
+import {refuseAudit, updateAuditCompetition,updateResponsiblePerson} from "@/api/dcims/competitionAudit";
 
 export default {
   name: "Competition",
@@ -470,6 +492,8 @@ export default {
       editvisible: false,
       // 修改对话框2
       editvisible1: false,
+      // // 修改对话框3
+      // editvisible2: false,
       // 二次确认是否修改
       dialogVisible: false,
       // 赛事表单校验
@@ -626,6 +650,16 @@ export default {
           console.log(this.form);
           this.editvisible1 = true;
         });
+      // }else if(type == 2){
+      //   this.loading = true;
+      //   this.reset();
+      //   const id = row.id || this.ids
+      //   getCompetition(id).then(response => {
+      //     this.loading = false;
+      //     this.form = response.data;
+      //     console.log(this.form);
+      //     this.editvisible2 = true;
+      //   });
       }
 
     },
@@ -680,6 +714,24 @@ export default {
 
       }
     },
+
+    // // 提交表单
+    // submitForm2() {
+    //   this.buttonLoading = true;
+    //   this.dialogVisible = false;
+    //   if (this.form.id != null) {
+    //     updateResponsiblePerson(this.form).then(response => {
+    //       this.$modal.msgSuccess("修改成功");
+    //       this.editvisible = false;
+    //       this.editvisible1 = false;
+    //       this.getList();
+    //     }).finally(() => {
+    //       this.buttonLoading = false;
+    //     });
+    //   } else {
+
+    //   }
+    // },
     /** 关闭二次确认窗口 */
     handleClose(done) {
       this.$confirm('确认关闭？')
