@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
 import com.ruoyi.system.converter.StringArrayConverter;
@@ -107,6 +108,7 @@ public class DcimsTeamVoV2 {
     /**
      * 获奖时间
      */
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date awardTime;
 
     /**

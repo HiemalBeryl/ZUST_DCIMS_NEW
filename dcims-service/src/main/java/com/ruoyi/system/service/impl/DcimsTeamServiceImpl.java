@@ -188,6 +188,10 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 e.setOss(null);
             }
         });
+        // 根据学院筛选
+        if (ObjectUtil.isNotNull(bo.getCollege())){
+            VoV2List2 = VoV2List2.stream().filter(e -> e.getCompetition().getCollege().equals(bo.getCollege())).collect(Collectors.toList());
+        }
         TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
         BeanUtils.copyProperties(build, build1);
         build1.setRows(VoV2List2);
@@ -328,6 +332,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.like(StringUtils.isNotBlank(bo.getStudentName()), DcimsTeam::getStudentName, bo.getStudentName());
         lqw.like(StringUtils.isNotBlank(bo.getNext_audit_id()), DcimsTeam::getNextAuditId, bo.getNext_audit_id());
         lqw.eq(bo.getAudit() != null, DcimsTeam::getAudit, bo.getAudit());
+        lqw.between(params.get("beginAwardTimeRange") != null && params.get("endAwardTimeRange") != null,
+            DcimsTeam::getAwardTime ,params.get("beginAwardTimeRange"), params.get("endAwardTimeRange"));
         return lqw;
     }
 
@@ -983,7 +989,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
      */
     public void download(List<DcimsTeamVoV2> downloadList, HttpServletResponse response){
         // 根据附件id查询oss文件
-        List<Long> attachmentIds = downloadList.stream().map(DcimsTeamVoV2::getSupportMaterial).collect(Collectors.toList());
+        List<Long> attachmentIds = downloadList.stream().map(DcimsTeamVoV2::getSupportMaterial).distinct().collect(Collectors.toList());
         System.out.println("附件id列表：" + attachmentIds);
         List<OssFile> ossFileList;
         try {

@@ -36,6 +36,29 @@
             @keyup.enter.native="handleQuery"
           />
         </el-form-item>
+
+        <el-form-item label="所属学院" prop="awardLevel" v-show="this.$store.state.user.roles.includes('AcademicAffairsOffice')">
+          <el-select v-model="queryParams.college" placeholder="请选择所属学院" clearable>
+            <el-option
+              v-for="dict in dict.type.dcims_college"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="获奖时间">
+          <el-date-picker
+            v-model="awardTimeRange"
+            style="width: 240px"
+            value-format="yyyy-MM-dd"
+            type="daterange"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          ></el-date-picker>
+        </el-form-item>
+
         <el-form-item label="比赛类型" prop="competitionType">
           <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
             <el-option
@@ -207,6 +230,11 @@
                   <el-table-column prop="teacherName" label="指导教师" width="130">
                   </el-table-column>
                   <el-table-column prop="awardTime" label="获奖时间" width="120">
+                  </el-table-column>
+                  <el-table-column prop="college" label="所属学院" width="170">
+                    <template slot-scope="scope">
+                      <dict-tag :options="dict.type.dcims_college" :value="scope.row.competition.college"/>
+                    </template>
                   </el-table-column>
                   <el-table-column prop="supportMaterial" label="佐证材料" width="100">
                     <template slot-scope="scope">
@@ -386,7 +414,7 @@ import download from '@/plugins/download.js';
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
-    dicts: ['dcims_award_type', 'dcims_award_level'],
+    dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_college'],
     data() {
       return {
       // 按钮loading
@@ -415,6 +443,8 @@ import download from '@/plugins/download.js';
       open1: false,
       // 是否显示弹出层2
       open2: false,
+      // 获奖时间范围
+      awardTimeRange: [],
       // 提交或退回标志
       flag: 0,
         // 查询参数
@@ -426,6 +456,7 @@ import download from '@/plugins/download.js';
           annual: undefined,
           competitionType: undefined,
           awardLevel: undefined,
+          college: undefined,
           studentName: undefined,
           teacherName: undefined,
           awardTime: undefined,
@@ -508,6 +539,11 @@ import download from '@/plugins/download.js';
       /** 查询竞赛赛事基本信息列表 */
       getList() {
         this.loading = true;
+        this.queryParams.params = {};
+        if (null != this.awardTimeRange && '' != this.awardTimeRange) {
+          this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
+          this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
+        }
         listTeamAudit(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;
@@ -525,6 +561,11 @@ import download from '@/plugins/download.js';
 
       getListTwo() {
         this.loading = true;
+        this.queryParams.params = {};
+        if (null != this.awardTimeRange && '' != this.awardTimeRange) {
+          this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
+          this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
+        }
         listTeam(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;

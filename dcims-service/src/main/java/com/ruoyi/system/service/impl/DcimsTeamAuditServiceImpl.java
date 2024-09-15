@@ -74,6 +74,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsTeam> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsTeam::getNextAuditId,teacherId);
+        lqw.eq(DcimsTeam::getAudit, 1);
         // 获取状态为待审核或被退回的竞赛, 可以对这些竞赛重新提交或退回。
         List<String> status = new ArrayList<>();
         status.add("0");

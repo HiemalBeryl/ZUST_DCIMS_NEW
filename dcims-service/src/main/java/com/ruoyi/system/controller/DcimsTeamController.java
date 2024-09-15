@@ -109,6 +109,7 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:list")
     @GetMapping("/list")
     public TableDataInfo<DcimsTeamVoV2> list(DcimsTeamBo bo, PageQuery pageQuery) {
+        System.out.println("bo:"+bo);
         TableDataInfo<DcimsTeamVoV2> queryresult = iDcimsTeamService.queryPageList(bo, pageQuery);
         if (bo.getAnnual() == null) {
             return queryresult;
