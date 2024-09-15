@@ -44,6 +44,15 @@ export function updateCompetition(data) {
   })
 }
 
+// 修改竞赛负责人
+export function updateResponsiblePerson(data) {
+  return request({
+    url: '/dcims/competition/putResponsiblePerson',
+    method: 'post',
+    data: data
+  })
+}
+
 // 删除竞赛赛事基本信息
 export function delCompetition(id) {
   return request({
