@@ -1,31 +1,25 @@
-package com.ruoyi.system.domain.vo;
-
-import java.util.Date;
+package com.ruoyi.system.domain.excel;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
-import com.ruoyi.system.converter.StringArrayConverter;
+import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import lombok.Data;
 
+import java.util.Date;
 
-/**
- * 参赛团队视图对象 dcims_team
- *
- * @author hiemalberyl
- * @date 2023-05-01
- */
 @Data
 @ExcelIgnoreUnannotated
-public class DcimsTeamVoV2 {
+public class DcimsTeamExportExcel {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * 主键
      */
+    @ExcelProperty(value = "主键")
     private Long id;
 
     /**
@@ -33,17 +27,6 @@ public class DcimsTeamVoV2 {
      */
     @ExcelProperty(value = "竞赛id")
     private Long competitionId;
-
-    /**
-     * 竞赛名称
-     */
-    @ExcelProperty(value = "竞赛名称")
-    private String competitionName;
-
-    /**
-     * 竞赛详情
-     */
-    private DcimsCompetitionVo competition;
 
     /**
      * 队伍名称
@@ -74,26 +57,26 @@ public class DcimsTeamVoV2 {
     /**
      * 指导教师工号
      */
-    @ExcelProperty(value = "指导教师工号", converter = StringArrayConverter.class)
-    private String[] teacherId;
+    @ExcelProperty(value = "指导教师工号")
+    private String teacherId;
 
     /**
      * 指导教师姓名
      */
-    @ExcelProperty(value = "指导教师姓名", converter = StringArrayConverter.class)
-    private String[] teacherName;
+    @ExcelProperty(value = "指导教师姓名")
+    private String teacherName;
 
     /**
      * 参赛学生学号
      */
-    @ExcelProperty(value = "参赛学生学号", converter = StringArrayConverter.class)
-    private String[] studentId;
+    @ExcelProperty(value = "参赛学生学号")
+    private String studentId;
 
     /**
      * 参赛学生姓名
      */
-    @ExcelProperty(value = "参赛学生姓名", converter = StringArrayConverter.class)
-    private String[] studentName;
+    @ExcelProperty(value = "参赛学生姓名")
+    private String studentName;
 
     /**
      * 更高级奖项id
@@ -108,8 +91,15 @@ public class DcimsTeamVoV2 {
     /**
      * 获奖时间
      */
+    @ExcelProperty(value = "获奖时间")
     @JsonFormat(locale="zh",timezone="GMT+8",pattern="yyyy/MM/dd")
     private Date awardTime;
+
+    /**
+     * 所属学院
+     */
+    @ExcelProperty(value = "所属学院")
+    private String collegeName;
 
     /**
      * 佐证材料
@@ -123,24 +113,25 @@ public class DcimsTeamVoV2 {
     private String supportMaterialURL;
 
     /**
-     * 佐证材料实体类
-     */
-    private SysOssVo oss;
-
-    /**
      * 审核状态
      */
     @ExcelProperty(value = "审核状态", converter = ExcelDictConvert.class)
     @ExcelDictFormat(dictType = "dcims_declare_award_status")
     private Integer audit;
 
-    /**
-     * 下一级审核人工号
-     */
-    private Long nextAuditId;
+     /**
+      * 下一级审核人工号
+      */
+     private Long nextAuditId;
 
-    /**
-     * 创建人
+     /**
+      * 审核状态详细
+      */
+     private DcimsTeamAuditVo auditDetail;
+
+     /**
+      * 创建人
      */
     private String createBy;
+
 }

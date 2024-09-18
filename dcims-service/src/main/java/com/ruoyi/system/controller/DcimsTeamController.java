@@ -38,6 +38,7 @@ import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.excel.DcimsComAndTeam;
+import com.ruoyi.system.domain.excel.DcimsTeamExportExcel;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.excel.TempDcimsComAndTeam;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
@@ -193,8 +194,8 @@ public class DcimsTeamController extends BaseController {
     @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DcimsTeamBo bo, HttpServletResponse response) {
-        List<DcimsTeamVo> list = iDcimsTeamService.queryList(bo);
-        ExcelUtil.exportExcel(list, "参赛团队", DcimsTeamVo.class, response);
+        List<DcimsTeamExportExcel> list = iDcimsTeamService.exportExcel(bo);
+        ExcelUtil.exportExcel(list, "参赛团队", DcimsTeamExportExcel.class, response);
     }
 
     /*
@@ -431,6 +432,7 @@ public class DcimsTeamController extends BaseController {
             return R.fail(bo.getAnnual()+"年团队获奖申报已截止（或未开放），如有疑问请联系学院或教务处。");
         return toAjax(iDcimsTeamService.updateByBo(bo));
     }
+
 
     /**
      * 为参赛团队添加佐证材料
