@@ -91,10 +91,10 @@
           <el-input v-model="form.organizer" placeholder="请输入主办单位" />
         </el-form-item>
         <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="false"/>
+          <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" :disabled="true"/>
         </el-form-item>
         <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="false"/>
+          <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" :disabled="true"/>
         </el-form-item>
         <el-form-item label="校内选拔时间" prop="innerTime">
           <el-date-picker clearable
@@ -149,25 +149,6 @@
         <el-button :loading="buttonLoading" type="primary" @click="dialogVisible = true">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
-
-      
-      <!-- <el-dialog title="修改竞赛负责人" :visible.sync="editvisible2" width="500px" append-to-body>
-          <el-form ref="form" :model="form" label-width="80px">
-            <div>
-              <el-form-item label="竞赛负责人工号" prop="responsiblePersonId">
-                <el-input v-model="form.responsiblePersonId" placeholder="请输入竞赛负责人工号" />
-              </el-form-item>
-              <el-form-item label="竞赛负责人" prop="responsiblePersonName">
-                <el-input v-model="form.responsiblePersonName" placeholder="请输入竞赛负责人" />
-              </el-form-item>
-            </div>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button :loading="buttonLoading" type="primary" @click="submitForm2">确 定</el-button>
-            <el-button @click="cancel">取 消</el-button>
-          </div>
-      </el-dialog> -->
-      
       <!-- 二次确认是否修改竞赛信息 -->
       <el-dialog
         title="提示"
@@ -181,6 +162,35 @@
               <el-button type="primary" @click="submitForm">确 定</el-button>
           </span>
       </el-dialog>
+    </el-dialog>
+    <el-dialog title="修改竞赛负责人" :visible.sync="editvisible2" width="500px" append-to-body>
+      <el-form ref="form" :model="form" label-width="80px">
+        <template>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-select
+                v-model="tutorForm"
+                filterable
+                remote
+                reserve-keyword
+                placeholder="请输入教师姓名"
+                :remote-method="queryTeacher"
+                :loading="loadingTeacher">
+                <el-option
+                  v-for="item in options"
+                  :key="item.teacherId"
+                  :label="item.teacherId + '  ' + item.name"
+                  :value="[item.teacherId, item.name]">
+                </el-option>
+              </el-select>
+            </el-col>
+          </el-row>
+        </template>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button :loading="buttonLoading" type="primary" @click="submitForm3">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
     </el-dialog>
 
 
@@ -340,7 +350,7 @@
       <el-col>
         <el-tag :span="1" type="danger">请在上方进行筛选条件选择(下方复选框无效)</el-tag>
       </el-col>
-      
+
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -382,7 +392,7 @@
       <el-table-column label="本年度追加经费" align="center" prop="appropriation" />
       <el-table-column label="个人赛限项" align="center" prop="personLimit" />
       <el-table-column label="团队赛限项" align="center" prop="teamLimit" />
-      <el-table-column v-if="(this.$store.state.user.roles.includes('AcademicAffairsOffice'))" label="竞赛申报书" align="center" prop="oss.url">
+      <el-table-column v-if="(this.$store.state.user.roles.includes('AcademicAffairsOffice')) || this.$store.state.user.roles.includes('admin')" label="竞赛申报书" align="center" prop="oss.url">
         <template slot-scope="scope">
           <el-button v-if="(scope.row.oss != null)"
           type="text"
@@ -391,7 +401,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column v-if="(this.$store.state.user.roles.includes('AcademicAffairsOffice'))" label="操作" align="center"
+      <el-table-column v-if="(this.$store.state.user.roles.includes('AcademicAffairsOffice')) || this.$store.state.user.roles.includes('admin')" label="操作" align="center"
                        class-name="small-padding fixed-width" width="200px">
         <template slot-scope="scope">
           <el-button
@@ -406,12 +416,12 @@
             icon="el-icon-edit"
             @click="xiugaileibie(scope.row, 1)"
           >修改信息</el-button>
-          <!-- <el-button
+          <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="xiugaileibie(scope.row, 2)"
-          >修改竞赛负责人</el-button> -->
+          >修改竞赛负责人</el-button>
           <el-button
             size="mini"
             type="text"
@@ -436,6 +446,7 @@
 import { listCompetition, getCompetition, delCompetition} from "@/api/dcims/competition";
 import download from '@/plugins/download.js';
 import {refuseAudit, updateAuditCompetition,updateResponsiblePerson} from "@/api/dcims/competitionAudit";
+import {listTeacherDict} from "@/api/dcims/basicData";
 
 export default {
   name: "Competition",
@@ -470,6 +481,12 @@ export default {
       daterangeNationalTime: [],
       // 审核人工号时间范围
       daterangeStopTime: [],
+      // 可选教师列表
+      options: [],
+      // 是否正在查询教师信息
+      loadingTeacher: false,
+      // 指导教师表单
+      tutorForm: [-1],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -492,8 +509,8 @@ export default {
       editvisible: false,
       // 修改对话框2
       editvisible1: false,
-      // // 修改对话框3
-      // editvisible2: false,
+      // 修改对话框3
+      editvisible2: false,
       // 二次确认是否修改
       dialogVisible: false,
       // 赛事表单校验
@@ -565,6 +582,8 @@ export default {
       this.open = false;
       this.editvisible = false;
       this.editvisible1 = false;
+      this.editvisible2 = false;
+      this.tutorForm = [];
       this.reset();
     },
     /** 搜索按钮操作 */
@@ -650,16 +669,17 @@ export default {
           console.log(this.form);
           this.editvisible1 = true;
         });
-      // }else if(type == 2){
-      //   this.loading = true;
-      //   this.reset();
-      //   const id = row.id || this.ids
-      //   getCompetition(id).then(response => {
-      //     this.loading = false;
-      //     this.form = response.data;
-      //     console.log(this.form);
-      //     this.editvisible2 = true;
-      //   });
+      }else if(type == 2){
+        this.loading = true;
+        this.reset();
+        const id = row.id || this.ids
+        getCompetition(id).then(response => {
+          this.loading = false;
+          this.form = response.data;
+          this.tutorForm = [response.data.responsiblePersonId, response.data.responsiblePersonName];
+          console.log(this.form);
+          this.editvisible2 = true;
+        });
       }
 
     },
@@ -715,23 +735,6 @@ export default {
       }
     },
 
-    // // 提交表单
-    // submitForm2() {
-    //   this.buttonLoading = true;
-    //   this.dialogVisible = false;
-    //   if (this.form.id != null) {
-    //     updateResponsiblePerson(this.form).then(response => {
-    //       this.$modal.msgSuccess("修改成功");
-    //       this.editvisible = false;
-    //       this.editvisible1 = false;
-    //       this.getList();
-    //     }).finally(() => {
-    //       this.buttonLoading = false;
-    //     });
-    //   } else {
-
-    //   }
-    // },
     /** 关闭二次确认窗口 */
     handleClose(done) {
       this.$confirm('确认关闭？')
@@ -768,7 +771,46 @@ export default {
           message: '已取消操作'
         });
       });
-    }
+    },
+
+    // 提交表单
+    submitForm3() {
+      this.buttonLoading = true;
+      this.dialogVisible = false;
+      if (this.form.id != null && this.tutorForm[0] != null) {
+        console.log(this.tutorForm);
+        this.form.responsiblePersonId = this.tutorForm[0];
+        this.form.responsiblePersonName = this.tutorForm[1];
+        updateAuditCompetition(this.form).then(response => {
+          this.$modal.msgSuccess("修改成功");
+          this.editvisible = false;
+          this.editvisible2 = false;
+          this.getList();
+        }).finally(() => {
+          this.buttonLoading = false;
+        });
+      } else {
+        this.$message({
+          type: 'warning',
+          message: '请填写完整竞赛指导教师信息'
+        });
+      }
+    },
+    /** 查询教师列表 */
+    queryTeacher(query) {
+      if (query !== '') {
+        this.loadingTeacher = true;
+        setTimeout(() => {
+          listTeacherDict(query, false).then(response => {
+            this.options = response.rows;
+          }).finally(() => {
+            this.loadingTeacher = false;
+          })
+        }, 200);
+      } else {
+        this.options = [];
+      }
+    },
   }
 };
 </script>

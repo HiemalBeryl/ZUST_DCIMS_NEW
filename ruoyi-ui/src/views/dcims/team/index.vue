@@ -27,6 +27,32 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+
+
+      <el-form-item label="所属学院" prop="awardLevel" v-show="this.$store.state.user.roles.includes('AcademicAffairsOffice') || this.$store.state.user.roles.includes('admin')">
+        <el-select v-model="queryParams.college" placeholder="请选择所属学院" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_college"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="获奖时间">
+        <el-date-picker
+          v-model="awardTimeRange"
+          style="width: 240px"
+          value-format="yyyy-MM-dd"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        ></el-date-picker>
+      </el-form-item>
+
+
+
       <el-form-item label="比赛类型" prop="competitionType">
         <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
           <el-option
@@ -332,7 +358,7 @@ import { listTeam, getTeam, delTeam, addTeam, updateTeam, removeOne } from "@/ap
 
 export default {
   name: "Team",
-  dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status'],
+  dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status', 'dcims_college'],
   data() {
     return {
       // 按钮loading
@@ -357,6 +383,8 @@ export default {
       open: false,
       // 是否不填写作品名称
       worksNameIsNull: false,
+      // 获奖时间范围
+      awardTimeRange: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -365,6 +393,7 @@ export default {
         annual: undefined,
         name: undefined,
         competitionType: undefined,
+        college: undefined,
         awardLevel: undefined,
         teacherId: undefined,
         teacherName: undefined,
@@ -409,6 +438,11 @@ export default {
     /** 查询参赛团队列表 */
     getList() {
       this.loading = true;
+      this.queryParams.params = {};
+      if (null != this.awardTimeRange && '' != this.awardTimeRange) {
+        this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
+        this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
+      }
       listTeam(this.queryParams).then(response => {
         this.teamList = response.rows;
         this.total = response.total;
@@ -465,6 +499,21 @@ export default {
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        competitionName: undefined,
+        annual: undefined,
+        name: undefined,
+        competitionType: undefined,
+        college: undefined,
+        awardLevel: undefined,
+        teacherId: undefined,
+        teacherName: undefined,
+        studentId: undefined,
+        studentName: undefined,
+        audit: '2',
+      }
       this.handleQuery();
     },
     // 多选框选中数据

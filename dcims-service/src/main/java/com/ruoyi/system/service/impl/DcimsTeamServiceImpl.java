@@ -54,12 +54,15 @@ import com.ruoyi.system.mapper.DcimsTeamMapper;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 
 /**
  * 参赛团队Service业务层处理
@@ -108,29 +111,33 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     @Override
     public TableDataInfo<DcimsTeamVoV2> queryPageList(DcimsTeamBo bo, PageQuery pageQuery) {
         List<Long> cIds = new ArrayList<>();
+        LambdaQueryWrapper<DcimsCompetition> l = new LambdaQueryWrapper<>();
+
         if (bo.getCompetitionName() != null && !bo.getCompetitionName().trim().equals("")){
-            LambdaQueryWrapper<DcimsCompetition> l = new LambdaQueryWrapper<>();
             l.like(DcimsCompetition::getName, bo.getCompetitionName());
-            List<DcimsCompetition> competitionList = dcimsCompetitionMapper.selectList(l);
-            cIds = competitionList.stream().map(DcimsCompetition::getId).collect(Collectors.toList());
+        }
+        if (ObjectUtil.isNotNull(bo.getAnnual())){
+            l.eq(DcimsCompetition::getAnnual, bo.getAnnual());
+        }
+        if (ObjectUtil.isNotNull(bo.getCollege())){
+            l.eq(DcimsCompetition::getCollege, bo.getCollege());
         }
 
+        List<DcimsCompetition> cl = dcimsCompetitionMapper.selectList(l);
+        // 表示满足筛选条件的竞赛id
+        cIds = cl.stream().map(DcimsCompetition::getId).collect(Collectors.toList());
+        System.out.println("cid: " + cIds);
+
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
-        lqw.in(cIds.size()>0, DcimsTeam::getCompetitionId, cIds);
         // 教务处可以查看全校，学院管理员可以查看学院，普通教师查看自己
         PageQuery pq = new PageQuery();
         pq.setPageNum(0);
         pq.setPageSize(10000);
+        // 表示自己的角色权限下，可以看到的所有竞赛
         TableDataInfo<DcimsCompetitionVo> competitionList = competitionService.queryPageList(new DcimsCompetitionBo(), pq, true, false);
-        List<Long> competitionIds0 = new ArrayList<>();
-        if(ObjectUtil.isNotNull(bo.getAnnual())){
-            competitionIds0 = competitionList.getRows().stream().filter(e ->
-                e.getAnnual().equals(bo.getAnnual())
-            ).map(DcimsCompetitionVo::getId).collect(Collectors.toList());
-        }else{
-            competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
-        }
-        //List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList());
+        System.out.println("competitionList: " + competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList()));
+        // 找出存在于competitionList中并且存在于cIds中的竞赛id
+        List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).filter(cIds::contains).collect(Collectors.toList());
         if (competitionIds0.size() > 0) {
             lqw.in(DcimsTeam::getCompetitionId, competitionIds0);
         }
@@ -159,6 +166,15 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             });
             return voV2;
         }).collect(Collectors.toList());
+
+        // 根据学院与年份进行筛选
+        if (ObjectUtil.isNotNull(bo.getCollege())){
+            VoV2List = VoV2List.stream().filter(e -> e.getCompetition().getCollege().equals(bo.getCollege())).collect(Collectors.toList());
+        }
+        if (ObjectUtil.isNotNull(bo.getAnnual())){
+            VoV2List = VoV2List.stream().filter(e -> e.getCompetition().getAnnual().equals(bo.getAnnual())).collect(Collectors.toList());
+        }
+
         // 获取团队对应oss信息
         Set<Long> OSSIds = new HashSet<>();
         build.getRows().forEach(e -> {
@@ -188,10 +204,6 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 e.setOss(null);
             }
         });
-        // 根据学院筛选
-        if (ObjectUtil.isNotNull(bo.getCollege())){
-            VoV2List2 = VoV2List2.stream().filter(e -> e.getCompetition().getCollege().equals(bo.getCollege())).collect(Collectors.toList());
-        }
         TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
         BeanUtils.copyProperties(build, build1);
         build1.setRows(VoV2List2);
@@ -1033,6 +1045,55 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 }
             });
         }
+
+
+        // 总文件夹为basepath，其中包含多个竞赛id的子文件夹，对每个子文件夹进行遍历，找出15MB以上大小的单个文件
+        // 如果存在多个文件内容相同，那么该文件大概率是包括了多项获奖信息的pdf文档
+        // 为了控制总压缩文件的大小，新建一个txt文件，将相同文件内容的文件只保留一个，文件名按照文件数量写入txt的每一行
+
+        // 获取basepath下的所有文件夹
+
+        File directoryPath = FileUtil.touch(basePath);
+        File[] competitionDirectories = directoryPath.listFiles();
+
+        assert competitionDirectories != null;
+        for (File competitionDir : competitionDirectories) {
+            Map<String, String> fileContentMap = new HashMap<>();
+            File[] files = competitionDir.listFiles();
+            assert files != null;
+            for (File file : files) {
+                if (file.length() > 15 * 1024 * 1024) { // file size > 15MB
+                    String key = String.valueOf(FileUtil.size(file));
+                    String suffix = FileUtil.getSuffix(file);
+                    String content = file.getName().replace(suffix, "").replace(".", "");
+                    System.out.println("content: " + content);
+                    System.out.println(fileContentMap.containsKey(key));
+                    if (!fileContentMap.containsKey(key)) {
+                        fileContentMap.put(key, content);
+                    } else {
+                        String originContent = fileContentMap.get(key);
+                        String newContent = originContent + "\n" + content;
+                        System.out.println("newContent: " + newContent);
+                        fileContentMap.put(key, newContent);
+                        FileUtil.del(file);
+                    }
+                }
+            }
+            // 通过hutool获取文件后缀
+            // 将文件名写入txt文件
+            List<String> fileList = new ArrayList<>(fileContentMap.values());
+            for(String newFileContent: fileList){
+                String[] preContentNames = newFileContent.split("\n");
+                for(int index = 1;index < preContentNames.length;index++){
+                    String contentName = preContentNames[index] + ".txt";
+                    FileUtil.touch(competitionDir.getPath() + "/" + contentName);
+                    FileUtil.writeString(newFileContent + "\n\n" + "共同使用 " + preContentNames[0] + ".pdf 作为佐证", competitionDir.getPath() + "/" + contentName, CharsetUtil.CHARSET_UTF_8);
+                }
+            }
+        }
+
+
+        OutputStream bos = null;
         try{
             // 翻译id为竞赛名
             List<Long> competitionIds = downloadList.stream().map(DcimsTeamVoV2::getCompetitionId).collect(Collectors.toList());
@@ -1077,15 +1138,61 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             File zip = ZipUtil.zip(String.valueOf(timestamp));
             InputStream inputStream = Files.newInputStream(zip.toPath());
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
+            // TODO:这里可以优化，采用buffer流手动压缩文件应该能更快
             IoUtil.copy(inputStream, response.getOutputStream());
             response.setContentLength((int) zip.getTotalSpace());
             // 删除临时文件
             FileUtil.del(new File(String.valueOf(timestamp)));
             inputStream.close();
             FileUtil.del(zip);
+
+
+
+
+
+//            // 设置响应头信息
+//            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE + "; charset=UTF-8");
+//            response.setHeader("Content-Disposition", "attachment;filename=" + "团队信息.zip");
+//            // 获取文件输入流
+//            InputStream[] is = new InputStream[1];
+//            File tempFile = FileUtil.touch(basePath);
+//            is[0] = Files.newInputStream(Paths.get(tempFile.getPath()));
+//            // 获取响应的输出流
+//            bos = new BufferedOutputStream(response.getOutputStream());
+//            // 待压缩文件列表
+//            String[] files = new String[1];
+//            files[0] = String.valueOf(timestamp);
+//            // 根据竞赛id压缩文件
+//            System.out.println("正在压缩文件。。。");
+//            ZipUtil.zip(bos, files, is);
+//            System.out.println("压缩文件完成。。。");
+//
+//
+//            // 写入文件
+////            System.out.println("正在写入文件。。。");
+////            response.reset();
+////            byte[] buffer = new byte[bis.available()];
+////            int read = bis.read(buffer);
+////            bis.close();
+////            System.out.println("文件大小：" + read);
+////            bos.write(buffer);
+////            response.setContentLength(read);
+////            bos.flush();
+////            System.out.println("写入文件完成。。。");
+////            // 删除临时文件
+////            FileUtil.del(new File(String.valueOf(timestamp)));
+////            FileUtil.del(zip);
         }catch (Exception e){
             System.out.println(e.getStackTrace());
             throw new RuntimeException(e);
+        }finally {
+            if(bos != null){
+                try {
+                    bos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
