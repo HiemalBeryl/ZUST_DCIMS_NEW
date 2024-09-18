@@ -25,6 +25,7 @@
 
     <!--  上传模板界面-->
     <div v-show="stepsActive==1" style="text-align: center;">
+      <h1>本系统仅统计本科生获奖数据，请勿上传研究生及校外学生数据！</h1>
       <el-upload
         class="upload"
         ref="upload0"
@@ -541,6 +542,9 @@ export default {
       }).finally(() => {
         this.appendFile = []
         this.classifyErrorType()
+        let tempTeam = this.team
+        this.$set(this, 'team', [])
+        this.$set(this, 'team', tempTeam)
         this.loading = false
         this.$modal.msgSuccess("修改成功");
       })
@@ -563,61 +567,62 @@ export default {
           switch (err.errorType){
             case "teacherNameRepeatError":
               if (!entity.hasOwnProperty("teacherNameRepeatError")){
-                entity["teacherNameRepeatError"] = []
+                this.$set(entity, "teacherNameRepeatError", [])
               }
               entity.teacherNameRepeatError.push(err)
               break;
             case "teacherNameNotFoundError":
               if (!entity.hasOwnProperty("teacherNameNotFoundError")){
-                entity["teacherNameNotFoundError"] = []
+                this.$set(entity, "teacherNameNotFoundError", [])
               }
               entity.teacherNameNotFoundError.push(err)
               break;
             case "studentNameRepeatError":
               if (!entity.hasOwnProperty("studentNameRepeatError")){
-                entity["studentNameRepeatError"] = []
+                this.$set(entity, "studentNameRepeatError", [])
               }
               entity.studentNameRepeatError.push(err)
               break;
             case "studentNameNotFoundError":
               if (!entity.hasOwnProperty("studentNameNotFoundError")){
-                entity["studentNameNotFoundError"] = []
+                this.$set(entity, "studentNameNotFoundError", [])
               }
               entity.studentNameNotFoundError.push(err)
               break;
             case "competitionNameError":
               if (!entity.hasOwnProperty("competitionNameError")){
-                entity["competitionNameError"] = []
+                this.$set(entity, "competitionNameError", [])
               }
               entity.competitionNameError.push(err)
               break;
             case "isSingleError":
               if (!entity.hasOwnProperty("isSingleError")){
-                entity["isSingleError"] = []
+                this.$set(entity, "isSingleError", [])
               }
               entity.isSingleError.push(err)
               break;
             case "awardLevelError":
               if (!entity.hasOwnProperty("awardLevelError")){
-                entity["awardLevelError"] = []
+                this.$set(entity, "awardLevelError", [])
               }
               entity.awardLevelError.push(err)
               break;
             case "fileNotFoundError":
               if (!entity.hasOwnProperty("fileNotFoundError")){
-                entity["fileNotFoundError"] = []
+                this.$set(entity, "fileNotFoundError", [])
               }
               entity.fileNotFoundError.push(err)
               break;
             case "tooMuchStudentError":
               if (!entity.hasOwnProperty("tooMuchStudentError")){
-                entity["tooMuchStudentError"] = []
+                this.$set(entity, "tooMuchStudentError", [])
               }
               entity.tooMuchStudentError.push(err)
               break;
           }
         }
       })
+      this.$set(this, 'team', this.team)
     },
     /** 打开重名核验窗口 */
     OpenDuplicateWindow(title, errMsg, names, ids, index) {
@@ -659,7 +664,7 @@ export default {
     queryTeacher(query, index) {
       var optionsTeacher = undefined;
       if (query !== '') {
-        listTeacherDict(query).then(response => {
+        listTeacherDict(query, true).then(response => {
           optionsTeacher = response.rows;
         }).finally(() => {
           for(let i = 0; i<optionsTeacher.length; i++){
@@ -676,7 +681,7 @@ export default {
     queryStudent(query, index) {
       var optionsStudent = undefined
       if (query !== '') {
-        listStudentDict(query).then(response => {
+        listStudentDict(query, true).then(response => {
           optionsStudent = response.rows;
         }).finally(() => {
           for(let i = 0; i<optionsStudent.length; i++){

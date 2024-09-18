@@ -26,7 +26,7 @@ public class DcimsTeamAuditBo extends BaseEntity {
     private Long id;
 
     /**
-     * 竞赛id
+     * 团队id
      */
     @NotNull(message = "团队id不能为空", groups = { PermitGroup.class, RefuseGroup.class })
     private Long teamId;

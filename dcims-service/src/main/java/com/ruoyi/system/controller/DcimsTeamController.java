@@ -23,6 +23,8 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.json.ObjectMapper;
 import com.alibaba.fastjson.JSON;
+import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.common.core.service.DeptService;
 import com.ruoyi.common.utils.JsonUtils;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
@@ -43,6 +45,7 @@ import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
+import com.ruoyi.system.utils.AccountUtils;
 import com.ruoyi.system.utils.WordUtil;
 import io.swagger.v3.core.util.Json;
 import com.ruoyi.system.service.*;
@@ -98,6 +101,7 @@ public class DcimsTeamController extends BaseController {
     private final IDcimsGlobalSettingService globalSettingService;
     private final IDcimsCompetitionService competitionService;
     private final ISysDictDataService dictDataService;
+    private final ISysDeptService deptService;
 
     /**
      * 查询参赛团队列表
@@ -153,7 +157,7 @@ public class DcimsTeamController extends BaseController {
     @GetMapping("/audit/listInProcessing")
     public TableDataInfo<DcimsTeamVoV2> listByTeacherIdInAuditProcessing(DcimsTeamBo bo, PageQuery pageQuery) {
         // 本接口只查询最新的30个
-        pageQuery.setPageSize(500);
+        pageQuery.setPageSize(50000);
         TableDataInfo<DcimsTeamVoV2> info = iDcimsTeamService.queryPageList(new DcimsTeamBo(), pageQuery);
         // 对结果筛选，只返回正在审核中和被退回的竞赛，同时应该限制下一级审核人的工号为教务处老师
         List<DcimsTeamVoV2> result = info.getRows().stream()
@@ -164,6 +168,19 @@ public class DcimsTeamController extends BaseController {
         if(StrUtil.equals(getUsername(), "102099")){
             result = result.stream()
                 .filter(e -> e.getAudit().equals(3))
+                .collect(Collectors.toList());
+        }else{
+            // 如果不是教务处，则需要根据学院筛选
+            Long teacherId = AccountUtils.getAccount().getTeacherId();
+            List<SysDept> sysDepts = deptService.selectDeptList(new SysDept());
+            Optional<SysDept> firstDept = sysDepts.stream().filter(dept -> dept.getLeaderTeacherId().equals(teacherId)).findFirst();
+            Integer teacherCollege = null;
+            if (firstDept.isPresent()){
+                teacherCollege = firstDept.get().getOrderNum();
+            }
+            Integer finalTeacherCollege = teacherCollege;
+            result = result.stream()
+                .filter(e -> Objects.equals(finalTeacherCollege, e.getCompetition().getCollege().intValue()))
                 .collect(Collectors.toList());
         }
         return TableDataInfo.build(result);
@@ -314,6 +331,18 @@ public class DcimsTeamController extends BaseController {
             excelData.setTotalHuojiangCount(allNumber);
         }
 
+
+        // 只展示本学院的竞赛
+        Long collegeId = AccountUtils.getCollegeId();
+        System.out.println("collegeId:"+collegeId);
+        // 表示该教师有所属学院且不是教务处
+        if(collegeId != null && collegeId != 0){
+            excelDataList = excelDataList.stream()
+                .filter(e -> e.getCollege().equals(String.valueOf(collegeId)))
+                .collect(Collectors.toList());
+        }
+
+
         // 最后对所有竞赛按照学院排序，输出序号
         System.out.println(excelDataList);
         SysDictData sysDictData = new SysDictData();
@@ -349,7 +378,10 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/download")
     public void downloadAttachment(DcimsTeamBo bo, HttpServletResponse response) {
         try {
-            iDcimsTeamService.download(bo,response);
+            PageQuery pq = new PageQuery();
+            pq.setPageSize(100000);
+            TableDataInfo<DcimsTeamVoV2> downloadList = list(bo, pq);
+            iDcimsTeamService.download(downloadList.getRows(), response);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

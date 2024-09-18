@@ -148,13 +148,11 @@
             ><div class="grid-content">
               <el-table
                 v-loading="loading2"
-                ref="multipleTable"
                 :data="competitionProcessingList"
                 tooltip-effect="dark"
                 style="width: 100%"
                 max-height="500px"
               >
-                <el-table-column type="selection" width="55"> </el-table-column>
                 <el-table-column prop="name" label="赛事名称" width="200">
                 </el-table-column>
                 <el-table-column prop="annual" label="赛事年份" width="200">
