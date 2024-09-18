@@ -99,6 +99,7 @@ public class DcimsTeamBo extends BaseEntity {
      * 获奖时间
      */
     @Null(message = "创建队伍时不能填写获奖时间，如需填写，请进入获奖申报页面", groups = { AddGroup.class })
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd")
     private Date awardTime;
 
     /**
