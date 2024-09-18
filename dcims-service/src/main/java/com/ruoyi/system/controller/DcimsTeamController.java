@@ -7,34 +7,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.io.IoUtil;
-
-
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import cn.hutool.json.ObjectMapper;
-import com.alibaba.fastjson.JSON;
 import com.ruoyi.common.core.domain.entity.SysDept;
-import com.ruoyi.common.core.service.DeptService;
-import com.ruoyi.common.utils.JsonUtils;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.system.domain.DcimsCompetition;
-import com.ruoyi.system.domain.DcimsTeam;
 import com.ruoyi.system.domain.DcimsTeamWithCompetition;
-import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.excel.DcimsComAndTeam;
@@ -47,13 +29,8 @@ import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
 import com.ruoyi.system.utils.AccountUtils;
 import com.ruoyi.system.utils.WordUtil;
-import io.swagger.v3.core.util.Json;
 import com.ruoyi.system.service.*;
-import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
-
-
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
 import cn.dev33.satoken.annotation.SaCheckPermission;
@@ -61,11 +38,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ContentDisposition;
 import org.springframework.http.MediaType;
-import org.springframework.util.ResourceUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import com.ruoyi.common.annotation.RepeatSubmit;
@@ -77,12 +50,9 @@ import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
-import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
 import com.ruoyi.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
-
-import static org.springframework.boot.actuate.health.Health.down;
 
 /**
  * 参赛团队

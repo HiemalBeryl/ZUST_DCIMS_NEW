@@ -32,6 +32,7 @@ import com.ruoyi.system.domain.DcimsTeamAudit;
 import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.entity.OssFile;
+import com.ruoyi.system.domain.excel.DcimsTeamExportExcel;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcelError;
 import com.ruoyi.system.domain.vo.*;
@@ -390,6 +391,38 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     public List<DcimsTeamVo> queryList(DcimsTeamBo bo) {
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
         return baseMapper.selectVoList(lqw);
+    }
+
+    /**
+     * Excel导出
+     */
+    @Override
+    public List<DcimsTeamExportExcel> exportExcel(DcimsTeamBo bo) {
+        LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
+        List<DcimsTeamVo> dcimsTeamVos = baseMapper.selectVoList(lqw);
+
+
+        List<DcimsTeamExportExcel> exportExcel = new ArrayList();
+        for (DcimsTeamVo vo : dcimsTeamVos){
+            DcimsTeamExportExcel exportExcel1 = new DcimsTeamExportExcel();
+            BeanUtils.copyProperties(vo, exportExcel1);
+            exportExcel.add(exportExcel1);
+        }
+
+        List<Long> competitionIds = exportExcel.stream()
+            .map(DcimsTeamExportExcel::getCompetitionId)
+            .collect(Collectors.toList());
+
+        List<DcimsCompetitionVo> dcimsCompetitionVos = competitionService.listById(competitionIds);
+
+        for (DcimsTeamExportExcel teamExportExcel : exportExcel) {
+            //设置学院名称
+            teamExportExcel.setCollegeName(translateCollegeName(dcimsCompetitionVos.stream()
+                .filter(e -> e.getId().equals(teamExportExcel.getCompetitionId()))
+                .findFirst().get().getCollege()));
+        }
+
+        return exportExcel;
     }
 
     private LambdaQueryWrapper<DcimsTeam> buildQueryWrapper(DcimsTeamBo bo) {
