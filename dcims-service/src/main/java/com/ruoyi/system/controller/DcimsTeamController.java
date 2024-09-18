@@ -209,18 +209,12 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/export")
     public void export(@ModelAttribute DcimsTeamBo bo, PageQuery pageQuery, HttpServletResponse response) {
         TableDataInfo<DcimsTeamVoV2> queryresult = iDcimsTeamService.queryPageList(bo, pageQuery);
-        System.out.println(queryresult.getRows());
-        System.out.println(bo);
-        List<DcimsTeamVo> list = new ArrayList<>();
-        for (DcimsTeamVoV2 dcimsTeamVoV2 : queryresult.getRows()) {
-            DcimsTeamVo dcimsTeamVo = new DcimsTeamVo();
-            BeanUtil.copyProperties(dcimsTeamVoV2, dcimsTeamVo);
-            list.add(dcimsTeamVo);
-        }
+        List<DcimsTeamVoV2> list = queryresult.getRows();
         List<DcimsTeamVoV2> result = new ArrayList<>();
 
+
         List<DcimsCompetitionVo> competitions = competitionService.listById(
-            list.stream().map(DcimsTeamVo::getCompetitionId).collect(Collectors.toList())
+            list.stream().map(DcimsTeamVoV2::getCompetitionId).collect(Collectors.toList())
         );
 
         list.forEach(e -> {
@@ -230,15 +224,27 @@ public class DcimsTeamController extends BaseController {
                 competitions.stream().filter(com -> com.getId().equals(voV2.getCompetitionId())).findFirst().get()
             );
             voV2.setCompetitionName(voV2.getCompetition().getName());
-            voV2.setTeacherName(e.getTeacherName().split(","));
-            voV2.setTeacherId(e.getTeacherId().split(","));
-            voV2.setStudentName(e.getStudentName().split(","));
-            voV2.setStudentId(e.getStudentId().split(","));
+//            voV2.setTeacherName(e.getTeacherName().split(","));
+//            voV2.setTeacherId(e.getTeacherId().split(","));
+//            voV2.setStudentName(e.getStudentName().split(","));
+//            voV2.setStudentId(e.getStudentId().split(","));
             System.out.println(e);
             System.out.println(voV2);
             result.add(voV2);
         });
-        System.out.println(result);
+
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        result.forEach(team -> {
+            for (SysDictData d : dictData){
+                if(team.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    team.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
+
+
         ExcelUtil.exportExcel(result, "参赛团队", DcimsTeamVoV2.class, response);
     }
 

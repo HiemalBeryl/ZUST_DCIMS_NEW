@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
@@ -67,9 +68,14 @@ public class DcimsTeamVoV2 {
     /**
      * 所属学院
      */
-    @ExcelProperty(value = "所属学院", converter = ExcelDictConvert.class, index = 5)
-    @ExcelDictFormat(dictType = "dcims_college")
     private Long college;
+
+    /**
+     * 所属学院名称
+     */
+    @ExcelProperty(value = "所属学院", index = 5)
+    @ExcelDictFormat(dictType = "dcims_college")
+    private String collegeName;
 
     /**
      * 奖项等级
@@ -115,6 +121,7 @@ public class DcimsTeamVoV2 {
     /**
      * 获奖时间
      */
+    @ColumnWidth(30)
     @ExcelProperty(value = "获奖时间", index = 6)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date awardTime;
@@ -156,4 +163,9 @@ public class DcimsTeamVoV2 {
      * 创建人
      */
     private String createBy;
+
+    /**
+     * 审核状态详细
+     */
+    private DcimsTeamAuditVo auditDetail;
 }

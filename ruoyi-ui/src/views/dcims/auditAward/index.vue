@@ -371,10 +371,18 @@
 <!--              </el-table-column>-->
               <el-table-column label="提交状态" align="center" fixed="right" prop="audit">
                 <template slot-scope="scope">
-                  <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
-                  <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
-                  <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
-                  <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                  <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
+                    <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                    <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                  </el-tooltip>
+                  <div v-else>
+                    <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                    <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                  </div>
                 </template>
               </el-table-column>
               <el-table-column fixed="right" label="查看详情" min-width="120" align="center">

@@ -43,11 +43,13 @@
       </el-table-column>
       <el-table-column label="评估状态" align="center" fixed="right" prop="audit">
         <template slot-scope="scope">
-          <el-tag type="primary" v-if="scope.row.audit == 0">等待添加佐证材料</el-tag>
-          <el-tag type="primary" v-if="scope.row.audit == 1 && scope.row.nextAuditId != 102099">学院评估中</el-tag>
-          <el-tag type="primary" v-if="scope.row.audit == 1 && scope.row.nextAuditId == 102099">教务处评估中</el-tag>
-          <el-tag type="success" v-if="scope.row.audit == 2">通过评估</el-tag>
-          <el-tag type="danger" v-if="scope.row.audit == 3">评估不通过</el-tag>
+          <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
+            <el-tag type="primary" v-if="scope.row.audit == 0">等待添加佐证材料</el-tag>
+            <el-tag type="primary" v-if="scope.row.audit == 1 && scope.row.nextAuditId != 102099">学院评估中</el-tag>
+            <el-tag type="primary" v-if="scope.row.audit == 1 && scope.row.nextAuditId == 102099">教务处评估中</el-tag>
+            <el-tag type="success" v-if="scope.row.audit == 2">通过评估</el-tag>
+            <el-tag type="danger" v-if="scope.row.audit == 3">评估不通过</el-tag>
+          </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">

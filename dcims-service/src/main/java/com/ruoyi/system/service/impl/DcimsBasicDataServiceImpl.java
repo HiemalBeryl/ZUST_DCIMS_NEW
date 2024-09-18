@@ -8,8 +8,10 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.json.ObjectMapper;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.JsonUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.DcimsStudent;
 import com.ruoyi.system.domain.DcimsTeacher;
 import com.ruoyi.system.domain.vo.DcimsBasicDataStudentVo;
@@ -48,25 +50,33 @@ public class DcimsBasicDataServiceImpl implements IDcimsBasicDataService {
 
     @Override
     public TableDataInfo<DcimsStudentVo> listStudentDict(String name, boolean exactMatch) {
-        LambdaQueryWrapper<DcimsStudent> lqw = new LambdaQueryWrapper<>();
+        QueryWrapper<DcimsStudent> qw = new QueryWrapper<>();
         if (exactMatch) {
-            lqw.eq(DcimsStudent::getName, name);
+            qw.apply(
+                StringUtils.isNotBlank(name),
+                "REPLACE(name, ' ', '') = {0}",
+                name
+            );
         } else {
-            lqw.like(DcimsStudent::getName, name);
+            qw.like("REPLACE(name, ' ', '')", name);
         }
-        List<DcimsStudentVo> result = studentBaseMapper.selectVoList(lqw);
+        List<DcimsStudentVo> result = studentBaseMapper.selectVoList(qw);
         return TableDataInfo.build(result);
     }
 
     @Override
     public TableDataInfo<DcimsTeacherVo> listTeacherDict(String name, boolean exactMatch) {
-        LambdaQueryWrapper<DcimsTeacher> lqw = new LambdaQueryWrapper<>();
+        QueryWrapper<DcimsTeacher> qw = new QueryWrapper<>();
         if (exactMatch) {
-            lqw.eq(DcimsTeacher::getName, name);
+            qw.apply(
+                StringUtils.isNotBlank(name),
+                "REPLACE(name, ' ', '') = {0}",
+                name
+            );
         } else {
-            lqw.like(DcimsTeacher::getName, name);
+            qw.like("REPLACE(name, ' ', '')", name);
         }
-        List<DcimsTeacherVo> result = teacherBaseMapper.selectVoList(lqw);
+        List<DcimsTeacherVo> result = teacherBaseMapper.selectVoList(qw);
         return TableDataInfo.build(result);
     }
 
