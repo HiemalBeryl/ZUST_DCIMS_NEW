@@ -204,6 +204,18 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 e.setOss(null);
             }
         });
+        // 填写所属学院与佐证材料文件名
+        VoV2List2.forEach(e -> {
+            if (ObjectUtil.isNotNull(e.getCompetition())){
+                e.setCollege(e.getCompetition().getCollege());
+            }
+            if (ObjectUtil.isNotNull(e.getOss())){
+                e.setSupportMaterialName(e.getOss().getFileName());
+            }
+        });
+
+
+
         TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
         BeanUtils.copyProperties(build, build1);
         build1.setRows(VoV2List2);

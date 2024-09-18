@@ -218,6 +218,7 @@
           <dict-tag :options="dict.type.dcims_award_level" :value="scope.row.awardLevel"/>
         </template>
       </el-table-column>
+      <el-table-column label="所属年份" align="center" prop="competition.annual" />
       <el-table-column label="指导教师工号" align="center" prop="teacherId" />
       <el-table-column label="指导教师姓名" align="center" prop="teacherName" />
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />

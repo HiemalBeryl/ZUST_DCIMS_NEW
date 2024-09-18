@@ -113,16 +113,6 @@ public class DcimsTeamController extends BaseController {
         System.out.println("bo:"+bo);
         TableDataInfo<DcimsTeamVoV2> queryresult = iDcimsTeamService.queryPageList(bo, pageQuery);
         return queryresult;
-//        if (bo.getAnnual() == null) {
-//            return queryresult;
-//        }
-//        TableDataInfo<DcimsTeamVoV2> returnResult = TableDataInfo.build(
-//            queryresult.getRows().stream()
-//                .filter(e -> bo.getAnnual().intValue() == e.getCompetition().getAnnual().intValue()).collect(Collectors.toList())
-//        );
-//
-//        returnResult.setTotal(queryresult.getTotal());
-//        return returnResult;
     }
 
     /**
