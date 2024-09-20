@@ -455,10 +455,11 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:export")
     @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
     @PostMapping("/download")
-    public void downloadAttachment(DcimsTeamBo bo, HttpServletResponse response) {
+    public void downloadAttachment(DcimsTeamBo bo, PageQuery pageQuery, HttpServletResponse response) {
         try {
             PageQuery pq = new PageQuery();
             pq.setPageSize(100000);
+            pq.setPageNum(1);
             TableDataInfo<DcimsTeamVoV2> downloadList = list(bo, pq);
             iDcimsTeamService.download(downloadList.getRows(), response);
         } catch (IOException e) {

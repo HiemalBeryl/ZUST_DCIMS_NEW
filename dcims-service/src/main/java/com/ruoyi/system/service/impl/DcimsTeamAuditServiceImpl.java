@@ -78,10 +78,8 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsTeam> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsTeam::getNextAuditId,teacherId);
-        lqw.eq(DcimsTeam::getAudit, 1);
         // 获取状态为待审核或被退回的竞赛, 可以对这些竞赛重新提交或退回。
         List<String> status = new ArrayList<>();
-        status.add("0");
         status.add("1");
         status.add("3");
         lqw.in(DcimsTeam::getAudit, status);
@@ -151,6 +149,32 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                 e.setSupportMaterialName(fileName);
             }
         });
+        // 填写审核详情
+        List<Long> teamIds = new ArrayList<>();
+        for(DcimsTeamVoV2 vo : VoV2List2){
+            teamIds.add(vo.getId());
+        }
+        LambdaQueryWrapper<DcimsTeamAudit> lqw2 = new LambdaQueryWrapper<>();
+        lqw2.in(teamIds.size() > 0, DcimsTeamAudit::getTeamId, teamIds);
+        List<DcimsTeamAuditVo> auditList = teamAuditBaseMapper.selectVoList(lqw2);
+        Map<Long, DcimsTeamAuditVo> m = new HashMap<>();
+        for (DcimsTeamAuditVo audit : auditList){
+            DcimsTeamAuditVo audit1 = m.get(audit.getTeamId());
+            if (audit1 != null){
+                if (audit1.getId() < audit.getId()){
+                    m.put(audit.getTeamId(), audit);
+                }
+            }else {
+                m.put(audit.getTeamId(), audit);
+            }
+        }
+        for (DcimsTeamAuditVo audit : m.values()){
+            for (DcimsTeamVoV2 vo : VoV2List2){
+                if (Objects.equals(audit.getTeamId(), vo.getId())){
+                    vo.setAuditDetail(audit);
+                }
+            }
+        }
 
         // 添加团队对应竞赛信息
         return TableDataInfo.build(VoV2List2);
@@ -212,6 +236,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                     add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     teamAuditList.add(add1);
                     add2.setNextAuditId(sysDept.getLeaderTeacherId());
+                    add2.setAudit(1);
                     teamList.add(add2);
                 }
             }
