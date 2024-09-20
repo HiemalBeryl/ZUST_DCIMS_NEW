@@ -20,6 +20,7 @@ import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
+import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.mapper.DcimsTeamAuditMapper;
 import com.ruoyi.system.mapper.DcimsTeamMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
@@ -55,6 +56,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
     private final DcimsTeamMapper teamBaseMapper;
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
+    private final DcimsCompetitionMapper dcimsCompetitionMapper;
 
     /**
      * 查询团队获奖审核
@@ -227,6 +229,18 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
 
     public List<DcimsTeamWithCompetition> queryListWithCompetition(DcimsTeamBo bo){
         List<DcimsTeamWithCompetition> result = teamBaseMapper.selectTeamWithCompetition(bo.getAnnual());
+
+        // 查看当前用户是否是学科竞赛负责人,是的话只差负责学科
+        List<String> roleList = StpUtil.getRoleList();
+        if(roleList.contains("AcademyCompetitionTeacher") && !roleList.contains("AcademyCompetitionHead")&& !roleList.contains("AcademicAffairsOffice") ){
+            Long teacherId = AccountUtils.getAccount().getTeacherId();
+            LambdaQueryWrapper<DcimsCompetition> l = new LambdaQueryWrapper<>();
+            l.eq(DcimsCompetition::getResponsiblePersonId, teacherId);
+            List<DcimsCompetition> competitionList = dcimsCompetitionMapper.selectList(l);
+            List<Long> ids = competitionList.stream().map(DcimsCompetition::getId).collect(Collectors.toList());
+            result = result.stream().filter(e -> ids.contains(e.getCompetitionId())).collect(Collectors.toList());
+        }
+
         if (bo.getCompetitionName() != null && !bo.getCompetitionName().isEmpty()) {
             System.out.println(bo.getCompetitionName());
             result = result.stream().filter(e -> {

@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.io.FileUtil;
@@ -114,6 +115,16 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             List<DcimsCompetition> competitionList = dcimsCompetitionMapper.selectList(l);
             cIds = competitionList.stream().map(DcimsCompetition::getId).collect(Collectors.toList());
         }
+//        // 查看当前用户是否是学科竞赛负责人,是的话只差负责学院
+//        List<String> roleList = StpUtil.getRoleList();
+//        if(roleList.contains("AcademyCompetitionTeacher") && !roleList.contains("AcademyCompetitionHead")&& !roleList.contains("AcademicAffairsOffice") ){
+//            Long teacherId = AccountUtils.getAccount().getTeacherId();
+//            LambdaQueryWrapper<DcimsCompetition> l = new LambdaQueryWrapper<>();
+//            l.eq(DcimsCompetition::getResponsiblePersonId, teacherId);
+//            List<DcimsCompetition> competitionList = dcimsCompetitionMapper.selectList(l);
+//            List<Long> ids = competitionList.stream().map(DcimsCompetition::getId).collect(Collectors.toList());
+//            cIds=cIds.stream().filter(ids::contains).collect(Collectors.toList());
+//        }
 
         LambdaQueryWrapper<DcimsTeam> lqw = buildQueryWrapper(bo);
         lqw.in(cIds.size()>0, DcimsTeam::getCompetitionId, cIds);
@@ -122,6 +133,16 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         pq.setPageNum(0);
         pq.setPageSize(10000);
         TableDataInfo<DcimsCompetitionVo> competitionList = competitionService.queryPageList(new DcimsCompetitionBo(), pq, true, false);
+
+        // 查看当前用户是否是学科竞赛负责人,是的话只差负责学院
+        List<String> roleList = StpUtil.getRoleList();
+        if(roleList.contains("AcademyCompetitionTeacher") && !roleList.contains("AcademyCompetitionHead")&& !roleList.contains("AcademicAffairsOffice") ){
+            Long teacherId = AccountUtils.getAccount().getTeacherId();
+            List<DcimsCompetitionVo> collect = competitionList.getRows().stream()
+                .filter(e -> teacherId.equals(e.getResponsiblePersonId())).collect(Collectors.toList());
+            competitionList.setRows(collect);
+        }
+
         List<Long> competitionIds0 = new ArrayList<>();
         if(ObjectUtil.isNotNull(bo.getAnnual())){
             competitionIds0 = competitionList.getRows().stream().filter(e ->
