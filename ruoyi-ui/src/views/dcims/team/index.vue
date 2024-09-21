@@ -224,7 +224,7 @@
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
       <el-table-column label="获奖时间" align="center" prop="awardTime" />
-      <el-table-column label="赛事类别" align="center" prop="level" />
+      <el-table-column label="赛事类别" align="center" prop="competition.level" />
       <el-table-column label="佐证材料" align="center" prop="oss.url">
         <template slot-scope="scope">
           <ImagePreview

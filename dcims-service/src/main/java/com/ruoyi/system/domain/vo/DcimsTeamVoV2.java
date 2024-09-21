@@ -85,13 +85,6 @@ public class DcimsTeamVoV2 {
     private String awardLevel;
 
     /**
-     * 赛事类别
-     */
-    @ExcelProperty(value = "赛事类别", converter = ExcelDictConvert.class)
-    @ExcelDictFormat(dictType = "dcims_competition_type")
-    private String level;
-
-    /**
      * 指导教师工号
      */
     @ExcelProperty(value = "指导教师工号", converter = StringArrayConverter.class, index = 8)

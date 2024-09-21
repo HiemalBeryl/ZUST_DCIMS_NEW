@@ -47,6 +47,10 @@ public interface IDcimsTeamService {
      */
     List<DcimsTeamVo> queryList(DcimsTeamBo bo);
 
+    /**
+     * 导出Excel
+     */
+    List<DcimsTeamExportExcel> exportExcel(DcimsTeamBo bo);
 
     /**
      * 新增参赛团队
