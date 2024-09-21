@@ -21,4 +21,6 @@ public interface DcimsStudentMapper extends BaseMapperPlus<DcimsCompetitionMappe
     * 根据学号批量插入
     * */
     void insertByStudentIds(List<DcimsBasicDataStudentVo> studentsInsert);
+
+
 }

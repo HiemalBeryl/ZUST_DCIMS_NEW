@@ -318,7 +318,7 @@
                   <el-option
                     v-for="item in options"
                     :key="item.teacherId"
-                    :label="item.name"
+                    :label="item.teacherId + '  ' + item.name"
                     :value="item.teacherId">
                   </el-option>
                 </el-select>

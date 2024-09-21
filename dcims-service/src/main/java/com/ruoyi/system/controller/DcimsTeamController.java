@@ -38,7 +38,6 @@ import com.ruoyi.system.domain.bo.DcimsCompetitionBo;
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.excel.DcimsComAndTeam;
-import com.ruoyi.system.domain.excel.DcimsTeamExportExcel;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.excel.TempDcimsComAndTeam;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
@@ -50,6 +49,7 @@ import com.ruoyi.system.utils.AccountUtils;
 import com.ruoyi.system.utils.WordUtil;
 import io.swagger.v3.core.util.Json;
 import com.ruoyi.system.service.*;
+import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 
 
@@ -110,17 +110,9 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:list")
     @GetMapping("/list")
     public TableDataInfo<DcimsTeamVoV2> list(DcimsTeamBo bo, PageQuery pageQuery) {
+        System.out.println("bo:"+bo);
         TableDataInfo<DcimsTeamVoV2> queryresult = iDcimsTeamService.queryPageList(bo, pageQuery);
-        if (bo.getAnnual() == null) {
-            return queryresult;
-        }
-        TableDataInfo<DcimsTeamVoV2> returnResult = TableDataInfo.build(
-            queryresult.getRows().stream()
-                .filter(e -> bo.getAnnual().intValue() == e.getCompetition().getAnnual().intValue()).collect(Collectors.toList())
-        );
-
-        returnResult.setTotal(queryresult.getTotal());
-        return returnResult;
+        return queryresult;
     }
 
     /**
@@ -162,8 +154,7 @@ public class DcimsTeamController extends BaseController {
         TableDataInfo<DcimsTeamVoV2> info = iDcimsTeamService.queryPageList(new DcimsTeamBo(), pageQuery);
         // 对结果筛选，只返回正在审核中和被退回的竞赛，同时应该限制下一级审核人的工号为教务处老师
         List<DcimsTeamVoV2> result = info.getRows().stream()
-            .filter(e -> e.getAudit() != null && (e.getAudit() == 1 || e.getAudit() == 3))
-            .filter(e -> e.getNextAuditId() != null && (e.getNextAuditId() == 102099 || e.getNextAuditId( )== -1))
+            .filter(e -> e.getAudit() != null && e.getNextAuditId() != null && (e.getAudit() == 1 || e.getAudit() == 3))
             .collect(Collectors.toList());
         // 如果当前登录账号为教务处，那么只显示被退回的竞赛
         if(StrUtil.equals(getUsername(), "102099")){
@@ -184,6 +175,29 @@ public class DcimsTeamController extends BaseController {
                 .filter(e -> Objects.equals(finalTeacherCollege, e.getCompetition().getCollege().intValue()))
                 .collect(Collectors.toList());
         }
+        // 根据入参bo进行条件筛选
+        if (StringUtils.isNotEmpty(bo.getCompetitionName())){
+            result = result.stream()
+                .filter(e -> e.getCompetition().getName().contains(bo.getCompetitionName()))
+                .collect(Collectors.toList());
+        }
+        if (ObjectUtil.isNotEmpty(bo.getAnnual())){
+            result = result.stream()
+                .filter(e -> e.getCompetition().getAnnual().equals(bo.getAnnual()))
+                .collect(Collectors.toList());
+        }
+        if (ObjectUtil.isNotEmpty(bo.getCollege())){
+            result = result.stream()
+                .filter(e -> e.getCompetition().getCollege().equals(bo.getCollege()))
+                .collect(Collectors.toList());
+        }
+        Map<String, Object> params = bo.getParams();
+        if (params.get("beginAwardTimeRange") != null && params.get("endAwardTimeRange") != null){
+            result = result.stream()
+                .filter(e -> e.getAwardTime().compareTo((Date) params.get("beginAwardTimeRange")) >= 0)
+                .filter(e -> e.getAwardTime().compareTo((Date) params.get("endAwardTimeRange")) <= 0)
+                .collect(Collectors.toList());
+        }
         return TableDataInfo.build(result);
     }
 
@@ -193,9 +207,45 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:export")
     @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(DcimsTeamBo bo, HttpServletResponse response) {
-        List<DcimsTeamExportExcel> list = iDcimsTeamService.exportExcel(bo);
-        ExcelUtil.exportExcel(list, "参赛团队", DcimsTeamExportExcel.class, response);
+    public void export(@ModelAttribute DcimsTeamBo bo, PageQuery pageQuery, HttpServletResponse response) {
+        TableDataInfo<DcimsTeamVoV2> queryresult = iDcimsTeamService.queryPageList(bo, pageQuery);
+        List<DcimsTeamVoV2> list = queryresult.getRows();
+        List<DcimsTeamVoV2> result = new ArrayList<>();
+
+
+        List<DcimsCompetitionVo> competitions = competitionService.listById(
+            list.stream().map(DcimsTeamVoV2::getCompetitionId).collect(Collectors.toList())
+        );
+
+        list.forEach(e -> {
+            DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+            BeanUtils.copyProperties(e, voV2);
+            voV2.setCompetition(
+                competitions.stream().filter(com -> com.getId().equals(voV2.getCompetitionId())).findFirst().get()
+            );
+            voV2.setCompetitionName(voV2.getCompetition().getName());
+//            voV2.setTeacherName(e.getTeacherName().split(","));
+//            voV2.setTeacherId(e.getTeacherId().split(","));
+//            voV2.setStudentName(e.getStudentName().split(","));
+//            voV2.setStudentId(e.getStudentId().split(","));
+            System.out.println(e);
+            System.out.println(voV2);
+            result.add(voV2);
+        });
+
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_college");
+        List<SysDictData> dictData = dictDataService.selectDictDataList(sysDictData);
+        result.forEach(team -> {
+            for (SysDictData d : dictData){
+                if(team.getCollege().equals(Long.parseLong(d.getDictValue()))){
+                    team.setCollegeName(d.getDictLabel());
+                }
+            }
+        });
+
+
+        ExcelUtil.exportExcel(result, "参赛团队", DcimsTeamVoV2.class, response);
     }
 
     /*
@@ -218,7 +268,14 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/exportDengjiBiao")
     public void exportDengjiBiao(DcimsTeamBo bo, HttpServletResponse response) throws IOException {
         List<DcimsTeamWithCompetition> result = iDcimsTeamAuditService.queryListWithCompetition(bo);
-//        OutputStream os = iDcimsTeamAuditService.getHuoJiangBiao(result);
+        if (ObjectUtil.isNotNull(bo.getCollege())){
+            result = result.stream().filter(e -> e.getCollege().equals(bo.getCollege())).collect(Collectors.toList());
+        }
+        // 判断学院，如果是教务处，则不做筛选
+        Long collegeId = AccountUtils.getCollegeId();
+        if (collegeId != null && collegeId != 0){
+            result = result.stream().filter(e -> e.getCollege().equals(collegeId)).collect(Collectors.toList());
+        }
         SysDictData sysDictData = new SysDictData();
         sysDictData.setDictType("dcims_award_level");
         List<SysDictData> awardDict = dictDataService.selectDictDataList(sysDictData);
@@ -230,10 +287,28 @@ public class DcimsTeamController extends BaseController {
             tempResult.add(t);
         });
         List<TempDcimsComAndTeam> data1 = tempResult.stream().filter(e -> Integer.parseInt(e.getAwardLevel()) <= 9).collect(Collectors.toList());
+        List<TempDcimsComAndTeam> data2 = tempResult.stream().filter(e -> Integer.parseInt(e.getAwardLevel()) <= 19 && Integer.parseInt(e.getAwardLevel()) >= 10).collect(Collectors.toList());
 
+        List<TempDcimsComAndTeam> blank = new ArrayList<>();
+        blank.add(new TempDcimsComAndTeam());
+        blank.add(new TempDcimsComAndTeam());
+
+        data1.addAll(data2);
+        data1.stream().forEach(t -> {
+            t.setAwardLevel(
+                awardDict.stream().filter(d -> StringUtils.equals(d.getDictValue(), t.getAwardLevel()))
+                    .findFirst().get().getDictLabel()
+            );
+        });
 
         ExcelUtil.exportExcel(data1, "参赛团队", TempDcimsComAndTeam.class, response);
 
+        // 下面的代码暂时没用
+//        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+//        response.setHeader("Content-Disposition", "attachment; filename=example.docx");
+//
+//        OutputStream outputStream = response.getOutputStream();
+//        outputStream = os;
     }
 
 
@@ -246,6 +321,9 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/exportHuiZongBiao")
     public void exportHuiZongBiao(DcimsTeamBo bo, HttpServletResponse response){
         List<DcimsTeamWithCompetition> result = iDcimsTeamAuditService.queryListWithCompetition(bo);
+        if (ObjectUtil.isNotNull(bo.getCollege())){
+            result = result.stream().filter(e -> e.getCollege().equals(bo.getCollege())).collect(Collectors.toList());
+        }
         Map<Long, List<DcimsTeamWithCompetition>> separatedCompetition = new HashMap<>();
         for(DcimsTeamWithCompetition r : result){
             separatedCompetition.computeIfAbsent(r.getCompetitionId(), k -> new ArrayList<>()).add(r);
@@ -377,10 +455,11 @@ public class DcimsTeamController extends BaseController {
     @SaCheckPermission("dcims:team:export")
     @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
     @PostMapping("/download")
-    public void downloadAttachment(DcimsTeamBo bo, HttpServletResponse response) {
+    public void downloadAttachment(DcimsTeamBo bo, PageQuery pageQuery, HttpServletResponse response) {
         try {
             PageQuery pq = new PageQuery();
             pq.setPageSize(100000);
+            pq.setPageNum(1);
             TableDataInfo<DcimsTeamVoV2> downloadList = list(bo, pq);
             iDcimsTeamService.download(downloadList.getRows(), response);
         } catch (IOException e) {
@@ -432,7 +511,6 @@ public class DcimsTeamController extends BaseController {
             return R.fail(bo.getAnnual()+"年团队获奖申报已截止（或未开放），如有疑问请联系学院或教务处。");
         return toAjax(iDcimsTeamService.updateByBo(bo));
     }
-
 
     /**
      * 为参赛团队添加佐证材料

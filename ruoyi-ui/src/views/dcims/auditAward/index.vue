@@ -36,6 +36,29 @@
             @keyup.enter.native="handleQuery"
           />
         </el-form-item>
+
+        <el-form-item label="所属学院" prop="awardLevel" v-show="this.$store.state.user.roles.includes('AcademicAffairsOffice') || this.$store.state.user.roles.includes('admin')">
+          <el-select v-model="queryParams.college" placeholder="请选择所属学院" clearable>
+            <el-option
+              v-for="dict in dict.type.dcims_college"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="获奖时间">
+          <el-date-picker
+            v-model="awardTimeRange"
+            style="width: 240px"
+            value-format="yyyy-MM-dd"
+            type="daterange"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          ></el-date-picker>
+        </el-form-item>
+
         <el-form-item label="比赛类型" prop="competitionType">
           <el-select v-model="queryParams.competitionType" placeholder="请选择比赛类型" clearable>
             <el-option
@@ -91,7 +114,7 @@
 
         <el-form-item>
           <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQueryTrack">重置</el-button>
         </el-form-item>
       </el-form>
 
@@ -208,10 +231,27 @@
                   </el-table-column>
                   <el-table-column prop="awardTime" label="获奖时间" width="120">
                   </el-table-column>
+                  <el-table-column prop="college" label="所属学院" width="170">
+                    <template slot-scope="scope">
+                      <dict-tag :options="dict.type.dcims_college" :value="scope.row.competition.college"/>
+                    </template>
+                  </el-table-column>
                   <el-table-column prop="supportMaterial" label="佐证材料" width="100">
                     <template slot-scope="scope">
                       <el-tag type="primary" v-if="scope.row.supportMaterial != null">有</el-tag>
                       <el-tag type="error" v-else>无</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="supportMaterial" label="当前状态" width="100">
+                    <template slot-scope="scope">
+                      <div>
+                        <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
+                          <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                          <el-tag type="success" v-if="scope.row.audit == 1">等待提交</el-tag>
+                          <el-tag type="success" v-if="scope.row.audit == 2">通过</el-tag>
+                          <el-tag type="danger" v-if="scope.row.audit == 3">教务处退回</el-tag>
+                        </el-tooltip>
+                      </div>
                     </template>
                   </el-table-column>
                   <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
@@ -250,10 +290,63 @@
       </div>
   </div>
 
+      <br/>
+    <div style="margin-top: 50px"></div>
+
 
     <!-- 流程跟踪列表，下方的表格 -->
+    <div style="margin-left: 100px;">
+
     <div class="juZhong" style="margin-top: 50px">
       <h1 style="text-align: center;">流程跟踪</h1>
+      <el-form :model="queryParamsTrack" ref="queryFormTrack" size="small" :inline="true" v-show="showSearch" label-width="68px" style="margin-left: 150px">
+        <el-form-item label="竞赛名称" prop="competitionName">
+          <el-input
+            v-model="queryParamsTrack.competitionName"
+            placeholder="请输入竞赛名称"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+
+        <el-form-item label="赛事年份" prop="annual">
+          <el-input
+            v-model="queryParamsTrack.annual"
+            placeholder="请输入赛事年份"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+
+        <el-form-item label="所属学院" prop="awardLevel" v-show="this.$store.state.user.roles.includes('AcademicAffairsOffice') || this.$store.state.user.roles.includes('admin')">
+          <el-select v-model="queryParamsTrack.college" placeholder="请选择所属学院" clearable>
+            <el-option
+              v-for="dict in dict.type.dcims_college"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="获奖时间">
+          <el-date-picker
+            v-model="awardTimeRangeTrack"
+            style="width: 240px"
+            value-format="yyyy-MM-dd"
+            type="daterange"
+            range-separator="-"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+          ></el-date-picker>
+        </el-form-item>
+
+
+
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQueryqueryFormTrack">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQueryqueryFormTrack">重置</el-button>
+        </el-form-item>
+      </el-form>
       <div>
         <el-row :gutter="20">
           <el-col :span="2"><div class="grid-content"></div></el-col>
@@ -261,7 +354,7 @@
           <el-col :span="20"
           ><div class="grid-content">
             <el-table
-              v-loading="loading"
+              v-loading="loading2"
               :data="teamProcessingList"
               tooltip-effect="dark"
               style="width: 100%"
@@ -290,10 +383,20 @@
 <!--              </el-table-column>-->
               <el-table-column label="提交状态" align="center" fixed="right" prop="audit">
                 <template slot-scope="scope">
-                  <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
-                  <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
-                  <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
-                  <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                  <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
+                    <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                    <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId != -1">教务处退回</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId == -1">材料被退回，等待负责人修改</el-tag>
+                  </el-tooltip>
+                  <div v-else>
+                    <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                    <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId != -1">教务处退回</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId == -1">材料被退回，等待负责人修改</el-tag>
+                  </div>
                 </template>
               </el-table-column>
               <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
@@ -375,6 +478,7 @@
 
 
   </div>
+  </div>
 </template>
 
 <script>
@@ -386,13 +490,14 @@ import download from '@/plugins/download.js';
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
-    dicts: ['dcims_award_type', 'dcims_award_level'],
+    dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_college'],
     data() {
       return {
       // 按钮loading
       buttonLoading: false,
       // 遮罩层
       loading: true,
+        loading2: true,
       // 选中数组
       ids: [],
       // 非单个禁用
@@ -415,6 +520,9 @@ import download from '@/plugins/download.js';
       open1: false,
       // 是否显示弹出层2
       open2: false,
+      // 获奖时间范围
+      awardTimeRange: [],
+      awardTimeRangeTrack: [],
       // 提交或退回标志
       flag: 0,
         // 查询参数
@@ -426,11 +534,22 @@ import download from '@/plugins/download.js';
           annual: undefined,
           competitionType: undefined,
           awardLevel: undefined,
+          college: undefined,
           studentName: undefined,
           teacherName: undefined,
           awardTime: undefined,
           supportMaterial: undefined,
           teacherId: undefined,
+          next_audit_id: this.$store.state.user.name,
+          audit: '1'
+        },
+        queryParamsTrack: {
+          pageNum: 1,
+          pageSize: 500,
+          competitionName: undefined,
+          annual: undefined,
+          college: undefined,
+          awardTime: undefined,
           next_audit_id: this.$store.state.user.name,
           audit: '1'
         },
@@ -508,6 +627,11 @@ import download from '@/plugins/download.js';
       /** 查询竞赛赛事基本信息列表 */
       getList() {
         this.loading = true;
+        this.queryParams.params = {};
+        if (null != this.awardTimeRange && '' != this.awardTimeRange) {
+          this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
+          this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
+        }
         listTeamAudit(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;
@@ -525,6 +649,11 @@ import download from '@/plugins/download.js';
 
       getListTwo() {
         this.loading = true;
+        this.queryParams.params = {};
+        if (null != this.awardTimeRange && '' != this.awardTimeRange) {
+          this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
+          this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
+        }
         listTeam(this.queryParams).then(response => {
           this.teamList = response.rows;
           this.total = response.total;
@@ -541,8 +670,13 @@ import download from '@/plugins/download.js';
       },
       /** 查询已经通过审核的获奖信息，现在的状态 **/
       getListInProcessing() {
-        this.loading = true;
-        listTeamInProcessing(this.queryParams).then(response => {
+        this.loading2 = true;
+        this.queryParamsTrack.params = {};
+        if (null != this.awardTimeRangeTrack && '' != this.awardTimeRangeTrack) {
+          this.queryParamsTrack.params["beginAwardTimeRange"] = this.awardTimeRangeTrack[0];
+          this.queryParamsTrack.params["endAwardTimeRange"] = this.awardTimeRangeTrack[1];
+        }
+        listTeamInProcessing(this.queryParamsTrack).then(response => {
           this.teamProcessingList = response.rows;
           this.totalProcessing = response.total;
 
@@ -551,7 +685,7 @@ import download from '@/plugins/download.js';
             e.studentName = e.studentName.join("，");
           })
 
-          this.loading = false;
+          this.loading2 = false;
         })
       },
       /** 修改按钮操作 */
@@ -611,11 +745,45 @@ import download from '@/plugins/download.js';
       this.queryParams.pageNum = 1;
       this.getListTwo();
     },
+      /** 搜索按钮操作 */
+      handleQueryqueryFormTrack() {
+        this.queryParamsTrack.pageNum = 1;
+        this.getListInProcessing();
+      },
     /** 重置按钮操作 */
-    resetQuery() {
+    resetQueryTrack() {
       this.resetForm("queryForm");
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 500,
+        competitionName: undefined,
+        name: undefined,
+        annual: undefined,
+        competitionType: undefined,
+        awardLevel: undefined,
+        college: undefined,
+        studentName: undefined,
+        teacherName: undefined,
+        awardTime: undefined,
+        supportMaterial: undefined,
+        teacherId: undefined,
+        next_audit_id: this.$store.state.user.name,
+        audit: '1'}
       this.getList();
     },
+      resetQueryqueryFormTrack() {
+        this.resetForm("queryFormTrack");
+        this.queryParamsTrack = {
+          pageNum: 1,
+          pageSize: 500,
+          competitionName: undefined,
+          annual: undefined,
+          college: undefined,
+          awardTime: undefined,
+          next_audit_id: this.$store.state.user.name,
+          audit: '1'}
+        this.getListInProcessing();
+      },
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)

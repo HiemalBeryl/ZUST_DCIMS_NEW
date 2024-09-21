@@ -90,8 +90,6 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
 //        }
 
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
-        System.out.println(lqw);
-        System.out.println(result.getRecords().stream().map(DcimsCompetitionVo::getName).collect(Collectors.toList()));
         TableDataInfo<DcimsCompetitionVo> build = TableDataInfo.build(result);
         // 获取团队对应oss信息
         Set<Long> OSSIds = new HashSet<>();

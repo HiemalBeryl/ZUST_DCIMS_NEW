@@ -3,11 +3,14 @@ package com.ruoyi.system.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.entity.SysDept;
+import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.system.domain.DcimsCompetition;
@@ -16,6 +19,7 @@ import com.ruoyi.system.domain.DcimsTeamAudit;
 import com.ruoyi.system.domain.DcimsTeamWithCompetition;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
+import com.ruoyi.system.domain.vo.*;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamAuditVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
@@ -26,6 +30,8 @@ import com.ruoyi.system.mapper.DcimsTeamMapper;
 import com.ruoyi.system.mapper.SysDeptMapper;
 import com.ruoyi.system.service.IDcimsCompetitionService;
 import com.ruoyi.system.service.IDcimsTeamAuditService;
+import com.ruoyi.system.service.ISysDictTypeService;
+import com.ruoyi.system.service.ISysOssService;
 import com.ruoyi.system.utils.AccountUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -56,6 +62,8 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
     private final DcimsTeamMapper teamBaseMapper;
     private final SysDeptMapper sysDeptMapper;
     private final IDcimsCompetitionService competitionService;
+    private final ISysOssService ossService;
+    private final ISysDictTypeService dictTypeService;
     private final DcimsCompetitionMapper dcimsCompetitionMapper;
 
     /**
@@ -76,9 +84,11 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         String teacherId = AccountUtils.getAccount(id).getTeacherId().toString();
         LambdaQueryWrapper<DcimsTeam> lqw = new LambdaQueryWrapper<>();
         lqw.eq(teacherId != null&&teacherId != "", DcimsTeam::getNextAuditId,teacherId);
-        // 获取审核状态为待审核的团队
-        lqw.eq(DcimsTeam::getAudit,1);
-
+        // 获取状态为待审核或被退回的竞赛, 可以对这些竞赛重新提交或退回。
+        List<String> status = new ArrayList<>();
+        status.add("1");
+        status.add("3");
+        lqw.in(DcimsTeam::getAudit, status);
         Page<DcimsTeamVo> result = teamBaseMapper.selectVoPage(pageQuery.build(), lqw);
 
         //添加竞赛名称
@@ -98,13 +108,82 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
             competitionVoList.forEach(c -> {
                 if (c.getId().equals(voV2.getCompetitionId())){
                     voV2.setCompetition(c);
+                    voV2.setCompetitionName(c.getName());
                 }
             });
             return voV2;
         }).collect(Collectors.toList());
+        // 获取团队对应oss信息
+        Set<Long> OSSIds = new HashSet<>();
+        VoV2List.forEach(e -> {
+            OSSIds.add(e.getSupportMaterial());
+        });
+        OSSIds.removeAll(Collections.singleton(null));
+        List<SysOssVo> ossVoList = ossService.listByIds(OSSIds);
+        List<DcimsTeamVoV2> VoV2List2 = VoV2List;
+        if(ossVoList.size() > 0){
+            VoV2List2 = VoV2List.stream().map(e -> {
+                DcimsTeamVoV2 voV2 = new DcimsTeamVoV2();
+                BeanUtils.copyProperties(e, voV2);
+                ossVoList.forEach(oss -> {
+                    if (oss.getOssId().equals(voV2.getSupportMaterial())){
+                        voV2.setSupportMaterialURL(oss.getUrl());
+                        voV2.setOss(oss);
+                    }
+                });
+                if (ObjectUtil.isNull(voV2.getOss()))
+                    voV2.setOss(new SysOssVo());
+                return voV2;
+            }).collect(Collectors.toList());
+        }
+        VoV2List2.forEach(e -> {
+            if (ObjectUtil.isNull(e.getOss())){
+                e.setOss(null);
+            }
+        });
+        // 填写所属学院与佐证材料文件名
+        VoV2List2.forEach(e -> {
+            if (ObjectUtil.isNotNull(e.getCompetition())){
+                e.setCollege(e.getCompetition().getCollege());
+                e.setCollegeName(String.valueOf(e.getCompetition().getCollege()));
+            }
+            if (ObjectUtil.isNotNull(e.getOss())){
+                String fileName = translateAwardLevel(e.getAwardLevel()) + "-"+ Arrays.toString(e.getStudentName()).substring(
+                    1,
+                    Arrays.toString(e.getStudentName()).length() - 1
+                ) + e.getOss().getFileSuffix();
+                e.setSupportMaterialName(fileName);
+            }
+        });
+        // 填写审核详情
+        List<Long> teamIds = new ArrayList<>();
+        for(DcimsTeamVoV2 vo : VoV2List2){
+            teamIds.add(vo.getId());
+        }
+        LambdaQueryWrapper<DcimsTeamAudit> lqw2 = new LambdaQueryWrapper<>();
+        lqw2.in(teamIds.size() > 0, DcimsTeamAudit::getTeamId, teamIds);
+        List<DcimsTeamAuditVo> auditList = teamAuditBaseMapper.selectVoList(lqw2);
+        Map<Long, DcimsTeamAuditVo> m = new HashMap<>();
+        for (DcimsTeamAuditVo audit : auditList){
+            DcimsTeamAuditVo audit1 = m.get(audit.getTeamId());
+            if (audit1 != null){
+                if (audit1.getId() < audit.getId()){
+                    m.put(audit.getTeamId(), audit);
+                }
+            }else {
+                m.put(audit.getTeamId(), audit);
+            }
+        }
+        for (DcimsTeamAuditVo audit : m.values()){
+            for (DcimsTeamVoV2 vo : VoV2List2){
+                if (Objects.equals(audit.getTeamId(), vo.getId())){
+                    vo.setAuditDetail(audit);
+                }
+            }
+        }
 
         // 添加团队对应竞赛信息
-        return TableDataInfo.build(VoV2List);
+        return TableDataInfo.build(VoV2List2);
     }
 
     /**
@@ -163,6 +242,7 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
                     add1.setNextTeacherId(sysDept.getLeaderTeacherId());
                     teamAuditList.add(add1);
                     add2.setNextAuditId(sysDept.getLeaderTeacherId());
+                    add2.setAudit(1);
                     teamList.add(add2);
                 }
             }
@@ -323,5 +403,27 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
             return sysDept.getLeaderTeacherId();
         }
         return null;
+    }
+
+    /**
+     * 从字典中翻译学院名称
+     */
+    private String translateCollegeName(Long collegeId) {
+        List<SysDictData> dcimsAwardLevel = dictTypeService.selectDictDataByType("dcims_college");
+        Optional<SysDictData> match = dcimsAwardLevel.stream()
+            .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getDictValue(), String.valueOf(collegeId)))
+            .findFirst();
+        return match.map(SysDictData::getDictLabel).orElse("未知");
+    }
+
+    /**
+     * 从字典中翻译获奖等级
+     */
+    private String translateAwardLevel(String awardLevel) {
+        List<SysDictData> dcimsAwardLevel = dictTypeService.selectDictDataByType("dcims_award_level");
+        Optional<SysDictData> match = dcimsAwardLevel.stream()
+            .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getDictValue(), awardLevel))
+            .findFirst();
+        return match.map(SysDictData::getDictLabel).orElse("未知");
     }
 }

@@ -266,6 +266,7 @@ export default {
         competitionName: undefined,
         teamName: undefined,
         awardLevel: undefined,
+        college: undefined,
         competitionType: undefined,
         studentName: undefined,
         teacherName: undefined,
@@ -356,6 +357,18 @@ export default {
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
+      this.queryParams = {
+        parentId: undefined,
+        competitionName: undefined,
+        teamName: undefined,
+        awardLevel: undefined,
+        college: undefined,
+        competitionType: undefined,
+        studentName: undefined,
+        teacherName: undefined,
+        competitionTime: undefined,
+        awardTime: undefined,
+      };
       this.handleQuery();
     },
     /** 新增按钮操作 */

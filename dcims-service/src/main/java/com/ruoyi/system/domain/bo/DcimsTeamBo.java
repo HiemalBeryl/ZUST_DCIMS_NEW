@@ -117,4 +117,9 @@ public class DcimsTeamBo extends BaseEntity {
      * 审核状态
      */
     private Integer audit;
+
+    /**
+     * 所属学院
+     */
+    private Long college;
 }

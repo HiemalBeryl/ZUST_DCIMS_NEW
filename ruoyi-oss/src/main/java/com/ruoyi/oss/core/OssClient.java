@@ -57,8 +57,8 @@ public class OssClient {
             } else {
                 clientConfig.setProtocol(Protocol.HTTP);
             }
-            clientConfig.setSocketTimeout(30000);
-            clientConfig.setConnectionTimeout(30000);
+            clientConfig.setSocketTimeout(90000);
+            clientConfig.setConnectionTimeout(90000);
             clientConfig.setMaxErrorRetry(8);
             AmazonS3ClientBuilder build = AmazonS3Client.builder()
                 .withEndpointConfiguration(endpointConfig)
