@@ -81,6 +81,13 @@ public class DcimsCompetitionServiceImpl implements IDcimsCompetitionService {
         Integer college = getFromCollege();
         if (college != -1)
             lqw.eq(DcimsCompetition::getCollege, college);
+        // TODO 如果赛事信息也只查找当前竞赛负责人的竞赛就打开
+//        // 查看当前用户是否是学科竞赛负责人,是的话只差负责学院
+//        List<String> roleList = StpUtil.getRoleList();
+//        if(roleList.contains("AcademyCompetitionTeacher") && !roleList.contains("AcademyCompetitionHead")&& !roleList.contains("AcademicAffairsOffice") ){
+//            Long teacherId = AccountUtils.getAccount().getTeacherId();
+//            lqw.eq(DcimsCompetition::getResponsiblePersonId, teacherId);
+//        }
 
         Page<DcimsCompetitionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         TableDataInfo<DcimsCompetitionVo> build = TableDataInfo.build(result);

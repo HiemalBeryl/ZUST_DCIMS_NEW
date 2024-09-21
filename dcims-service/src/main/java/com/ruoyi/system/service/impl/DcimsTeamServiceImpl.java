@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.io.FileUtil;
@@ -142,6 +143,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 表示自己的角色权限下，可以看到的所有竞赛
         TableDataInfo<DcimsCompetitionVo> competitionList = competitionService.queryPageList(new DcimsCompetitionBo(), pq, true, false);
         System.out.println("competitionList: " + competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList()));
+
+
+        // 查看当前用户是否是学科竞赛负责人,是的话只差负责学院
+        List<String> roleList = StpUtil.getRoleList();
+        if(roleList.contains("AcademyCompetitionTeacher") && !roleList.contains("AcademyCompetitionHead")&& !roleList.contains("AcademicAffairsOffice") ){
+            Long teacherId = AccountUtils.getAccount().getTeacherId();
+            List<DcimsCompetitionVo> collect = competitionList.getRows().stream()
+                .filter(e -> teacherId.equals(e.getResponsiblePersonId())).collect(Collectors.toList());
+            competitionList.setRows(collect);
+        }
+
         // 找出存在于competitionList中并且存在于cIds中的竞赛id
         List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).filter(cIds::contains).collect(Collectors.toList());
         if (competitionIds0.size() > 0) {
