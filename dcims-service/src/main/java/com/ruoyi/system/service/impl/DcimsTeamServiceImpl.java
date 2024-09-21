@@ -185,6 +185,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             return voV2;
         }).collect(Collectors.toList());
 
+        // 拿出赛事类别键值对
+        Map<Long, String> map = new HashMap<>();
+        for (DcimsCompetitionVo competitionVo : competitionVoList) {
+            map.put(competitionVo.getId(),competitionVo.getLevel());
+        }
+        for (DcimsTeamVoV2 dcimsTeamVoV2 : VoV2List) {
+            if(map.containsKey(dcimsTeamVoV2.getCompetitionId())){
+                dcimsTeamVoV2.setLevel(map.get(dcimsTeamVoV2.getCompetitionId()));
+            }
+        }
+
         // 根据学院与年份与名称进行筛选
         if (ObjectUtil.isNotNull(bo.getCollege())){
             VoV2List = VoV2List.stream().filter(e -> e.getCompetition().getCollege().equals(bo.getCollege())).collect(Collectors.toList());
@@ -278,6 +289,14 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
         TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
         BeanUtils.copyProperties(build, build1);
+
+        // 将当前用户所能看到的所有条目默认进行排序，排序先按年份，再按类别，再按学院，再按名称
+        VoV2List2.sort(Comparator.comparing(DcimsTeamVoV2::getAwardTime)
+            .thenComparing(DcimsTeamVoV2::getLevel)
+            .thenComparing(DcimsTeamVoV2::getCollege)
+            .thenComparing(DcimsTeamVoV2::getName));
+
+
         build1.setRows(VoV2List2);
         build1.setTotal(totalRecord);
         return build1;

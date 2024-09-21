@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
+import com.ruoyi.system.domain.excel.DcimsTeamExportExcel;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
 import com.ruoyi.system.domain.vo.DcimsTeamVo;
 import com.ruoyi.system.domain.bo.DcimsTeamBo;
@@ -45,6 +46,7 @@ public interface IDcimsTeamService {
      * 查询参赛团队列表
      */
     List<DcimsTeamVo> queryList(DcimsTeamBo bo);
+
 
     /**
      * 新增参赛团队
