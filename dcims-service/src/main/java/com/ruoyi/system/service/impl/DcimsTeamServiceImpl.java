@@ -1286,6 +1286,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     public HashMap<String, Object> queryAward(DcimsTeamBo bo) {
         PageQuery pq = new PageQuery();
         pq.setPageSize(100000);
+        pq.setPageNum(1);
         TableDataInfo<DcimsTeamVoV2> downloadList = queryPageList(bo, pq);
         TableDataInfo<DcimsTeamVoV2> queryresult = null;
         if (bo.getAnnual() == null) {
