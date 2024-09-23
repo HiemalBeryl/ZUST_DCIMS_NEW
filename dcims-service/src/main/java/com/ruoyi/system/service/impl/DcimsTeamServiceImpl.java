@@ -201,7 +201,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         }
         long totalRecord = VoV2List.size();
         // 将当前用户所能看到的所有条目默认进行排序，排序先按年份，再按类别，再按学院，再按名称
-        VoV2List = VoV2List.stream().sorted(Comparator.comparing((DcimsTeamVoV2 e) -> e.getCompetition().getAnnual())
+        VoV2List = VoV2List.stream().sorted(Comparator.comparing((DcimsTeamVoV2 e) -> e.getAwardTime())
+            .reversed()
             .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getLevel())
             .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getCollege())
             .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getId())).collect(Collectors.toList());
