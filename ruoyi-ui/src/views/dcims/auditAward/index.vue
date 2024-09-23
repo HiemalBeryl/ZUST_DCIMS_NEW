@@ -79,6 +79,14 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="赛事类别" prop="level">
+          <el-input
+            v-model="queryParams.level"
+            placeholder="请输入赛事类别"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
         <el-form-item label="指导教师工号" prop="teacherId">
           <el-input
             v-model="queryParams.teacherId"

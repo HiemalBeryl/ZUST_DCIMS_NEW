@@ -1,5 +1,8 @@
 package com.ruoyi.system.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.ruoyi.common.annotation.ExcelDictFormat;
+import com.ruoyi.common.convert.ExcelDictConvert;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import lombok.Data;
@@ -65,6 +68,11 @@ public class DcimsTeamBo extends BaseEntity {
      */
     @Null(message = "创建队伍时不能填写奖项等级，如需填写，请进入获奖申报页面", groups = { AddGroup.class })
     private String awardLevel;
+
+    /**
+     * 赛事类别
+     */
+    private String level;
 
     /**
      * 指导教师工号

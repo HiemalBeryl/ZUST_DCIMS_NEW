@@ -129,6 +129,9 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         if (ObjectUtil.isNotNull(bo.getCollege())){
             l.eq(DcimsCompetition::getCollege, bo.getCollege());
         }
+        if (ObjectUtil.isNotNull(bo.getLevel())){
+            l.eq(DcimsCompetition::getLevel, bo.getLevel());
+        }
 
         List<DcimsCompetition> cl = dcimsCompetitionMapper.selectList(l);
         // 表示满足筛选条件的竞赛id
