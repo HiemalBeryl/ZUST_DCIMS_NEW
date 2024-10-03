@@ -139,6 +139,11 @@ public class DcimsTeamVoV2 {
     private Long supportMaterial;
 
     /**
+     * 佐证材料
+     */
+    private String remark;
+
+    /**
      * 佐证材料地址
      */
     private String supportMaterialURL;

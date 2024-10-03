@@ -22,6 +22,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="supportMaterial" column="support_material"/>
         <result property="audit" column="audit"/>
         <result property="nextAuditId" column="next_audit_id"/>
+        <result property="remark" column="remark"/>
         <result property="version" column="version"/>
         <result property="createTime" column="create_time"/>
         <result property="createBy" column="create_by"/>

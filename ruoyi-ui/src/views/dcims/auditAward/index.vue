@@ -262,6 +262,7 @@
                       </div>
                     </template>
                   </el-table-column>
+                  <el-table-column prop="remark" label="备注" width="130"></el-table-column>
                   <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
                     <template slot-scope="scope">
                       <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
@@ -407,6 +408,7 @@
                   </div>
                 </template>
               </el-table-column>
+              <el-table-column prop="remark" label="备注" width="130"></el-table-column>
               <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
                 <template slot-scope="scope">
                   <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
