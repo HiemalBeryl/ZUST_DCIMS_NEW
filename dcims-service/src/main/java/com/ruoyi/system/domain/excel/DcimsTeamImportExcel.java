@@ -91,6 +91,12 @@ public class DcimsTeamImportExcel {
     private String supportMaterialFileName;
 
     /**
+     * 备注
+     */
+    @ExcelProperty(value = "备注", index = 11)
+    private String remark;
+
+    /**
      * 竞赛对应主键
      */
     @ExcelIgnore

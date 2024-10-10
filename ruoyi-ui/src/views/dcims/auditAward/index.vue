@@ -79,6 +79,14 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item label="赛事类别" prop="level">
+          <el-input
+            v-model="queryParams.level"
+            placeholder="请输入赛事类别"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
         <el-form-item label="指导教师工号" prop="teacherId">
           <el-input
             v-model="queryParams.teacherId"
@@ -242,6 +250,19 @@
                       <el-tag type="error" v-else>无</el-tag>
                     </template>
                   </el-table-column>
+                  <el-table-column prop="supportMaterial" label="当前状态" width="100">
+                    <template slot-scope="scope">
+                      <div>
+                        <el-tooltip v-if="scope.row.auditDetail != null" class="item" effect="dark" :content="scope.row.auditDetail.reason" placement="top-end">
+                          <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
+                          <el-tag type="success" v-if="scope.row.audit == 1">等待提交</el-tag>
+                          <el-tag type="success" v-if="scope.row.audit == 2">通过</el-tag>
+                          <el-tag type="danger" v-if="scope.row.audit == 3">教务处退回</el-tag>
+                        </el-tooltip>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="remark" label="备注" width="130"></el-table-column>
                   <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
                     <template slot-scope="scope">
                       <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>
@@ -375,16 +396,19 @@
                     <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
                     <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
                     <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
-                    <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId != -1">教务处退回</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId == -1">材料被退回，等待负责人修改</el-tag>
                   </el-tooltip>
                   <div v-else>
                     <el-tag type="primary" v-if="scope.row.audit == 0">等待负责人修改材料</el-tag>
                     <el-tag type="success" v-if="scope.row.audit == 1">等待教务处通过</el-tag>
                     <el-tag type="danger" v-if="scope.row.audit == 2">通过</el-tag>
-                    <el-tag type="danger" v-if="scope.row.audit == 3">材料被退回，等待负责人修改</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId != -1">教务处退回</el-tag>
+                    <el-tag type="danger" v-if="scope.row.audit == 3 && scope.row.nextAuditId == -1">材料被退回，等待负责人修改</el-tag>
                   </div>
                 </template>
               </el-table-column>
+              <el-table-column prop="remark" label="备注" width="130"></el-table-column>
               <el-table-column fixed="right" label="查看详情" min-width="120" align="center">
                 <template slot-scope="scope">
                   <el-button type="text" @click="checkDetail(scope.row)">查看详情</el-button>

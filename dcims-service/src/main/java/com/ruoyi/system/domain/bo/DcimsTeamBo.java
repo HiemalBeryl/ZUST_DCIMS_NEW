@@ -1,5 +1,8 @@
 package com.ruoyi.system.domain.bo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
+import com.ruoyi.common.annotation.ExcelDictFormat;
+import com.ruoyi.common.convert.ExcelDictConvert;
 import com.ruoyi.common.core.validate.AddGroup;
 import com.ruoyi.common.core.validate.EditGroup;
 import lombok.Data;
@@ -67,6 +70,11 @@ public class DcimsTeamBo extends BaseEntity {
     private String awardLevel;
 
     /**
+     * 赛事类别
+     */
+    private String level;
+
+    /**
      * 指导教师工号
      */
     @NotBlank(message = "指导教师工号不能为空", groups = { AddGroup.class, EditGroup.class })
@@ -94,6 +102,11 @@ public class DcimsTeamBo extends BaseEntity {
      * 比赛时间
      */
     private Date competitionTime;
+
+    /**
+     * 佐证材料
+     */
+    private String remark;
 
     /**
      * 获奖时间

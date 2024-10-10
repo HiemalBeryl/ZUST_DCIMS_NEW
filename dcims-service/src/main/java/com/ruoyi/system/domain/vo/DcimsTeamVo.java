@@ -91,6 +91,11 @@ public class DcimsTeamVo {
     private Long advancedAwardNumber;
 
     /**
+     * 备注
+     */
+    private String remark;
+
+    /**
      * 比赛时间
      */
     private Date competitionTime;

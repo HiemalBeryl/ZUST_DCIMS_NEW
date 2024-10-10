@@ -1,5 +1,6 @@
 package com.ruoyi.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.compress.ZipReader;
 import cn.hutool.core.io.FileUtil;
@@ -129,6 +130,9 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         if (ObjectUtil.isNotNull(bo.getCollege())){
             l.eq(DcimsCompetition::getCollege, bo.getCollege());
         }
+        if (ObjectUtil.isNotNull(bo.getLevel())){
+            l.eq(DcimsCompetition::getLevel, bo.getLevel());
+        }
 
         List<DcimsCompetition> cl = dcimsCompetitionMapper.selectList(l);
         // 表示满足筛选条件的竞赛id
@@ -143,6 +147,17 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         // 表示自己的角色权限下，可以看到的所有竞赛
         TableDataInfo<DcimsCompetitionVo> competitionList = competitionService.queryPageList(new DcimsCompetitionBo(), pq, true, false);
         System.out.println("competitionList: " + competitionList.getRows().stream().map(DcimsCompetitionVo::getId).collect(Collectors.toList()));
+
+
+        // 查看当前用户是否是学科竞赛负责人,是的话只差负责学院
+        List<String> roleList = StpUtil.getRoleList();
+        if(roleList.contains("AcademyCompetitionTeacher") && !roleList.contains("AcademyCompetitionHead")&& !roleList.contains("AcademicAffairsOffice") ){
+            Long teacherId = AccountUtils.getAccount().getTeacherId();
+            List<DcimsCompetitionVo> collect = competitionList.getRows().stream()
+                .filter(e -> teacherId.equals(e.getResponsiblePersonId())).collect(Collectors.toList());
+            competitionList.setRows(collect);
+        }
+
         // 找出存在于competitionList中并且存在于cIds中的竞赛id
         List<Long> competitionIds0 = competitionList.getRows().stream().map(DcimsCompetitionVo::getId).filter(cIds::contains).collect(Collectors.toList());
         if (competitionIds0.size() > 0) {
@@ -174,6 +189,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             return voV2;
         }).collect(Collectors.toList());
 
+
         // 根据学院与年份与名称进行筛选
         if (ObjectUtil.isNotNull(bo.getCollege())){
             VoV2List = VoV2List.stream().filter(e -> e.getCompetition().getCollege().equals(bo.getCollege())).collect(Collectors.toList());
@@ -185,7 +201,13 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             VoV2List = VoV2List.stream().filter(e -> e.getCompetition().getName().contains(bo.getCompetitionName())).collect(Collectors.toList());
         }
         long totalRecord = VoV2List.size();
-        VoV2List = VoV2List.stream().sorted(Comparator.comparing(DcimsTeamVoV2::getId)).collect(Collectors.toList());
+        // 将当前用户所能看到的所有条目默认进行排序，排序先按年份，再按类别，再按学院，再按名称
+        // Comparator.nullsLast:空指针处理
+        VoV2List = VoV2List.stream().sorted(Comparator.comparing((DcimsTeamVoV2 e) -> e.getAwardTime(), Comparator.nullsLast(Comparator.naturalOrder()))
+            .reversed()
+            .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getLevel())
+            .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getCollege())
+            .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getId())).collect(Collectors.toList());
         long start = pageQuery.getPageSize() * (pageQuery.getPageNum() - 1L);
         long end = Math.min(start + pageQuery.getPageSize(), totalRecord);
         VoV2List = VoV2List.subList((int) start, (int) end);
@@ -267,6 +289,9 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
         TableDataInfo<DcimsTeamVoV2> build1 = TableDataInfo.build(VoV2List2);
         BeanUtils.copyProperties(build, build1);
+
+
+
         build1.setRows(VoV2List2);
         build1.setTotal(totalRecord);
         return build1;
@@ -1299,6 +1324,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
     public HashMap<String, Object> queryAward(DcimsTeamBo bo) {
         PageQuery pq = new PageQuery();
         pq.setPageSize(100000);
+        pq.setPageNum(1);
         TableDataInfo<DcimsTeamVoV2> downloadList = queryPageList(bo, pq);
         TableDataInfo<DcimsTeamVoV2> queryresult = null;
         if (bo.getAnnual() == null) {

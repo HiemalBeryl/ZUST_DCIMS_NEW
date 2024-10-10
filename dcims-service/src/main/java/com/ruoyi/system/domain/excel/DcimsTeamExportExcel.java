@@ -2,6 +2,7 @@ package com.ruoyi.system.domain.excel;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.ExcelDictFormat;
 import com.ruoyi.common.convert.ExcelDictConvert;
@@ -93,6 +94,7 @@ public class DcimsTeamExportExcel {
      */
     @ExcelProperty(value = "获奖时间")
     @JsonFormat(locale="zh",timezone="GMT+8",pattern="yyyy/MM/dd")
+    @ColumnWidth(20)
     private Date awardTime;
 
     /**

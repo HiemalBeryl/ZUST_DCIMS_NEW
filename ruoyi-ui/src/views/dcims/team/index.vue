@@ -73,6 +73,14 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="赛事类别" prop="level">
+        <el-input
+          v-model="queryParams.level"
+          placeholder="请输入赛事类别"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="指导教师工号" prop="teacherId">
         <el-input
           v-model="queryParams.teacherId"
@@ -224,6 +232,7 @@
       <el-table-column label="参赛学生学号" align="center" prop="studentId" />
       <el-table-column label="参赛学生姓名" align="center" prop="studentName" />
       <el-table-column label="获奖时间" align="center" prop="awardTime" />
+      <el-table-column label="赛事类别" align="center" prop="competition.level" />
       <el-table-column label="佐证材料" align="center" prop="oss.url">
         <template slot-scope="scope">
           <ImagePreview
@@ -401,6 +410,7 @@ export default {
         teacherName: undefined,
         studentId: undefined,
         studentName: undefined,
+        level: undefined,
         audit: '2',
       },
       // 表单参数

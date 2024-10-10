@@ -171,6 +171,13 @@
           </template>
         </el-table-column>
 
+        <el-table-column prop="remark" label="备注" width="180">
+          <template slot-scope="scope">
+            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.remark" placeholder="请输入内容"></el-input>
+            <div v-else class="txt">{{scope.row.remark}}</div>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="competitionTime" label="比赛时间" width="180">
           <template slot-scope="scope">
             <el-date-picker clearable

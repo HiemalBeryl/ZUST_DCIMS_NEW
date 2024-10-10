@@ -85,6 +85,13 @@ public class DcimsTeamVoV2 {
     private String awardLevel;
 
     /**
+     * 赛事类别
+     */
+    @ExcelProperty(value = "赛事类别", converter = ExcelDictConvert.class)
+    @ExcelDictFormat(dictType = "dcims_competition_type")
+    private String level;
+
+    /**
      * 指导教师工号
      */
     @ExcelProperty(value = "指导教师工号", converter = StringArrayConverter.class, index = 8)
@@ -130,6 +137,11 @@ public class DcimsTeamVoV2 {
      * 佐证材料
      */
     private Long supportMaterial;
+
+    /**
+     * 佐证材料
+     */
+    private String remark;
 
     /**
      * 佐证材料地址
