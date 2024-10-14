@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import cn.dev33.satoken.annotation.SaIgnore;
@@ -21,6 +24,7 @@ import com.ruoyi.system.domain.bo.DcimsDeclareAwardBo;
 import com.ruoyi.system.domain.bo.DcimsTeamAuditBo;
 import com.ruoyi.system.domain.excel.DcimsComAndTeam;
 import com.ruoyi.system.domain.excel.DcimsTeamImportExcel;
+import com.ruoyi.system.domain.excel.TeamSingleStudent;
 import com.ruoyi.system.domain.excel.TempDcimsComAndTeam;
 import com.ruoyi.system.domain.vo.DcimsCompetitionVo;
 import com.ruoyi.system.domain.vo.DcimsTeamVoV2;
@@ -30,6 +34,7 @@ import com.ruoyi.system.service.IDcimsTeamAuditService;
 import com.ruoyi.system.utils.AccountUtils;
 import com.ruoyi.system.utils.WordUtil;
 import com.ruoyi.system.service.*;
+import jodd.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.*;
@@ -233,7 +238,6 @@ public class DcimsTeamController extends BaseController {
      *  导出省级以上获奖情况学生登记表
      */
     @SaCheckPermission("dcims:team:export")
-//    @SaIgnore
     @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
     @PostMapping("/exportDengjiBiao")
     public void exportDengjiBiao(DcimsTeamBo bo, HttpServletResponse response) throws IOException {
@@ -272,13 +276,118 @@ public class DcimsTeamController extends BaseController {
         });
 
         ExcelUtil.exportExcel(data1, "参赛团队", TempDcimsComAndTeam.class, response);
+    }
 
-        // 下面的代码暂时没用
-//        response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-//        response.setHeader("Content-Disposition", "attachment; filename=example.docx");
-//
-//        OutputStream outputStream = response.getOutputStream();
-//        outputStream = os;
+
+    /**
+     *  导出省级以上获奖情况学生登记表
+     */
+    @SaCheckPermission("dcims:team:export")
+    @Log(title = "参赛团队", businessType = BusinessType.EXPORT)
+    @PostMapping("/exportDengjiBiaoSingleStudent")
+    public void exportDengjiBiaoSingleStudent(DcimsTeamBo bo, HttpServletResponse response) throws IOException {
+        List<DcimsTeamWithCompetition> result = iDcimsTeamAuditService.queryListWithCompetition(bo);
+        if (ObjectUtil.isNotNull(bo.getCollege())){
+            result = result.stream().filter(e -> e.getCollege().equals(bo.getCollege())).collect(Collectors.toList());
+        }
+        // 判断学院，如果是教务处，则不做筛选
+        Long collegeId = AccountUtils.getCollegeId();
+        if (collegeId != null && collegeId != 0){
+            result = result.stream().filter(e -> e.getCollege().equals(collegeId)).collect(Collectors.toList());
+        }
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_award_level");
+        List<SysDictData> awardDict = dictDataService.selectDictDataList(sysDictData);
+
+        List<TeamSingleStudent> jiaoyutingList = new ArrayList<>();
+        Map<String, Object> params = bo.getParams();
+        result.forEach(e -> {
+            String endAwardTime = (String) params.get("endAwardTimeRange");
+            String beginAwardTime = (String) params.get("beginAwardTimeRange");
+
+            DcimsTeamWithCompetition entity = null;
+
+            System.out.println(endAwardTime + "  " + beginAwardTime);
+            if (StringUtil.isNotBlank(endAwardTime) && StringUtil.isNotBlank(beginAwardTime)){
+                Date endAwardTimeDate = null;
+                Date beginAwardTimeDate = null;
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    endAwardTimeDate = sdf.parse((String) params.get("endAwardTimeRange"));
+                    beginAwardTimeDate = sdf.parse((String) params.get("beginAwardTimeRange"));
+                } catch (ParseException ex) {
+                    throw new RuntimeException(ex);
+                }
+                System.out.println(e.getStudentName());
+                System.out.println(e.getAwardLevel() + "  " + endAwardTimeDate + "  " + beginAwardTimeDate);
+                if (e.getAwardTime().before(endAwardTimeDate) && e.getAwardTime().after(beginAwardTimeDate)){
+                    entity = e;
+                    String awardLevel1 = entity.getAwardLevel();
+                    if (Integer.parseInt(awardLevel1) >= 20){
+                        entity = null;
+                    }
+                }else{
+                    entity = null;
+                }
+            }else{
+                entity = e;
+                String awardLevel1 = entity.getAwardLevel();
+                if (Integer.parseInt(awardLevel1) >= 20){
+                    entity = null;
+                }
+            }
+
+            if(ObjectUtil.isNotNull(entity)){
+                String[] studentNames = entity.getStudentName().split(",");
+                String[] studentIds = entity.getStudentId().split(",");
+                for (int i = 0; i < studentNames.length; i++){
+                    TeamSingleStudent t = new TeamSingleStudent();
+                    if (i + 1 > studentNames.length){
+                        t.setStudentName("");
+                    }else{
+                        t.setStudentName(studentNames[i]);
+                    }
+                    if (i + 1 > studentIds.length){
+                        t.setStudentNumber("-1");
+                    }else{
+                        t.setStudentNumber(studentIds[i]);
+                    }
+                    t.setCompetitionName(entity.getName());
+                    t.setAwardTime(entity.getAwardTime());
+
+                    t.setAwardLevel(entity.getAwardLevel());
+                    String awardLevel = awardDict.stream().filter(d -> StringUtils.equals(d.getDictValue(), t.getAwardLevel()))
+                        .findFirst().get().getDictLabel();
+                    if (awardLevel.length() == 5){
+                        t.setAwardLevel(awardLevel.substring(0, 2) + "级");
+                        if (t.getAwardLevel().equals("省级级")){
+                            t.setAwardLevel("省级");
+                        }
+                        t.setAwardLevelSubstring(awardLevel.substring(2, 5));
+                    }else{
+                        t.setAwardLevel(awardLevel);
+                        t.setAwardLevelSubstring(awardLevel);
+                    }
+
+                    String[] cType = new String[]{"“互联网+”创新创业大赛", "挑战杯", "创青春中国青年创新创业大赛", "其他"};
+                    t.setCompetitionType(cType[3]);
+                    if (t.getCompetitionName().contains("互联网+")){
+                        t.setCompetitionType(cType[0]);
+                    }else if (t.getCompetitionName().contains("挑战杯")){
+                        t.setCompetitionType(cType[1]);
+                    }else if (t.getCompetitionName().contains("创青春")){
+                        t.setCompetitionType(cType[2]);
+                    }
+
+                    t.setDescription("");
+                    jiaoyutingList.add(t);
+                }
+            }
+        });
+
+        HashMap<Object, Object> map = new HashMap<>();
+        map.put("exportYear", bo.getAnnual() != null ? bo.getAnnual(): "xxxx");
+        ExcelUtil.exportTemplate(Collections.singletonList(jiaoyutingList), "教育厅学年统计", "excel/教育厅学年统计.xlsx", response);
     }
 
 

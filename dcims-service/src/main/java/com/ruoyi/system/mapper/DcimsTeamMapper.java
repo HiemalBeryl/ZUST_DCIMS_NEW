@@ -19,7 +19,7 @@ import java.util.Map;
 public interface DcimsTeamMapper extends BaseMapperPlus<DcimsTeamMapper, DcimsTeam, DcimsTeamVo> {
     @Select({
         "<script>",
-        "SELECT c.name, c.level, c.organizer, c.college, c.responsible_person_name, c.responsible_person_id, c.phone, t.competition_id, t.award_level, t.student_name, t.teacher_name FROM dcims_team AS t, dcims_competition AS c",
+        "SELECT c.name, c.level, c.organizer, c.college, c.responsible_person_name, c.responsible_person_id, c.phone, t.competition_id, t.award_level, t.student_name, t.teacher_name, t.student_id, t.teacher_id, t.award_time FROM dcims_team AS t, dcims_competition AS c",
         "<where>",
         "   c.id = t.competition_id AND (c.del_flag = 0 AND t.del_flag = 0) AND (c.state = 1 AND t.audit = 2)",
         "   <if test='annual != null'>",

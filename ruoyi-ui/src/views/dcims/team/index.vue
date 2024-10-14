@@ -74,12 +74,14 @@
         </el-select>
       </el-form-item>
       <el-form-item label="赛事类别" prop="level">
-        <el-input
-          v-model="queryParams.level"
-          placeholder="请输入赛事类别"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        <el-select v-model="queryParams.level" placeholder="请选择赛事类别" clearable>
+          <el-option
+            v-for="dict in dict.type.dcims_competition_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="指导教师工号" prop="teacherId">
         <el-input
@@ -202,6 +204,16 @@
           @click="handleExport4"
           v-hasPermi="['dcims:team:export']"
         >下载省级以上科技竞赛获奖学生情况登记表（doc）</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport5"
+          v-hasPermi="['dcims:team:export']"
+        >国家数据平台数据采集</el-button>
       </el-col>
 
       <el-col>
@@ -369,7 +381,7 @@ import { listTeam, getTeam, delTeam, addTeam, updateTeam, removeOne } from "@/ap
 
 export default {
   name: "Team",
-  dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status', 'dcims_college'],
+  dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_declare_award_status', 'dcims_college', 'dcims_competition_type'],
   data() {
     return {
       // 按钮loading
@@ -624,6 +636,17 @@ export default {
       this.download('dcims/team/exportTeamWord', {
         ...this.queryParams
       }, `省级及以上科技竞赛获奖学生情况登记表.docx`)
+    },
+    /** 导出按钮操作 */
+    handleExport5() {
+      if (null != this.awardTimeRange && '' != this.awardTimeRange) {
+        this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
+        this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
+      }
+
+      this.download('dcims/team/exportDengjiBiaoSingleStudent', {
+        ...this.queryParams
+      }, `表6-6-3学生获省级及以上各类竞赛奖励情况.xlsx`)
     },
 
     /** 是否填写作品名称 */
