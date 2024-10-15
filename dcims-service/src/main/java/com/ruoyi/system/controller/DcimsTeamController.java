@@ -149,6 +149,10 @@ public class DcimsTeamController extends BaseController {
             result = result.stream()
                 .filter(e -> Objects.equals(finalTeacherCollege, e.getCompetition().getCollege().intValue()))
                 .collect(Collectors.toList());
+            // 去除掉自己为审核人的条目
+            result = result.stream()
+                .filter(e -> !Objects.equals(e.getNextAuditId(), teacherId))
+                .collect(Collectors.toList());
         }
         // 根据入参bo进行条件筛选
         if (StringUtils.isNotEmpty(bo.getCompetitionName())){
