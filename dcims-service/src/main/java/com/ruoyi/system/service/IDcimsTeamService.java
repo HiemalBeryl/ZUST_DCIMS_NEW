@@ -49,6 +49,11 @@ public interface IDcimsTeamService {
 
 
     /**
+     * 导出Excel
+     */
+    List<DcimsTeamExportExcel> exportExcel(DcimsTeamBo bo);
+
+    /**
      * 新增参赛团队
      */
     Boolean insertByBo(DcimsTeamBo bo);

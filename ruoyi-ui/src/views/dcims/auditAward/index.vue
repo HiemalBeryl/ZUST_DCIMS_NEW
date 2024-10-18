@@ -80,12 +80,14 @@
           </el-select>
         </el-form-item>
         <el-form-item label="赛事类别" prop="level">
-          <el-input
-            v-model="queryParams.level"
-            placeholder="请输入赛事类别"
-            clearable
-            @keyup.enter.native="handleQuery"
-          />
+          <el-select v-model="queryParams.level" placeholder="请选择赛事类别" clearable>
+            <el-option
+              v-for="dict in dict.type.dcims_competition_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="指导教师工号" prop="teacherId">
           <el-input
@@ -440,12 +442,11 @@
   <!-- 查看详情对话框 -->
   <el-dialog title="查看详情" :visible.sync="openDetail" width="500px" append-to-body>
     <el-descriptions title="团队信息">
-<!--    <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition.name }}</el-descriptions-item>-->
       <el-descriptions-item label="所属竞赛">{{ this.detailForm.competition ? this.detailForm.competition.name : '' }}</el-descriptions-item>
-    <el-descriptions-item label="队伍名称">{{ this.detailForm.name }}</el-descriptions-item>
-    <el-descriptions-item label="作品名称">
-      <span v-if="this.detailForm.worksName != null">
-        {{ this.detailForm.worksName }}
+      <el-descriptions-item label="队伍名称">{{ this.detailForm.name }}</el-descriptions-item>
+      <el-descriptions-item label="作品名称">
+        <span v-if="this.detailForm.worksName != null">
+          {{ this.detailForm.worksName }}
       </span>
       <span v-else>
         无
@@ -467,6 +468,7 @@
         <el-tag size="small">否</el-tag>
       </span>
     </el-descriptions-item>
+      <el-descriptions-item label="备注" :span="3">{{ this.detailForm.remark }}</el-descriptions-item>
     <el-descriptions-item label="佐证材料" v-if="openDetail == true">
           <ImagePreview
             v-if="checkFileSuffix(detailForm.fileSuffix) && openDetail == true"
@@ -500,7 +502,7 @@ import download from '@/plugins/download.js';
 
   export default {
     name:"tuanDuiHuoJiangShenHe",
-    dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_college'],
+    dicts: ['dcims_award_type', 'dcims_award_level', 'dcims_college', 'dcims_competition_type'],
     data() {
       return {
       // 按钮loading
