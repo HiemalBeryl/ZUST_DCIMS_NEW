@@ -139,8 +139,9 @@ public class DcimsTeamVoV2 {
     private Long supportMaterial;
 
     /**
-     * 佐证材料
+     * 备注
      */
+    @ExcelProperty(value = "备注", index = 15)
     private String remark;
 
     /**
