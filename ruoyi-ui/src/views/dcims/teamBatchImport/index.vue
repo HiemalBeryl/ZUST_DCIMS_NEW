@@ -143,16 +143,16 @@
                 </div>
                 <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
               </el-tooltip>
-            </div>
-            <el-tooltip placement="right"
-                        v-show="scope.row.hasOwnProperty('studentNameNotFoundError') && scope.row.studentNameNotFoundError.length > 0">
-              <div slot="content">
-                <div v-for="(error, index) in scope.row.studentNameNotFoundError" style="margin-bottom: 5px;margin-top: 5px;">
-                  {{ error.errorMessage }}
+              <el-tooltip placement="right"
+                          v-show="scope.row.hasOwnProperty('studentNameNotFoundError') && scope.row.studentNameNotFoundError.length > 0">
+                <div slot="content">
+                  <div v-for="(error, index) in scope.row.studentNameNotFoundError" style="margin-bottom: 5px;margin-top: 5px;">
+                    {{ error.errorMessage }}
+                  </div>
                 </div>
-              </div>
-              <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
-            </el-tooltip>
+                <i class="el-icon-warning" style="font-size: 18px; color: red"></i>
+              </el-tooltip>
+            </div>
             <div class="txt">{{scope.row.studentName}}</div>
           </template>
         </el-table-column>
@@ -678,6 +678,8 @@ export default {
             optionsTeacher[i]['id'] = optionsTeacher[i].teacherId
           }
           this.DuplicatedDetail.entity[index].options = optionsTeacher
+          // 添加校外教师
+          this.DuplicatedDetail.entity[index].options.push({id: "-2", name: "校外教师"})
         })
       } else {
         optionsTeacher = [];
@@ -695,6 +697,9 @@ export default {
             optionsStudent[i]['id'] = optionsStudent[i].studentId
           }
           this.DuplicatedDetail.entity[index].options = optionsStudent
+          // 添加研究生与校外学生
+          this.DuplicatedDetail.entity[index].options.push({id: "校外学生", name: query})
+          this.DuplicatedDetail.entity[index].options.push({id: "研究生", name: query})
         })
       } else {
         optionsStudent = [];

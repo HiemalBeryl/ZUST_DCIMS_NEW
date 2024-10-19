@@ -1097,6 +1097,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                             dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + teacherVo.getRows().get(0).getTeacherId() + ",");
                         }else if (teacherVo.getRows().size() == 0){
                             // 教师不存在
+                            dcimsTeamImportExcel.setTeacherId(dcimsTeamImportExcel.getTeacherId() + "-1" + ",");
                             dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.teacherNameNotFoundError, "教师"+ teacher +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！"));
                         }else{
                             // 教师存在重名
@@ -1113,6 +1114,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                             dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + studentVo.getRows().get(0).getStudentId() + ",");
                         }else if (studentVo.getRows().size() == 0){
                             // 学生不存在
+                            dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + "-1" + ",");
                             dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！(只统计本科生数据，研究生请不要导入)"));
                         }else{
                             // 学生存在重名
