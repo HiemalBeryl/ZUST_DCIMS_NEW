@@ -78,6 +78,7 @@ public class DcimsCompetitionController extends BaseController {
     @GetMapping("/audit/listInProcessing")
     public TableDataInfo<DcimsCompetitionVo> listByTeacherIdInAuditProcessing(DcimsCompetitionBo bo, PageQuery pageQuery) {
         // 本接口只查询最新的30个
+        pageQuery.setPageNum(0);
         pageQuery.setPageSize(2000);
         TableDataInfo<DcimsCompetitionVo> info = iDcimsCompetitionService.queryPageList(bo, pageQuery, false, false);
         // 对结果筛选，只返回正在审核中和被退回的竞赛，同时应该限制下一级审核人的工号为教务处老师
