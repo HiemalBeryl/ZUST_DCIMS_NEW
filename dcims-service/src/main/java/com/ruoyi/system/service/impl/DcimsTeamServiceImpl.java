@@ -64,6 +64,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -782,35 +783,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             });
             // 如果未匹配到佐证材料的数量大于一半，则考虑是否是解压文件时编码出错，重新解压
             if (importTeamData.stream().filter(e -> ObjectUtil.isNull(e.getSupportMaterial())).count() > importTeamData.size() / 2){
-                // 重新解压
-                List<Object> tempList2 = unzipSupportMaterial(file, unzipFile);
-                File excelFile2 = (File) tempList2.get(0);
-                List<SysOssVo> ossVo2 = (List<SysOssVo>) tempList2.get(1);
-                importTeamData = EasyExcel.read(new FileInputStream(excelFile2)).head(DcimsTeamImportExcel.class).autoCloseStream(false).sheet().headRowNumber(3).doReadSync();
-                // 匹配oss
-                importTeamData.forEach(dcimsTeamImportExcel -> {
-                    Optional<SysOssVo> match = ossVo2.stream()
-                        .filter(vo -> {
-                            if (StrUtil.isBlank(vo.getOriginalName()) || StrUtil.isBlank(dcimsTeamImportExcel.getSupportMaterialFileName()))
-                                return false;
-                            // 删除文件后缀名
-                            String originFileName = vo.getOriginalName().trim().replace(vo.getFileSuffix(),"");
-                            String supportFileName = dcimsTeamImportExcel.getSupportMaterialFileName().trim().replace(vo.getFileSuffix(),"");
-                            return StrUtil.equals(originFileName, supportFileName);
-                        })
-                        .findFirst();
-                    match.ifPresent(vo -> dcimsTeamImportExcel.setSupportMaterial(vo.getOssId()));
-                    match.ifPresent(dcimsTeamImportExcel::setOss);
-                });
-                // 未匹配到的添加错误信息
-                importTeamData.forEach(dcimsTeamImportExcel -> {
-                    if(ObjectUtil.isNull(dcimsTeamImportExcel.getSupportMaterial())){
-                        if(ObjectUtil.isNull(dcimsTeamImportExcel.getErrors())){
-                            dcimsTeamImportExcel.setErrors(new ArrayList<>());
-                        }
-                        dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.fileNotFoundError, "未找到对应的的佐证材料，请确认表格中的文件名与实际是否一致，如果多次匹配失败请采用简单的文件名，如：1.jpg！"));
-                    }
-                });
+                throw new IOException("匹配佐证材料失败，请检查导入模板内的“获奖佐证材料”列与奖状文件名是否一致！");
             }
 
 
@@ -1484,6 +1457,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             File tempFile = FileUtil.createTempFile();
             FileUtil.writeFromStream(file, tempFile);
             String fileType = FileUtil.getType(tempFile);
+            System.out.println(fileType);
             if (fileType.equals("rar")){
                 FileUtil.mkdir(unzipFile.getAbsolutePath() + System.getProperty("file.separator"));
                 Junrar.extract(tempFile.getAbsolutePath(), unzipFile.getAbsolutePath());
@@ -1496,6 +1470,12 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                 }
                 archive.extract(in, false, new ExtractCallback(archive, unzipFile.getAbsolutePath()));
                 archive.close();
+            }else if (fileType.equals("zip")){
+                try {
+                    ZipUtil.unzip(tempFile.getAbsolutePath(), unzipFile.getAbsolutePath(), CharsetUtil.CHARSET_UTF_8);
+                }catch (IllegalArgumentException e){
+                    ZipUtil.unzip(tempFile.getAbsolutePath(), unzipFile.getAbsolutePath(), CharsetUtil.CHARSET_GBK);
+                }
             }else{
                 Extractor extractor = CompressUtil.createExtractor(
                     CharsetUtil.defaultCharset(),
