@@ -1115,7 +1115,7 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
                         }else if (studentVo.getRows().size() == 0){
                             // 学生不存在
                             dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + "-1" + ",");
-                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！(只统计本科生数据，研究生请不要导入)"));
+                            dcimsTeamImportExcel.getErrors().add(new DcimsTeamImportExcelError(DcimsTeamImportExcelError.ErrorType.studentNameNotFoundError, "学生"+ student +"不存在，请确认姓名是否填写正确！多个学生名请使用逗号分隔！研究生与校外学生数据请点击本按钮进行确认"));
                         }else{
                             // 学生存在重名
                             dcimsTeamImportExcel.setStudentId(dcimsTeamImportExcel.getStudentId() + "-1" + ",");
