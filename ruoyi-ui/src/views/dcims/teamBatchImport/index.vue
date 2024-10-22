@@ -671,6 +671,8 @@ export default {
     queryTeacher(query, index) {
       var optionsTeacher = undefined;
       if (query !== '') {
+        // 去除query中的```符号
+        query = query.replace(/`/g, "")
         listTeacherDict(query, true).then(response => {
           optionsTeacher = response.rows;
         }).finally(() => {
@@ -690,6 +692,8 @@ export default {
     queryStudent(query, index) {
       var optionsStudent = undefined
       if (query !== '') {
+        // 去除query中的```符号
+        query = query.replace(/`/g, "")
         listStudentDict(query, true).then(response => {
           optionsStudent = response.rows;
         }).finally(() => {
