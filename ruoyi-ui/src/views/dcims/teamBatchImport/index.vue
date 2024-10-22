@@ -684,7 +684,7 @@ export default {
           }
           this.DuplicatedDetail.entity[index].options = optionsTeacher
           // 添加校外教师
-          this.DuplicatedDetail.entity[index].options.push({id: "-2", name: "校外教师"})
+          this.DuplicatedDetail.entity[index].options.push({id: "校外教师", name: query})
         })
       } else {
         optionsTeacher = [];
