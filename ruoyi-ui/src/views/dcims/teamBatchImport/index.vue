@@ -316,8 +316,11 @@
         <el-table-column prop="number" label="修改提示" width="400">
           <template slot-scope="scope">
             <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入内容"></el-input>
-            <div v-if="scope.row.options.length > 1" class="txt">
+            <div v-if="(scope.row.options.length > 2 && DuplicatedDetail.title === '检查教师重名情况') || (scope.row.options.length > 3  && DuplicatedDetail.title === '检查学生重名情况')" class="txt">
               <i class="el-icon-warning" style="font-size: 18px; color: red">请从重名老师/学生中选择一位</i>
+            </div>
+            <div v-if="(scope.row.options.length < 2 && DuplicatedDetail.title === '检查教师重名情况') || (scope.row.options.length < 3  && DuplicatedDetail.title === '检查学生重名情况')" class="txt">
+              <i class="el-icon-warning" style="font-size: 18px; color: red">请确认该名老师/学生是否属于校内；是否是研究生</i>
             </div>
             <div v-else class="txt"></div>
           </template>
