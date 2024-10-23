@@ -293,9 +293,9 @@
     <!-- 重名修改界面-->
     <el-dialog :title="DuplicatedDetail.title" :visible.sync="DuplicatedNameChangeWindowIsVisible" :before-close="CloseDuplicateWindow" style="text-align: center;">
       <el-table :data="DuplicatedDetail.entity" style="width: 100%">
-        <el-table-column prop="name" label="名称" width="250">
+        <el-table-column prop="name" label="姓名" width="250">
           <template slot-scope="scope">
-            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入内容"></el-input>
+            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入姓名"></el-input>
             <div v-else class="txt">{{scope.row.name}}</div>
           </template>
         </el-table-column>

@@ -109,7 +109,7 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="指导教师" prop="teacherId">{{ Array.isArray(form.teacherName) ? form.teacherName.join(', ') : form.teacherName }}
+          <el-form-item label="指导教师" prop="teacherName">{{ Array.isArray(form.teacherName) ? form.teacherName.join(', ') : form.teacherName }}
 <!--            <el-select-->
 <!--              v-model="form.teacherId"-->
 <!--              filterable-->
@@ -192,9 +192,9 @@
     <!-- 修改指导教师或参赛学生，同批量导入的重名修改界面-->
     <el-dialog :title="DuplicatedDetail.title" :visible.sync="DuplicatedNameChangeWindowIsVisible" :before-close="CloseDuplicateWindow" style="text-align: center;">
       <el-table :data="DuplicatedDetail.entity" style="width: 100%">
-        <el-table-column prop="name" label="名称" width="250">
+        <el-table-column prop="name" label="姓名" width="250">
           <template slot-scope="scope">
-            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入名称"></el-input>
+            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入姓名"></el-input>
             <div v-else class="txt">{{scope.row.name}}</div>
           </template>
         </el-table-column>
