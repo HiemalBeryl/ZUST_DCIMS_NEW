@@ -109,45 +109,47 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="指导教师" prop="teacherId">
-            <el-select
-              v-model="form.teacherId"
-              filterable
-              remote
-              multiple
-              :reserve-keyword="false"
-              placeholder="请输入教师姓名"
-              :remote-method="queryTeacher"
-              :loading="loadingTeacher"
-              @change="syncTeacherName">
-              <el-option
-                v-for="item in optionsTeacher"
-                :key="item.teacherId"
-                :label="item.name"
-                :value="item.teacherId">
-              </el-option>
-            </el-select>
+          <el-form-item label="指导教师" prop="teacherId">{{ Array.isArray(form.teacherName) ? form.teacherName.join(', ') : form.teacherName }}
+<!--            <el-select-->
+<!--              v-model="form.teacherId"-->
+<!--              filterable-->
+<!--              remote-->
+<!--              multiple-->
+<!--              :reserve-keyword="false"-->
+<!--              placeholder="请输入教师姓名"-->
+<!--              :remote-method="queryTeacher"-->
+<!--              :loading="loadingTeacher"-->
+<!--              @change="syncTeacherName">-->
+<!--              <el-option-->
+<!--                v-for="item in optionsTeacher"-->
+<!--                :key="item.teacherId"-->
+<!--                :label="item.name"-->
+<!--                :value="item.teacherId">-->
+<!--              </el-option>-->
+<!--            </el-select>-->
           </el-form-item>
-          <el-form-item label="参赛学生" prop="studentId">
-            <el-select
-              v-model="form.studentId"
-              filterable
-              remote
-              multiple
-              :reserve-keyword="false"
-              placeholder="请输入学生姓名"
-              :remote-method="queryStudent"
-              :loading="loadingStudent"
-              @change="syncStudentName">
-              <el-option
-                v-for="item in optionsStudent"
-                :key="item.studentId"
-                :label="item.studentId + '  ' + item.name"
-                :value="item.studentId">
-              </el-option>
-            </el-select>
+        <el-form-item label="指导教师工号" prop="teacherId">{{ Array.isArray(form.teacherId) ? form.teacherId.join(', ') : form.teacherId }}<el-button size="mini" @click="editPeople('teacher')">修改</el-button></el-form-item>
+        <el-form-item label="参赛学生" prop="studentName">{{ Array.isArray(form.studentName) ? form.studentName.join(', ') : form.studentName }}
+<!--            <el-select-->
+<!--              v-model="form.studentId"-->
+<!--              filterable-->
+<!--              remote-->
+<!--              multiple-->
+<!--              :reserve-keyword="false"-->
+<!--              placeholder="请输入学生姓名"-->
+<!--              :remote-method="queryStudent"-->
+<!--              :loading="loadingStudent"-->
+<!--              @change="syncStudentName">-->
+<!--              <el-option-->
+<!--                v-for="item in optionsStudent"-->
+<!--                :key="item.studentId"-->
+<!--                :label="item.studentId + '  ' + item.name"-->
+<!--                :value="item.studentId">-->
+<!--              </el-option>-->
+<!--            </el-select>-->
           </el-form-item>
-          <el-form-item label="比赛时间" prop="competitionTime">
+        <el-form-item label="参赛学生学号" prop="studentId">{{ Array.isArray(form.studentId) ? form.studentId.join(', ') : form.studentId }}<el-button size="mini" @click="editPeople('student')">修改</el-button></el-form-item>
+        <el-form-item label="比赛时间" prop="competitionTime">
             <el-date-picker clearable
               v-model="form.competitionTime"
               type="datetime"
@@ -184,6 +186,43 @@
               <el-button type="primary" @click="submitForm">确 定</el-button>
           </span>
       </el-dialog>
+    </el-dialog>
+
+
+    <!-- 修改指导教师或参赛学生，同批量导入的重名修改界面-->
+    <el-dialog :title="DuplicatedDetail.title" :visible.sync="DuplicatedNameChangeWindowIsVisible" :before-close="CloseDuplicateWindow" style="text-align: center;">
+      <el-table :data="DuplicatedDetail.entity" style="width: 100%">
+        <el-table-column prop="name" label="名称" width="250">
+          <template slot-scope="scope">
+            <el-input v-if="scope.row.edit" class="item" v-model="scope.row.name" placeholder="请输入名称"></el-input>
+            <div v-else class="txt">{{scope.row.name}}</div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="number" label="学号/工号" width="250">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.number" placeholder="请选择" @click.native="queryPeopleNew(scope.$index)">
+              <el-option
+                v-for="item in scope.row.options"
+                :key="item.id"
+                :label="item.id + '   ' + item.name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="number" label="操作" width="150">
+          <template slot-scope="scope">
+            <el-button type="text" @click="deleteOne(scope.$index)">删除</el-button>
+            <el-button type="text" @click="saveName(scope.$index)">确定</el-button>
+            <el-button type="text" @click="addOne(scope.$index, 1)">在下方插入一行</el-button>
+            <el-button type="text" @click="addOne(scope.$index, -1)">在上方插入一行</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-button type="primary" @click="saveDuplicateWindow()" :loading="loading" style="margin-top: 30px">确定并保存</el-button>
+      <el-button @click="CloseDuplicateWindow()" :loading="loading" style="margin-top: 30px">取消</el-button>
     </el-dialog>
   </div>
 </template>
@@ -276,6 +315,15 @@ export default {
       optionsStudent: [],
       // 预览列表图片
       previewListResource: true,
+      // 展示重名修改窗口
+      DuplicatedNameChangeWindowIsVisible: false,
+      // 重名修改窗口内容
+      DuplicatedDetail:{
+        index: -1,
+        title: "教师/学生重名核验窗口",
+        errMsg: "我是错误信息",
+        entity: []
+      }
     };
   },
   created() {
@@ -530,7 +578,184 @@ export default {
     openNewTab(url) {
       window.open(url, '_blank');
     },
+    /** 修改指导教师或学生面板 */
+    editPeople(type){
+      let NamesArray = [];
+      let idsArray = [];
+      switch (type){
+        case "teacher":{
+          this.DuplicatedDetail.title = "编辑指导教师";
+          console.log(this.form.teacherName)
+          console.log(typeof this.form.teacherName)
 
+          NamesArray = Array.isArray(this.form.teacherName) ? this.form.teacherName : [this.form.teacherName];
+          idsArray = Array.isArray(this.form.teacherId) ? this.form.teacherId : [this.form.teacherId];
+          break;
+        }
+        case "student":{
+          this.DuplicatedDetail.title = "编辑参赛学生";
+          NamesArray = Array.isArray(this.form.studentName) ? this.form.studentName : [this.form.studentName];
+          idsArray = Array.isArray(this.form.studentId) ? this.form.studentId : [this.form.studentId];
+          break;
+        }
+      }
+
+      for (let i = 0; i < NamesArray.length; i++){
+        let tmp = {
+          name: NamesArray[i],
+          number: idsArray[i],
+          options: {}
+        }
+
+        this.DuplicatedDetail.entity.push(tmp)
+        if (this.DuplicatedDetail.title === "编辑指导教师"){
+          this.queryTeacherNew(NamesArray[i], i)
+        }else{
+          this.queryStudentNew(NamesArray[i], i)
+        }
+      }
+      console.log(this.DuplicatedDetail.entity)
+      this.DuplicatedNameChangeWindowIsVisible = true
+    },
+    /** 关闭重名核验窗口 */
+    CloseDuplicateWindow() {
+      this.DuplicatedDetail.title = "";
+      this.DuplicatedDetail.index = -1;
+      this.DuplicatedDetail.errMsg = "";
+      this.DuplicatedDetail.entity = [];
+
+      this.DuplicatedNameChangeWindowIsVisible = false;
+    },
+    /** 远程搜索教师工号 */
+    queryTeacherNew(query, index) {
+      var optionsTeacher = undefined;
+      if (query !== '') {
+        // 去除query中的```符号
+        query = query.replace(/`/g, "")
+        listTeacherDict(query, true).then(response => {
+          optionsTeacher = response.rows;
+        }).finally(() => {
+          for(let i = 0; i<optionsTeacher.length; i++){
+            optionsTeacher[i]['id'] = optionsTeacher[i].teacherId
+          }
+          this.DuplicatedDetail.entity[index].options = optionsTeacher
+          // 添加校外教师
+          this.DuplicatedDetail.entity[index].options.push({id: "校外教师", name: query})
+        })
+      } else {
+        optionsTeacher = [];
+      }
+    },
+
+    /** 远程搜索学生学号 */
+    queryStudentNew(query, index) {
+      var optionsStudent = undefined
+      if (query !== '') {
+        // 去除query中的```符号
+        query = query.replace(/`/g, "")
+        listStudentDict(query, true).then(response => {
+          optionsStudent = response.rows;
+        }).finally(() => {
+          for(let i = 0; i<optionsStudent.length; i++){
+            optionsStudent[i]['id'] = optionsStudent[i].studentId
+          }
+          this.DuplicatedDetail.entity[index].options = optionsStudent
+          // 添加研究生与校外学生
+          this.DuplicatedDetail.entity[index].options.push({id: "校外学生", name: query})
+          this.DuplicatedDetail.entity[index].options.push({id: "研究生", name: query})
+        })
+      } else {
+        optionsStudent = [];
+      }
+    },
+    /** 保存重名核验窗口内容 */
+    saveDuplicateWindow(){
+      // 判断是否都填写
+      for(let j = 0; j<this.DuplicatedDetail.entity.length; j++){
+        if(!this.isEmptyString(this.DuplicatedDetail.entity[j].name) && !this.isEmptyString(this.DuplicatedDetail.entity[j].number)){
+
+        }else{
+          let mStart = this.DuplicatedDetail.title.substring(4)
+          this.$modal.msgError(mStart+this.DuplicatedDetail.entity[j].name+"姓名填写错误或未选择工号，请修改后重新保存！")
+          return
+        }
+      }
+
+
+      // 将教师或学生的姓名与学号更改保存到原先的数组中
+      const title = this.DuplicatedDetail.title
+      console.log(this.DuplicatedDetail.entity)
+      switch (title){
+        case "编辑指导教师":{
+          let name = [];
+          let id = [];
+          for (let j =0; j<this.DuplicatedDetail.entity.length; j++){
+            name.push(this.DuplicatedDetail.entity[j].name);
+            id.push(this.DuplicatedDetail.entity[j].number)
+          }
+          this.form.teacherId = id;
+          this.form.teacherName = name;
+          break;
+        }
+        case "编辑参赛学生":{
+          let name = [];
+          let id = [];
+          for (let j =0; j<this.DuplicatedDetail.entity.length; j++){
+            name.push(this.DuplicatedDetail.entity[j].name);
+            id.push(this.DuplicatedDetail.entity[j].number)
+          }
+          this.form.studentId = id;
+          this.form.studentName = name;
+          break;
+        }
+      }
+
+
+
+      this.CloseDuplicateWindow();
+    },
+    /** 删除一位学生或老师 */
+    deleteOne(index){
+      console.log("要删除的行为" + index)
+      this.DuplicatedDetail.entity.splice(index,1)
+    },
+
+    /** 添加一位学生或老师 */
+    addOne(index, position){
+      let item = {
+        name: '',
+        number: '',
+        options: {},
+        edit: true
+      }
+      this.DuplicatedDetail.entity.splice(index + position, 0, item)
+    },
+
+    /** 确定学生姓名 */
+    saveName(index){
+      this.DuplicatedDetail.entity[index].edit = false;
+    },
+
+    /** 查询学生或老师 */
+    queryPeopleNew(index){
+      switch (this.DuplicatedDetail.title){
+        case "编辑指导教师":{
+          this.queryTeacherNew(this.DuplicatedDetail.entity[index].name, index)
+          break;
+        }case "编辑参赛学生":{
+          this.queryStudentNew(this.DuplicatedDetail.entity[index].name, index)
+          break;
+        }
+      }
+    },
+
+    /** 字符串判空 */
+    isEmptyString(s){
+      if(s == null || s === ''){
+        return true;
+      }
+      return false;
+    }
   }
 };
 </script>

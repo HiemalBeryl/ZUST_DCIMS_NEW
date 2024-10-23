@@ -543,49 +543,61 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
 
 
         // 填写教师、学生姓名
-        String studentIds = bo.getStudentId();
-        String[] splitStudentIds = studentIds.split(",");
-        List<String> studentIdsString = new ArrayList<>(Arrays.asList(splitStudentIds));
-        List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdsString);
-        // 根据studentIdsString的顺序与students.getId()的顺序对应，将students的顺序排序
-        List<DcimsStudentVo> studentsSorted = new ArrayList<>();
-        for(String id : studentIdsString){
-            for(DcimsStudentVo student : students){
-                if(student.getStudentId().equals(id)){
-                    studentsSorted.add(student);
-                }
-            }
-        }
+//        String studentIds = bo.getStudentId();
+//        String[] splitStudentIds = studentIds.split(",");
+//        List<String> studentIdsString = new ArrayList<>(Arrays.asList(splitStudentIds));
+//        List<DcimsStudentVo> students = basicDataService.getStudentNameByIds(studentIdsString);
+//        // 根据studentIdsString的顺序与students.getId()的顺序对应，将students的顺序排序
+//        List<DcimsStudentVo> studentsSorted = new ArrayList<>();
+//        for(String id : studentIdsString){
+//            for(DcimsStudentVo student : students){
+//                if(student.getStudentId().equals(id)){
+//                    studentsSorted.add(student);
+//                }
+//            }
+//        }
+//
+//        String studentName = "";
+//        for(DcimsStudentVo student : studentsSorted){
+//            studentName = studentName.concat(student.getName() + ',');
+//        }
+//        studentName = studentName.substring(0,studentName.length() - 1);
+//        update.setStudentName(studentName);
+//
+//        String teacherIds = bo.getTeacherId();
+//        String[] splitTeacherIds = teacherIds.split(",");
+//        List<Long> teacherIdsLong = new ArrayList<>();
+//        for(String id : splitTeacherIds){
+//            teacherIdsLong.add(Long.parseLong(id));
+//        }
+//        List<DcimsTeacherVo> teachers = basicDataService.getTeacherNameByIds(teacherIdsLong);
+//        // 同样对教师也进行排序
+//        List<DcimsTeacherVo> teachersSorted = new ArrayList<>();
+//        for(Long id : teacherIdsLong){
+//            for(DcimsTeacherVo teacher : teachers){
+//                if(teacher.getTeacherId().equals(id)){
+//                    teachersSorted.add(teacher);
+//                }
+//            }
+//        }
+//        String teacherName = "";
+//        for(DcimsTeacherVo teacher : teachersSorted){
+//            teacherName = teacherName.concat(teacher.getName() + ',');
+//        }
+//        teacherName = teacherName.substring(0,teacherName.length() - 1);
+//        update.setTeacherName(teacherName);
 
-        String studentName = "";
-        for(DcimsStudentVo student : studentsSorted){
-            studentName = studentName.concat(student.getName() + ',');
+        // 判断 学生/教师 个数是否与 工号/学号 数量相同
+        String[] studentIds = update.getStudentId().split(",");
+        String[] studentNames = update.getStudentName().split(",");
+        String[] teacherIds = update.getTeacherId().split(",");
+        String[] teacherNames = update.getTeacherName().split(",");
+        if (studentIds.length != studentNames.length){
+            throw new IllegalArgumentException("学生工号与姓名数量不匹配");
         }
-        studentName = studentName.substring(0,studentName.length() - 1);
-        update.setStudentName(studentName);
-
-        String teacherIds = bo.getTeacherId();
-        String[] splitTeacherIds = teacherIds.split(",");
-        List<Long> teacherIdsLong = new ArrayList<>();
-        for(String id : splitTeacherIds){
-            teacherIdsLong.add(Long.parseLong(id));
+        if (teacherIds.length != teacherNames.length){
+            throw new IllegalArgumentException("教师工号与姓名数量不匹配");
         }
-        List<DcimsTeacherVo> teachers = basicDataService.getTeacherNameByIds(teacherIdsLong);
-        // 同样对教师也进行排序
-        List<DcimsTeacherVo> teachersSorted = new ArrayList<>();
-        for(Long id : teacherIdsLong){
-            for(DcimsTeacherVo teacher : teachers){
-                if(teacher.getTeacherId().equals(id)){
-                    teachersSorted.add(teacher);
-                }
-            }
-        }
-        String teacherName = "";
-        for(DcimsTeacherVo teacher : teachersSorted){
-            teacherName = teacherName.concat(teacher.getName() + ',');
-        }
-        teacherName = teacherName.substring(0,teacherName.length() - 1);
-        update.setTeacherName(teacherName);
 
 
         return baseMapper.updateById(update) > 0;
