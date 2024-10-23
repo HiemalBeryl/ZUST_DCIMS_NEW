@@ -365,7 +365,9 @@ public class DcimsTeamController extends BaseController {
                     if (awardLevel.length() == 5){
                         t.setAwardLevel(awardLevel.substring(0, 2) + "级");
                         if (t.getAwardLevel().equals("省级级")){
-                            t.setAwardLevel("省级");
+                            t.setAwardLevel("省部级");
+                        } else if (t.getAwardLevel().equals("区域级")) {
+                            t.setAwardLevel("省部级");
                         }
                         t.setAwardLevelSubstring(awardLevel.substring(2, 5));
                     }else{
@@ -382,8 +384,17 @@ public class DcimsTeamController extends BaseController {
                     }else if (t.getCompetitionName().contains("创青春")){
                         t.setCompetitionType(cType[2]);
                     }
+                    switch (entity.getCompetitionType()){
+                        case "50":{
+                            t.setDescription("个人");
+                            break;
+                        }
+                        case "100":{
+                            t.setDescription("团体");
+                            break;
+                        }
+                    }
 
-                    t.setDescription("");
                     jiaoyutingList.add(t);
                 }
             }
