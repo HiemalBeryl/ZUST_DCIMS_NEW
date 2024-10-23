@@ -107,6 +107,17 @@
               <el-input v-model="form.phone" placeholder="请输入手机号" />
             </el-form-item>
           </el-col>
+          <el-col :span="8">
+            <el-form-item label="是否是单人赛" prop="singleRace">
+              <el-tooltip class="item" effect="dark" content="此选项作为工作量和奖金计算依据，既有单人赛也有团队赛的，建议选择“团队赛“" placement="right">
+                <i class="el-icon-question"></i>
+              </el-tooltip>
+              <el-select v-model="form.singleRace" placeholder="请选择比赛性质" clearable>
+                <el-option key="50" label="单人赛" value="50"></el-option>
+                <el-option key="100" label="团队赛" value="100"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
         <el-row>
           <el-col :span="8">
@@ -354,6 +365,9 @@
           attachment: [
             { required: true, message: "请上传竞赛申报书", trigger: "blur" }
           ],
+          singleRace: [
+            { required: true, message: "请选择是否是单人赛", trigger: "blur" }
+          ],
         },
         // 教师工号
         teacherIds: [''],
@@ -376,9 +390,11 @@
     created(){
       this.form = {
         responsiblePersonId: undefined,
-        responsiblePersonName: undefined
+        responsiblePersonName: undefined,
+        singleRace: '100'
       };
       this.getLoginTeacher();
+      // this.form.singleRace = '100';
 
       // 检测是否存在上次未填写完成的表单
       var arr = JSON.parse(localStorage.getItem("competitionForm"))
@@ -462,7 +478,8 @@
           createBy: undefined,
           updateTime: undefined,
           updateBy: undefined,
-          delFlag: undefined
+          delFlag: undefined,
+          singleRace: undefined
         };
         this.teacherIds = [''];
         this.teachingHour = [''];
