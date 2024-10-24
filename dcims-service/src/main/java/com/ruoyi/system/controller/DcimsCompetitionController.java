@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.excel.util.StringUtils;
 import com.ruoyi.system.domain.DcimsCompetition;
 import com.ruoyi.system.domain.DcimsGlobalSetting;
 import com.ruoyi.system.domain.bo.DcimsCompetitionAuditBo;
 import com.ruoyi.system.domain.vo.DcimsTeacherVo;
+import com.ruoyi.system.mapper.DcimsCompetitionMapper;
 import com.ruoyi.system.service.IDcimsCompetitionAuditService;
 import com.ruoyi.system.service.IDcimsGlobalSettingService;
 import com.ruoyi.system.service.ISysDeptService;
@@ -52,6 +54,7 @@ public class DcimsCompetitionController extends BaseController {
     private final IDcimsCompetitionAuditService iDcimsCompetitionAuditService;
     private final ISysDeptService deptService;
     private final IDcimsGlobalSettingService globalSettingService;
+    private final DcimsCompetitionMapper competitionMapper;
 
     /**
      * 查询竞赛赛事基本信息列表
@@ -261,5 +264,40 @@ public class DcimsCompetitionController extends BaseController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    /**
+     * 查询导入的竞赛是否需要录入团队赛/个人赛数据
+     */
+    @GetMapping("/needTeamOrPersonal/{ids}")
+    public List<DcimsCompetition> needTeamOrPersonal(@NotNull(message = "主键不能为空")
+                                         @PathVariable Long[] ids) {
+        List<DcimsCompetition> list = new ArrayList<>();
+        for (int j = 0; j < ids.length; j++) {
+            DcimsCompetition competition = competitionMapper.selectById(ids[j]);
+            if (StringUtils.isBlank(competition.getSingleRace())) {
+                list.add(competition);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 填写竞赛团队赛/个人赛数据，也就是为single_race列赋值50/100
+     */
+    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.UPDATE)
+    @RepeatSubmit()
+    @PostMapping("/putSingleRace?id={id}&singleRace={singleRace}")
+    public R<Void> putSingleRace(@NotNull(message = "主键不能为空")
+                                 @PathVariable Long id,
+                                 @NotNull(message = "是否团队赛不能为空")
+                                 @PathVariable String singleRace) {
+        System.out.println("id = " + id);
+        System.out.println("singleRace = " + singleRace);
+        DcimsCompetition dcimsCompetition = competitionMapper.selectById(id);
+        dcimsCompetition.setSingleRace(singleRace);
+        int i = competitionMapper.updateById(dcimsCompetition);
+        return toAjax(i);
     }
 }

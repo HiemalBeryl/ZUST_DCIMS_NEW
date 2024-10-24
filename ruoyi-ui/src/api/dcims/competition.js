@@ -75,3 +75,19 @@ export function deleteTutor(id) {
     method: 'post'
   })
 }
+
+//询导入的竞赛是否需要录入团队赛/个人赛数据
+export function needTeamOrPersonal(id) {
+  return request({
+    url: '/dcims/competition/needTeamOrPersonal/' + id,
+    method: 'get'
+  })
+}
+
+//填写竞赛团队赛/个人赛数据，也就是为single_race列赋值50/100
+export function fillSingleRace(query) {
+  return request({
+    url: '/dcims/competition/putSingleRace?id='+query.id+'&singleRace='+query.singleRace,
+    method: 'post'
+  })
+}

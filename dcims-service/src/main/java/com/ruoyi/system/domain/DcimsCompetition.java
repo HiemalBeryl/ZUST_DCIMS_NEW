@@ -82,6 +82,11 @@ public class DcimsCompetition extends BaseEntity {
      */
     private Long phone;
     /**
+     * 是否是单人赛
+     * 50-单人赛，100-团队赛
+     */
+    private String singleRace;
+    /**
      * 校内选拔时间
      */
     private Date innerTime;

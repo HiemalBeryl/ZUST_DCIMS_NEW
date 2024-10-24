@@ -173,5 +173,9 @@ public class DcimsCompetitionBo extends BaseEntity {
      */
     private Long nextAuditId;
 
-
+    /**
+     * 是否是单人赛
+     * 50-单人赛，100-团队赛
+     */
+    private String singleRace;
 }

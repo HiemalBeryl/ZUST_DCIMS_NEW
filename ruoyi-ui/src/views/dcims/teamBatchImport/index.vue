@@ -330,11 +330,35 @@
       <el-button @click="CloseDuplicateWindow()" :loading="loading" style="margin-top: 30px">取消</el-button>
     </el-dialog>
 
+    <el-dialog title="确认竞赛类型" :visible.sync="showCompetitionSingleTeamTypeWindowFlag" style="text-align: center;" :show-close=false>
+      <el-tooltip class="item" effect="dark" content="此选项作为工作量和奖金计算依据，既有单人赛也有团队赛的，建议选择“团队赛“" placement="right">
+        <i class="el-icon-question"></i>
+      </el-tooltip>
+      <el-table :data="competitionSingleTeamTypeWindowData" style="width: 100%">
+        <el-table-column prop="competitionName" label="竞赛名" width="250">
+          <template slot-scope="scope">
+            <div class="txt">{{scope.row.competitionName}}</div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="number" label="比赛类型" width="250">
+          <template slot-scope="scope">
+            <el-select v-model="scope.row.isSingle" placeholder="请选择">
+              <el-option key="50" label="单人赛" value="50"></el-option>
+              <el-option key="100" label="团队赛" value="100"></el-option>
+            </el-select>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-button type="primary" @click="fillSingleRaceRepeat" :loading="loading" style="margin-top: 30px">确定并保存</el-button>
+    </el-dialog>
+
   </div>
 </template>
 <script>
 import {uploadTemplate, editImportData, appendImportData, submitImportData} from '@/api/dcims/team'
-import {listCompetition} from "@/api/dcims/competition";
+import {listCompetition, needTeamOrPersonal, fillSingleRace} from "@/api/dcims/competition";
 import {listStudentDict, listTeacherDict} from "@/api/dcims/basicData";
 export default {
   name: 'TeamBatchImport',
@@ -376,7 +400,11 @@ export default {
         title: "教师/学生重名核验窗口",
         errMsg: "我是错误信息",
         entity: []
-      }
+      },
+      // 是否显示竞赛团队赛/个人赛信息填写窗口
+      showCompetitionSingleTeamTypeWindowFlag: false,
+      // 填写信息窗口数据
+      competitionSingleTeamTypeWindowData: [],
     }
   },
   created() {
@@ -389,6 +417,11 @@ export default {
       if (this.stepsActive <= 3) {
         this.stepsActive++;
         this.loading = false
+      }
+
+      if (this.stepsActive === 2){
+        // 判断导入的数据中是否包含未填写团队类型的竞赛，如果包含，则弹出新窗口提示用户填写。
+        this.showCompetitionSingleTeamTypeWindow()
       }
     },
     // 回退到上一个步骤
@@ -754,6 +787,68 @@ export default {
     /** 前端移除某条错误,也就是移除row对象中的错误属性 */
     removeError(row, errorType){
       this.$delete(row, errorType)
+    },
+    /** 是否显示竞赛单人团队类型窗口 */
+    showCompetitionSingleTeamTypeWindow(){
+      let ids = []
+      for (let i = 0; i < this.team.length; i++){
+        ids.push(this.team[i].competitionId)
+      }
+      // ids去重
+      ids = Array.from(new Set(ids))
+      needTeamOrPersonal(ids).then(resp => {
+        console.log("len" + resp)
+        console.log("len" + resp.length)
+        if (resp.length > 0){
+          this.showCompetitionSingleTeamTypeWindowFlag = true
+          for (let i = 0; i < resp.length; i++){
+            let temp = {
+              competitionId: '',
+              competitionName: '',
+              isSingle: ''
+            }
+            temp.competitionId = resp[i].id
+            temp.competitionName = resp[i].name
+            temp.isSingle = resp[i].singleRace != null ? resp[i].singleRace : undefined
+            this.competitionSingleTeamTypeWindowData.push(temp)
+          }
+        }
+      })
+    },
+    /** 填写竞赛单人团队类型 */
+    fillSingleRace(id, singleRace){
+      // 将id转换为数字
+      let query = {
+        id: parseInt(id),
+        singleRace: singleRace
+      }
+
+      fillSingleRace(query).then(resp => {
+        if (resp.code == 200){
+          this.$message.success("填写成功！")
+        }
+      })
+    },
+    fillSingleRaceRepeat(){
+      // 判断是否每行都填写了isSingle
+      for (let i = 0; i < this.competitionSingleTeamTypeWindowData.length; i++){
+        if (this.isEmptyString(this.competitionSingleTeamTypeWindowData[i].isSingle)){
+          this.$message.warning("请填写完所有的竞赛类型后再进行保存！")
+          return false;
+        }
+      }
+
+      for (let i = 0; i < this.competitionSingleTeamTypeWindowData.length; i++){
+        this.fillSingleRace(this.competitionSingleTeamTypeWindowData[i].competitionId, this.competitionSingleTeamTypeWindowData[i].isSingle)
+      }
+      this.showCompetitionSingleTeamTypeWindowFlag = false
+    },
+    /** 字符串判空 */
+    isEmptyString(s){
+      if(s == null || s === ''){
+        return true;
+      }
+      return false;
     }
 
   }
