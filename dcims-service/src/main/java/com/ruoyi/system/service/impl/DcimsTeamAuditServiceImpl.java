@@ -182,7 +182,10 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
             }
         }
         // 排序
-        List<DcimsTeamVoV2> collect = VoV2List2.stream().sorted(Comparator.comparing(DcimsTeamVoV2::getCompetitionId).thenComparing(vo -> Arrays.toString(vo.getStudentName()))).collect(Collectors.toList());
+        List<DcimsTeamVoV2> collect = VoV2List2.stream()
+            .sorted(Comparator.comparing(DcimsTeamVoV2::getCompetitionId)
+                .thenComparing(DcimsTeamVoV2::getAwardLevel)
+                .thenComparing(vo -> Arrays.toString(vo.getStudentName()))).collect(Collectors.toList());
 
         // 添加团队对应竞赛信息
         return TableDataInfo.build(collect);
