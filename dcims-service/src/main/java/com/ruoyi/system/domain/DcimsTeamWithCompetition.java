@@ -27,10 +27,6 @@ public class DcimsTeamWithCompetition extends DcimsCompetition{
      */
     private Long competitionId;
     /**
-     * 是否是单人赛
-     */
-    private String singleRace;
-    /**
      * 队伍名称
      */
     private String name;

@@ -502,14 +502,6 @@ public class DcimsTeamController extends BaseController {
             }
             excelData.setTotalHuojiangNumber(allCount);
             excelData.setTotalHuojiangCount(allNumber);
-
-            if (StringUtils.equals(excelData.getSingleRace(), "50")){
-                excelData.setSingleRace("是");
-            }else if (ObjectUtil.isNull(excelData.getSingleRace())){
-                excelData.setSingleRace("");
-            }else{
-                excelData.setSingleRace("否");
-            }
         }
 
 
