@@ -288,11 +288,11 @@ public class DcimsCompetitionController extends BaseController {
      */
     @Log(title = "竞赛赛事基本信息", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
-    @PostMapping("/putSingleRace?id={id}&singleRace={singleRace}")
+    @PostMapping("/putSingleRace")
     public R<Void> putSingleRace(@NotNull(message = "主键不能为空")
-                                 @PathVariable Long id,
+                                 @RequestParam Long id,
                                  @NotNull(message = "是否团队赛不能为空")
-                                 @PathVariable String singleRace) {
+                                 @RequestParam String singleRace) {
         System.out.println("id = " + id);
         System.out.println("singleRace = " + singleRace);
         DcimsCompetition dcimsCompetition = competitionMapper.selectById(id);
