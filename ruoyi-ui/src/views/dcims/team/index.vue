@@ -173,7 +173,7 @@
           size="mini"
           @click="handleExport"
           v-hasPermi="['dcims:team:export']"
-        >下载获奖信息表</el-button>
+        >下载省级及以上科技竞赛获奖学生与指导教师名单</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -193,7 +193,7 @@
           size="mini"
           @click="handleExport3"
           v-hasPermi="['dcims:team:export']"
-        >下载省级及以上科技竞赛获奖学生情况登记表（xls）</el-button>
+        >下载大学生科技竞赛项目省级以上获奖情况汇总表（xls）</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -621,7 +621,7 @@ export default {
 
       this.download('dcims/team/exportDengjiBiao', {
         ...this.queryParams
-      }, `省级及以上科技竞赛获奖学生情况登记表.xlsx`)
+      }, `省级及以上科技竞赛获奖学生与指导教师名单.xlsx`)
     },
     /** 导出按钮操作 */
     handleExport2() {
@@ -637,7 +637,7 @@ export default {
 
       this.download('dcims/team/exportHuiZongBiao', {
         ...this.queryParams
-      }, `获奖信息表${new Date().getTime()}.xlsx`)
+      }, `大学生科技竞赛项目省级以上获奖情况汇总表.xlsx`)
     },
     /** 导出按钮操作 */
     handleExport4() {
