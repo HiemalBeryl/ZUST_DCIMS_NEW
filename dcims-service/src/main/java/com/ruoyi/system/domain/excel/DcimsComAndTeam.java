@@ -20,6 +20,8 @@ public class DcimsComAndTeam {
     private String competitionType;
 
     private String isSingle;
+    @ExcelProperty(value = "是否单人赛")
+    private String singleRace;
 
     @ExcelProperty(value = "主办单位")
     private String organizer;

@@ -441,6 +441,8 @@ public class DcimsTeamController extends BaseController {
             excelData.setCompetitionName(value.get(0).getName());
             excelData.setCompetitionType(value.get(0).getLevel());
             excelData.setCollege(String.valueOf(value.get(0).getCollege()));
+            System.out.println("singleRace:"+value.get(0).getSingleRace());
+            excelData.setSingleRace(StringUtils.equals(value.get(0).getSingleRace(), "50") ? "是" : "否");
             excelDataList.add(excelData);
 
             for (DcimsTeamWithCompetition com : value){

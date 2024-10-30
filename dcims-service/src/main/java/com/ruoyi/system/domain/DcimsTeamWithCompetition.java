@@ -43,6 +43,10 @@ public class DcimsTeamWithCompetition extends DcimsCompetition{
      */
     private String awardLevel;
     /**
+     * 是否是单人赛
+     */
+    private String singleRace;
+    /**
      * 指导教师工号
      */
     private String teacherId;
