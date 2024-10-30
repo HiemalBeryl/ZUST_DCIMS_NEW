@@ -537,7 +537,7 @@ public class DcimsTeamController extends BaseController {
 
         System.out.println(excelDataList);
         HashMap<Object, Object> map = new HashMap<>();
-        map.put("exportYear", bo.getAnnual() != null ? bo.getAnnual(): "xxxx");
+        map.put("exportYear", bo.getAnnual() != null ? bo.getAnnual(): "20xx");
         ExcelUtil.exportTemplate(CollUtil.newArrayList(map, excelDataList), "获奖汇总表", "excel/获奖汇总表.xlsx", response);
 
     }

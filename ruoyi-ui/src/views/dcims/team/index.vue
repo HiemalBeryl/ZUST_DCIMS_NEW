@@ -610,14 +610,18 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      if (this.queryParams.annual === undefined || this.queryParams.annual === ""){
-        this.$message.warning("请在上方输入年份后再进行导出操作！")
-        return null;
-      }
+      // if (this.queryParams.annual === undefined || this.queryParams.annual === ""){
+      //   this.$message.warning("请在上方输入年份后再进行导出操作！")
+      //   return null;
+      // }
 
-      this.download('dcims/team/exportHuiZongBiao', {
+      // this.download('dcims/team/exportHuiZongBiao', {
+      //   ...this.queryParams
+      // }, `获奖信息表${new Date().getTime()}.xlsx`)
+
+      this.download('dcims/team/exportDengjiBiao', {
         ...this.queryParams
-      }, `获奖信息表${new Date().getTime()}.xlsx`)
+      }, `省级及以上科技竞赛获奖学生情况登记表.xlsx`)
     },
     /** 导出按钮操作 */
     handleExport2() {
@@ -627,9 +631,13 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport3() {
-      this.download('dcims/team/exportDengjiBiao', {
+      // this.download('dcims/team/exportDengjiBiao', {
+      //   ...this.queryParams
+      // }, `省级及以上科技竞赛获奖学生情况登记表.xlsx`)
+
+      this.download('dcims/team/exportHuiZongBiao', {
         ...this.queryParams
-      }, `省级及以上科技竞赛获奖学生情况登记表.xlsx`)
+      }, `获奖信息表${new Date().getTime()}.xlsx`)
     },
     /** 导出按钮操作 */
     handleExport4() {

@@ -75,6 +75,13 @@
             <version>16.02-2.01</version>
         </dependency>
 
+        <!-- 拼音依赖 -->
+        <dependency>
+            <groupId>com.belerweb</groupId>
+            <artifactId>pinyin4j</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
 
 
     </dependencies>

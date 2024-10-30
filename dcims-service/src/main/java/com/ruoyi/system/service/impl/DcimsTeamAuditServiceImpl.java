@@ -5,6 +5,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.pinyin.PinyinUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -183,9 +184,14 @@ public class DcimsTeamAuditServiceImpl implements IDcimsTeamAuditService {
         }
         // 排序
         List<DcimsTeamVoV2> collect = VoV2List2.stream()
-            .sorted(Comparator.comparing(DcimsTeamVoV2::getCompetitionId)
+            .sorted(
+                Comparator.comparing(DcimsTeamVoV2::getCompetitionId)
                 .thenComparing(DcimsTeamVoV2::getAwardLevel)
-                .thenComparing(vo -> Arrays.toString(vo.getStudentName()))).collect(Collectors.toList());
+                .thenComparing(vo -> PinyinUtil.getPinyin(Arrays.toString(vo.getStudentName())))
+            )
+            .collect(Collectors.toList()
+        );
+
 
         // 添加团队对应竞赛信息
         return TableDataInfo.build(collect);
