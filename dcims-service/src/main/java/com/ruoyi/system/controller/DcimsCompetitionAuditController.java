@@ -44,7 +44,7 @@ public class DcimsCompetitionAuditController extends BaseController {
      * 通过竞赛审核
      */
     @SaCheckPermission("dcims:competitionAudit:add")
-    @Log(title = "竞赛审核", businessType = BusinessType.INSERT)
+    @Log(title = "通过竞赛审核", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PostMapping()
     public R<Void> add(@Validated(PermitGroup.class) @RequestBody List<DcimsCompetitionAuditBo> boList) {
@@ -55,7 +55,7 @@ public class DcimsCompetitionAuditController extends BaseController {
      * 驳回竞赛审核
      */
     @SaCheckPermission("dcims:competitionAudit:remove")
-    @Log(title = "竞赛审核", businessType = BusinessType.DELETE)
+    @Log(title = "驳回竞赛审核", businessType = BusinessType.UPDATE)
     @PostMapping("/delete")
     public R<Void> remove(@Validated(RefuseGroup.class) @RequestBody List<DcimsCompetitionAuditBo> boList) {
         return toAjax(iDcimsCompetitionAuditService.deleteWithValidByIds(boList));
@@ -65,7 +65,7 @@ public class DcimsCompetitionAuditController extends BaseController {
      * 修改竞赛部分信息
      */
     @SaCheckPermission("dcims:competitionAudit:update")
-    @Log(title = "团队获奖审核", businessType = BusinessType.UPDATE)
+    @Log(title = "审核人修改竞赛信息", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PostMapping("/put")
     public R<Void> edit(@Validated(EditGroup.class) @RequestBody DcimsCompetitionBo bo) {

@@ -636,6 +636,7 @@ public class DcimsTeamController extends BaseController {
      * 获取批量导入模板
      */
     @SaIgnore
+    @Log(title = "批量导入", businessType = BusinessType.EXPORT)
     @PostMapping("/importTemplate")
     public void importTemplate(@NotNull(message = "请选择模板对应的年份") Integer annual, HttpServletResponse response) {
         try {
@@ -657,6 +658,7 @@ public class DcimsTeamController extends BaseController {
      * 上传批量导入压缩文件，返回文件内的数据
      */
     @SaIgnore
+    @Log(title = "批量导入", businessType = BusinessType.QUERY)
     @PostMapping("/uploadTemplate")
     public Map<String, Object> uploadTemplate(@RequestPart MultipartFile file) throws IOException, ArchiveException {
         List<DcimsTeamImportExcel> importList = iDcimsTeamService.readDataFromTemplate(file.getInputStream());
@@ -667,6 +669,7 @@ public class DcimsTeamController extends BaseController {
      * 手动修改后的批量导入信息
      */
     @SaIgnore
+    @Log(title = "批量导入", businessType = BusinessType.UPDATE)
     @PostMapping("/editImportData")
     public Map<String, Object> editImportData(String id, @RequestBody List<DcimsTeamImportExcel> importTeamData){
         System.out.println(importTeamData);
@@ -677,6 +680,7 @@ public class DcimsTeamController extends BaseController {
      * 追加批量导入信息
      */
     @SaIgnore
+    @Log(title = "批量导入", businessType = BusinessType.UPDATE)
     @PostMapping("/appendImportData")
     public Map<String, Object> appendImportData(String id, String type, @RequestPart MultipartFile file) throws IOException, ArchiveException {
         return iDcimsTeamService.appendImportData(id, type, file.getInputStream());
@@ -686,6 +690,7 @@ public class DcimsTeamController extends BaseController {
      * 确认批量导入信息，保存进入数据库
      */
     @SaIgnore
+    @Log(title = "批量导入", businessType = BusinessType.INSERT)
     @PostMapping("/submitImportData")
     public R<Boolean> submitImportData(String id){
         return iDcimsTeamService.submitImportData(id) ? R.ok("成功") : R.fail("操作失败，请检查表格中的数据是否有误，请修改后重新提交");

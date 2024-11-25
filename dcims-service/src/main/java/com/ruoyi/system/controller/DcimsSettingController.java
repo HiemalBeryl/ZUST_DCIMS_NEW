@@ -35,7 +35,7 @@ public class DcimsSettingController {
 
 
     @SaCheckPermission("dcims:globalSetting:1")
-    @Log(title = "删除某一年份", businessType = BusinessType.DELETE)
+    @Log(title = "截止时间设置", businessType = BusinessType.DELETE)
     @GetMapping("/del")
     public R<Boolean> delAnnual(String year) {
         return iDcimsGlobalSettingService.deleteAnnual(year);
@@ -43,7 +43,7 @@ public class DcimsSettingController {
 
 
     @SaCheckPermission("dcims:globalSetting:1")
-    @Log(title = "添加年份", businessType = BusinessType.INSERT)
+    @Log(title = "截止时间设置", businessType = BusinessType.INSERT)
     @GetMapping("/add")
     public R<Boolean> addAnnual(String year) {
         return iDcimsGlobalSettingService.addAnnual(year);
@@ -58,7 +58,7 @@ public class DcimsSettingController {
 
 
     @SaCheckPermission("dcims:globalSetting:1")
-    @Log(title = "修改年份内业务的起止时间", businessType = BusinessType.UPDATE)
+    @Log(title = "截止时间设置", businessType = BusinessType.UPDATE)
     @PostMapping("/update")
     public DcimsGlobalSetting changeDetail(@RequestBody DcimsGlobalSettingBo globalSettingBo) {
         DcimsGlobalSetting globalSetting = new DcimsGlobalSetting();

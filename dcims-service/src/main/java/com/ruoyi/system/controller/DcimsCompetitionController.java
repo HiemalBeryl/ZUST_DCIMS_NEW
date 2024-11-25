@@ -119,7 +119,7 @@ public class DcimsCompetitionController extends BaseController {
      * 导出竞赛赛事基本信息列表
      */
     @SaCheckPermission("dcims:competition:export")
-    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @Log(title = "导出基本信息表", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DcimsCompetitionBo bo, HttpServletResponse response) {
         List<DcimsCompetitionVo> list = iDcimsCompetitionService.queryList(bo);
@@ -130,7 +130,7 @@ public class DcimsCompetitionController extends BaseController {
      * 导出立项汇总表
      */
     @SaCheckPermission("dcims:competition:export")
-    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @Log(title = "导出立项汇总表", businessType = BusinessType.EXPORT)
     @PostMapping("/exportByType")
     public void exportByType(DcimsCompetitionBo bo, HttpServletResponse response) {
         PageQuery pq = new PageQuery();
@@ -215,6 +215,7 @@ public class DcimsCompetitionController extends BaseController {
      *
      */
     @SaCheckPermission("dcims:competition:addTutor")
+    @Log(title = "竞赛赛事基本信息-添加指导教师", businessType = BusinessType.UPDATE)
     @PostMapping("/tutor/competitionId/{competitionId}/teacherIds/{teacherIds}")
     public R<Void> addTutor(@NotNull(message = "所属竞赛不能为空")
                             @PathVariable Long competitionId,
@@ -241,7 +242,7 @@ public class DcimsCompetitionController extends BaseController {
      * 批量下载竞赛立项申报书附件
      */
     @SaCheckPermission("dcims:competition:export")
-    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @Log(title = "竞赛赛事基本信息-下载申报书", businessType = BusinessType.EXPORT)
     @PostMapping("/download")
     public void download(DcimsCompetitionBo bo, HttpServletResponse response) {
         try {
@@ -256,7 +257,7 @@ public class DcimsCompetitionController extends BaseController {
      * 批量下载集中授课表
      */
     @SaCheckPermission("dcims:competition:export")
-    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.EXPORT)
+    @Log(title = "竞赛赛事基本信息-下载集中授课表", businessType = BusinessType.EXPORT)
     @PostMapping("/download2")
     public void download2(DcimsCompetitionBo bo, HttpServletResponse response) {
         try {
@@ -286,7 +287,7 @@ public class DcimsCompetitionController extends BaseController {
     /**
      * 填写竞赛团队赛/个人赛数据，也就是为single_race列赋值50/100
      */
-    @Log(title = "竞赛赛事基本信息", businessType = BusinessType.UPDATE)
+    @Log(title = "竞赛赛事基本信息-填写比赛类型", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PostMapping("/putSingleRace")
     public R<Void> putSingleRace(@NotNull(message = "主键不能为空")
