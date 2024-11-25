@@ -125,4 +125,7 @@ public class DcimsComAndTeam {
     private int totalHuojiangCount;
     @ExcelProperty(value = {"合计", "获奖项数"})
     private int totalHuojiangNumber;
+
+    @ExcelProperty(value = "备注（奖项重复情况）")
+    private String repeatDetail;
 }

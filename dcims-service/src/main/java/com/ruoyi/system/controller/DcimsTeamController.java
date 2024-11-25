@@ -441,7 +441,6 @@ public class DcimsTeamController extends BaseController {
             excelData.setCompetitionType(value.get(0).getLevel());
             excelData.setCollege(String.valueOf(value.get(0).getCollege()));
             excelData.setSingleRace(StringUtils.equals(value.get(0).getSingleRace(), "50") ? "是" : "否");
-
             //计算竞赛时间
             if (
                 StringUtils.isNotBlank(
@@ -458,21 +457,19 @@ public class DcimsTeamController extends BaseController {
             if(StringUtils.isBlank(excelData.getCompetitionTime())){
                 String time = "";
                 for (DcimsTeamWithCompetition v: value){
-                    if (v.getAwardLevel() != null && v.getAwardLevel().matches("-?\\d+") && Integer.parseInt(v.getAwardLevel()) >= 19 && Integer.parseInt(v.getAwardLevel()) <= 10){
+                    if (v.getAwardLevel() != null && v.getAwardLevel().matches("-?\\d+") && Integer.parseInt(v.getAwardLevel()) <= 19 && Integer.parseInt(v.getAwardLevel()) >= 10){
                         time =  DateUtil.format(v.getCompetitionTime(), "yyyy-MM-dd");
                         break;
                     }
                 }
                 for (DcimsTeamWithCompetition v: value){
-                    if (v.getAwardLevel() != null && v.getAwardLevel().matches("-?\\d+") && Integer.parseInt(v.getAwardLevel()) >= 9){
+                    if (v.getAwardLevel() != null && v.getAwardLevel().matches("-?\\d+") && Integer.parseInt(v.getAwardLevel()) <= 9){
                         time =  DateUtil.format(v.getCompetitionTime(), "yyyy-MM-dd");
                         break;
                     }
                 }
                 excelData.setCompetitionTime(time);
             }
-
-
             // 计算集中授课时数
             String[] hours = value.get(0).getTeachingHours() != null ? value.get(0).getTeachingHours().split(",") : new String[0];
             Integer totalHours = 0;
@@ -490,6 +487,9 @@ public class DcimsTeamController extends BaseController {
                 }
             }
             excelData.setTeachingHour(totalHours);
+            // 计算奖项重复情况
+            String repeat = getRepeatDetail(value);
+            excelData.setRepeatDetail(repeat);
 
             excelDataList.add(excelData);
 
@@ -742,5 +742,52 @@ public class DcimsTeamController extends BaseController {
     @PostMapping("/submitImportData")
     public R<Boolean> submitImportData(String id){
         return iDcimsTeamService.submitImportData(id) ? R.ok("成功") : R.fail("操作失败，请检查表格中的数据是否有误，请修改后重新提交");
+    }
+
+
+    /**
+     * 获取奖项重复情况
+     * @return
+     */
+    private String getRepeatDetail(List<DcimsTeamWithCompetition> data){
+        // 当data中任意一个数据与data中其他数据的teacherName和studentName属性都相同时，认为是重复的
+        // 且重复的数据中awardLevel属性不同
+        // 将重复的结果记录下来，以Map<string,int>形式保存，key格式为两者重复的awardLevel，以{x-y}的格式保存；value为重复的次数，每当有不同的data重复 时次数+1
+        // 最后将结果转换为字符串返回
+        Map<String, Integer> repeatMap = new HashMap<>();
+        for (int i = 0; i < data.size(); i++){
+            DcimsTeamWithCompetition d1 = data.get(i);
+            for (int j = i + 1; j < data.size(); j++){
+                DcimsTeamWithCompetition d2 = data.get(j);
+                if (d1.getTeacherName().equals(d2.getTeacherName()) && d1.getStudentName().equals(d2.getStudentName())){
+                    // 这里要求d1和d2的awardlevel其中一个在0~9之间，另一个在10~19之间
+                    if (d1.getAwardLevel() != null && d2.getAwardLevel() != null){
+                        int a1 = Integer.parseInt(d1.getAwardLevel());
+                        int a2 = Integer.parseInt(d2.getAwardLevel());
+                        if ((a1 >= 0 && a1 <= 9 && a2 >= 10 && a2 <= 19) || (a2 >= 0 && a2 <= 9 && a1 >= 10 && a1 <= 19)){
+                            String key = Math.min(a1, a2) + "-" + Math.max(a1, a2);
+                            repeatMap.put(key, repeatMap.getOrDefault(key, 0) + 1);
+                        }
+                    }
+                }
+            }
+        }
+        SysDictData sysDictData = new SysDictData();
+        sysDictData.setDictType("dcims_award_level");
+        List<SysDictData> awardLevel = dictDataService.selectDictDataList(sysDictData);
+        // 将repeatMap的x-y类型的key转换成对应的奖项等级字符串
+        Map<String, String> awardLevelMap = new HashMap<>();
+        for (String str: repeatMap.keySet()){
+            String[] splits = str.split("-");
+            String a1 = awardLevel.stream().filter(e -> e.getDictValue().equals(splits[0])).findFirst().get().getDictLabel();
+            String a2 = awardLevel.stream().filter(e -> e.getDictValue().equals(splits[1])).findFirst().get().getDictLabel();
+            awardLevelMap.put(str, a1 + "和" + a2);
+        }
+        // 将结果转换为字符串输入
+        StringBuilder sb = new StringBuilder();
+        for (String key: repeatMap.keySet()){
+            sb.append(awardLevelMap.get(key)).append("有").append(repeatMap.get(key)).append("次重复，");
+        }
+        return sb.length() > 0 ? sb.substring(0,sb.length() - 1).toString() : "";
     }
 }
