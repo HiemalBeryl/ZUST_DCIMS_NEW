@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.IoUtil;
 import com.ruoyi.common.core.domain.entity.SysDept;
 import cn.hutool.core.util.ObjectUtil;
@@ -430,19 +431,66 @@ public class DcimsTeamController extends BaseController {
 //                list.add(r);
 //            }
         }
-        System.out.println(separatedCompetition);
 
 
         List<DcimsComAndTeam> excelDataList = new ArrayList<>();
         for (List<DcimsTeamWithCompetition> value : separatedCompetition.values()){
-            System.out.println(value.size());
             DcimsComAndTeam excelData = new DcimsComAndTeam();
             BeanUtils.copyProperties(value.get(0), excelData);
             excelData.setCompetitionName(value.get(0).getName());
             excelData.setCompetitionType(value.get(0).getLevel());
             excelData.setCollege(String.valueOf(value.get(0).getCollege()));
-            System.out.println("singleRace:"+value.get(0).getSingleRace());
             excelData.setSingleRace(StringUtils.equals(value.get(0).getSingleRace(), "50") ? "是" : "否");
+
+            //计算竞赛时间
+            if (
+                StringUtils.isNotBlank(
+                    DateUtil.format(value.get(0).getNationalTime(), "yyyy-MM-dd")
+                )
+            ){
+                excelData.setCompetitionTime(
+                    DateUtil.format(value.get(0).getNationalTime(), "yyyy-MM-dd")
+                );
+            }else{
+                String time = DateUtil.format(value.get(0).getProvinceTime(), "yyyy-MM-dd");
+                excelData.setCompetitionTime(time != null ? time : "");
+            }
+            if(StringUtils.isBlank(excelData.getCompetitionTime())){
+                String time = "";
+                for (DcimsTeamWithCompetition v: value){
+                    if (v.getAwardLevel() != null && v.getAwardLevel().matches("-?\\d+") && Integer.parseInt(v.getAwardLevel()) >= 19 && Integer.parseInt(v.getAwardLevel()) <= 10){
+                        time =  DateUtil.format(v.getCompetitionTime(), "yyyy-MM-dd");
+                        break;
+                    }
+                }
+                for (DcimsTeamWithCompetition v: value){
+                    if (v.getAwardLevel() != null && v.getAwardLevel().matches("-?\\d+") && Integer.parseInt(v.getAwardLevel()) >= 9){
+                        time =  DateUtil.format(v.getCompetitionTime(), "yyyy-MM-dd");
+                        break;
+                    }
+                }
+                excelData.setCompetitionTime(time);
+            }
+
+
+            // 计算集中授课时数
+            String[] hours = value.get(0).getTeachingHours() != null ? value.get(0).getTeachingHours().split(",") : new String[0];
+            Integer totalHours = 0;
+            for (String hour: hours){
+                if (hour != null && hour.contains("=")) {
+                    // 获取等号后的内容
+                    String afterEqual = hour.substring(hour.indexOf('=') + 1).trim();
+                    // 尝试将等号后的字符串转换成整数并累加到sum中
+                    try {
+                        int number = Integer.parseInt(afterEqual);
+                        totalHours += number;
+                    } catch (NumberFormatException e) {
+                        // 如果转换失败，说明等号后面不是有效的整数，忽略此异常
+                    }
+                }
+            }
+            excelData.setTeachingHour(totalHours);
+
             excelDataList.add(excelData);
 
             for (DcimsTeamWithCompetition com : value){

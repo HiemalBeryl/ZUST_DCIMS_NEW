@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.ruoyi.system.domain.DcimsTeam;
 import lombok.Data;
+import software.amazon.ion.Decimal;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -25,6 +26,12 @@ public class DcimsComAndTeam {
 
     @ExcelProperty(value = "主办单位")
     private String organizer;
+
+    @ExcelProperty(value = "竞赛时间")
+    private String competitionTime;
+
+    @ExcelProperty(value = "集中授课时数")
+    private Integer teachingHour;
 
     @ExcelProperty(value = "集中授课时数")
     private BigDecimal jiZhongShouKeShiShu;
