@@ -139,6 +139,10 @@ public class DcimsCompetition extends BaseEntity {
      */
     private String redHeaderFile;
     /**
+     * 校赛参与人次
+     */
+    private Integer innerStudentCount;
+    /**
      * 奖金核算状态
      */
     private String moneyAggregate;

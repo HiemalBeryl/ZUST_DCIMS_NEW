@@ -76,7 +76,7 @@ export function deleteTutor(id) {
   })
 }
 
-//询导入的竞赛是否需要录入团队赛/个人赛数据
+//查导入的竞赛是否需要录入团队赛/个人赛数据
 export function needTeamOrPersonal(id) {
   return request({
     url: '/dcims/competition/needTeamOrPersonal/' + id,
@@ -88,6 +88,22 @@ export function needTeamOrPersonal(id) {
 export function fillSingleRace(query) {
   return request({
     url: '/dcims/competition/putSingleRace?id='+query.id+'&singleRace='+query.singleRace,
+    method: 'post'
+  })
+}
+
+//查询导入的竞赛是否需要录入校赛参与人次
+export function needInnerStudentCount(id) {
+  return request({
+    url: '/dcims/competition/needInnerStudent/' + id,
+    method: 'get'
+  })
+}
+
+//填写校赛参与人次数据，也就是为inner_student_count列赋值1~999
+export function fillInnerStudentCount(query) {
+  return request({
+    url: '/dcims/competition/putInnerStudent?id='+query.id+'&innerStudentCount='+query.singleRace,
     method: 'post'
   })
 }

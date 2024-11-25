@@ -354,11 +354,38 @@
       <el-button type="primary" @click="fillSingleRaceRepeat" :loading="loading" style="margin-top: 30px">确定并保存</el-button>
     </el-dialog>
 
+    <el-dialog title="填写校赛参与人数（人次）" :visible.sync="showInnerStudentCountWindowFlag" style="text-align: center;" :show-close=false>
+      <el-tooltip class="item" effect="dark" content="此选项作为统计需要，请填写竞赛的校赛参与人次。“" placement="right">
+        <i class="el-icon-question"></i>
+      </el-tooltip>
+      <el-table :data="innerStudentCountWindowData" style="width: 100%">
+        <el-table-column prop="competitionName" label="竞赛名" width="250">
+          <template slot-scope="scope">
+            <div class="txt">{{scope.row.competitionName}}</div>
+          </template>
+        </el-table-column>
+
+        <el-table-column prop="number" label="参与人数（人次）" width="250">
+          <template slot-scope="scope">
+            <el-input-number v-model="scope.row.isSingle" :min="1" :max="999" label="请输入校内比赛人次"></el-input-number>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-button type="primary" @click="fillInnerStudentCountRepeat" :loading="loading" style="margin-top: 30px">确定并保存</el-button>
+    </el-dialog>
+
   </div>
 </template>
 <script>
 import {uploadTemplate, editImportData, appendImportData, submitImportData} from '@/api/dcims/team'
-import {listCompetition, needTeamOrPersonal, fillSingleRace} from "@/api/dcims/competition";
+import {
+  listCompetition,
+  needTeamOrPersonal,
+  fillSingleRace,
+  needInnerStudentCount,
+  fillInnerStudentCount
+} from "@/api/dcims/competition";
 import {listStudentDict, listTeacherDict} from "@/api/dcims/basicData";
 export default {
   name: 'TeamBatchImport',
@@ -405,6 +432,10 @@ export default {
       showCompetitionSingleTeamTypeWindowFlag: false,
       // 填写信息窗口数据
       competitionSingleTeamTypeWindowData: [],
+      // 是否显示校赛参与人次信息填写窗口
+      showInnerStudentCountWindowFlag: false,
+      // 填写信息窗口数据2
+      innerStudentCountWindowData: [],
     }
   },
   created() {
@@ -422,6 +453,8 @@ export default {
       if (this.stepsActive === 2){
         // 判断导入的数据中是否包含未填写团队类型的竞赛，如果包含，则弹出新窗口提示用户填写。
         this.showCompetitionSingleTeamTypeWindow()
+        // 判断导入的数据中是否包含未填写校赛参与人次，如果包含，则弹出新窗口提示用户填写。
+        this.showInnerStudentCountWindow()
       }
     },
     // 回退到上一个步骤
@@ -815,6 +848,9 @@ export default {
         }
       })
     },
+
+
+
     /** 填写竞赛单人团队类型 */
     fillSingleRace(id, singleRace){
       // 将id转换为数字
@@ -843,6 +879,63 @@ export default {
       }
       this.showCompetitionSingleTeamTypeWindowFlag = false
     },
+
+
+
+    /** 是否显示竞赛单人团队类型窗口 */
+    showInnerStudentCountWindow(){
+      let ids = []
+      for (let i = 0; i < this.team.length; i++){
+        ids.push(this.team[i].competitionId)
+      }
+      // ids去重
+      ids = Array.from(new Set(ids))
+      needInnerStudentCount(ids).then(resp => {
+        if (resp.length > 0){
+          this.showInnerStudentCountWindowFlag = true
+          for (let i = 0; i < resp.length; i++){
+            let temp = {
+              competitionId: '',
+              competitionName: '',
+              isSingle: ''
+            }
+            temp.competitionId = resp[i].id
+            temp.competitionName = resp[i].name
+            temp.isSingle = resp[i].singleRace != null ? resp[i].singleRace : undefined
+            this.innerStudentCountWindowData.push(temp)
+          }
+        }
+      })
+    },
+    /** 填写竞赛单人团队类型 */
+    fillInnerStudentCount(id, singleRace){
+      // 将id转换为数字
+      let query = {
+        id: parseInt(id),
+        singleRace: singleRace
+      }
+
+      fillInnerStudentCount(query).then(resp => {
+        if (resp.code == 200){
+          this.$message.success("填写成功！")
+        }
+      })
+    },
+    fillInnerStudentCountRepeat(){
+      // 判断是否每行都填写了isSingle
+      for (let i = 0; i < this.innerStudentCountWindowData.length; i++){
+        if (this.isEmptyString(this.innerStudentCountWindowData[i].isSingle)){
+          this.$message.warning("请填写完所有的竞赛类型后再进行保存！")
+          return false;
+        }
+      }
+
+      for (let i = 0; i < this.innerStudentCountWindowData.length; i++){
+        this.fillInnerStudentCount(this.innerStudentCountWindowData[i].competitionId, this.innerStudentCountWindowData[i].isSingle)
+      }
+      this.showInnerStudentCountWindowFlag = false
+    },
+
     /** 字符串判空 */
     isEmptyString(s){
       if(s == null || s === ''){

@@ -301,4 +301,36 @@ public class DcimsCompetitionController extends BaseController {
         int i = competitionMapper.updateById(dcimsCompetition);
         return toAjax(i);
     }
+
+    /**
+     * 查询导入的竞赛是否需要录入校赛参与人次
+     */
+    @GetMapping("/needInnerStudent/{ids}")
+    public List<DcimsCompetition> needInnerStudent(@NotNull(message = "主键不能为空")
+                                                     @PathVariable Long[] ids) {
+        List<DcimsCompetition> list = new ArrayList<>();
+        for (int j = 0; j < ids.length; j++) {
+            DcimsCompetition competition = competitionMapper.selectById(ids[j]);
+            if (competition.getInnerStudentCount() == null) {
+                list.add(competition);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 填写竞赛的校赛参与人次属性
+     */
+    @Log(title = "竞赛赛事基本信息-填写校赛参与人次", businessType = BusinessType.UPDATE)
+    @RepeatSubmit()
+    @PostMapping("/putInnerStudent")
+    public R<Void> putInnerStudent(@NotNull(message = "主键不能为空")
+                                 @RequestParam Long id,
+                                 @NotNull(message = "是否团队赛不能为空")
+                                 @RequestParam Integer innerStudentCount) {
+        DcimsCompetition dcimsCompetition = competitionMapper.selectById(id);
+        dcimsCompetition.setInnerStudentCount(innerStudentCount);
+        int i = competitionMapper.updateById(dcimsCompetition);
+        return toAjax(i);
+    }
 }
