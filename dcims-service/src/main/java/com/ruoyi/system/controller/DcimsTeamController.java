@@ -441,6 +441,7 @@ public class DcimsTeamController extends BaseController {
             excelData.setCompetitionType(value.get(0).getLevel());
             excelData.setCollege(String.valueOf(value.get(0).getCollege()));
             excelData.setSingleRace(StringUtils.equals(value.get(0).getSingleRace(), "50") ? "是" : "否");
+            excelData.setInnerStudentCount(ObjectUtil.isNotEmpty(value.get(0).getInnerStudentCount())? value.get(0).getInnerStudentCount().toString() : "");
             //计算竞赛时间
             if (
                 StringUtils.isNotBlank(
