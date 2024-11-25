@@ -765,6 +765,13 @@ public class DcimsTeamController extends BaseController {
                     if (d1.getAwardLevel() != null && d2.getAwardLevel() != null){
                         int a1 = Integer.parseInt(d1.getAwardLevel());
                         int a2 = Integer.parseInt(d2.getAwardLevel());
+                        // 将区域赛视为省级比赛
+                        if (a1 >= 10 && a1 <= 14){
+                            a1 = a1 + 5;
+                        }
+                        if (a2 >= 10 && a2 <= 14){
+                            a2 = a2 + 5;
+                        }
                         if ((a1 >= 0 && a1 <= 9 && a2 >= 10 && a2 <= 19) || (a2 >= 0 && a2 <= 9 && a1 >= 10 && a1 <= 19)){
                             String key = Math.min(a1, a2) + "-" + Math.max(a1, a2);
                             repeatMap.put(key, repeatMap.getOrDefault(key, 0) + 1);
