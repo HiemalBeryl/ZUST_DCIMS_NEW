@@ -509,13 +509,13 @@ public class DcimsTeamController extends BaseController {
                     case "16":
                         awardLevel = 11;
                         break;
-                    case "18":
+                    case "17":
                         awardLevel = 12;
                         break;
-                    case "19":
+                    case "18":
                         awardLevel = 13;
                         break;
-                    case "20":
+                    case "19":
                         awardLevel = 14;
                         break;
                     default:
