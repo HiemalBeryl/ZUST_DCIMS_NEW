@@ -466,6 +466,46 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         lqw.eq(bo.getAudit() != null, DcimsTeam::getAudit, bo.getAudit());
         lqw.between(params.get("beginAwardTimeRange") != null && params.get("endAwardTimeRange") != null,
             DcimsTeam::getAwardTime ,params.get("beginAwardTimeRange"), params.get("endAwardTimeRange"));
+        String studentType = null;
+        if(params.get("studentType") != null){
+            studentType = (String) params.get("studentType");
+        }
+        if (StringUtils.isNotBlank(studentType)){
+            switch (studentType){
+                // 1.完全由本科生组成的队伍，即不包含研究生与校外学生字样
+                case "1":{
+                    lqw.notLike(DcimsTeam::getStudentId, "研究生");
+                    lqw.notLike(DcimsTeam::getStudentId, "校外学生");
+                    break;
+                }
+                // 2.完全由研究生组成的队伍
+                case "2":{
+                    lqw.like(DcimsTeam::getStudentId, "研究生");
+                    lqw.and(wrapper -> wrapper.apply("student_id NOT REGEXP '[0-9]'"));
+                    lqw.notLike(DcimsTeam::getStudentId, "校外学生");
+                    break;
+                }
+                // 3.完全由校外学生组成的队伍
+                case "3":{
+                    lqw.like(DcimsTeam::getStudentId, "校外学生");
+                    lqw.and(wrapper -> wrapper.apply("student_id NOT REGEXP '[0-9]'"));
+                    lqw.notLike(DcimsTeam::getStudentId, "研究生");
+                    break;
+                }
+                // 4.队伍中包括本科生与研究生
+                case "4":{
+                    lqw.like(DcimsTeam::getStudentId, "研究生");
+                    lqw.and(wrapper -> wrapper.apply("student_id REGEXP '[0-9][\\u4e00-\\u9fa5]|[\\u4e00-\\u9fa5][0-9]'"));
+                    break;
+                }
+                // 5.队伍中包括本科生与校外学生
+                case "5":{
+                    lqw.like(DcimsTeam::getStudentId, "校外学生");
+                    lqw.and(wrapper -> wrapper.apply("student_id REGEXP '[0-9][\\u4e00-\\u9fa5]|[\\u4e00-\\u9fa5][0-9]'"));
+                    break;
+                }
+            }
+        }
         return lqw;
     }
 

@@ -125,6 +125,15 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="学生类型" prop="studentType" v-show="this.$store.state.user.roles.includes('AcademicAffairsOffice') || this.$store.state.user.roles.includes('admin')">
+        <el-select v-model="queryParams.studentType" placeholder="请选择学生类型" clearable>
+          <el-option key="1" label="队伍只包含本科生" value="1"></el-option>
+          <el-option key="2" label="队伍只包含研究生" value="2"></el-option>
+          <el-option key="3" label="队伍只包含校外学生" value="3"></el-option>
+          <el-option key="4" label="队伍包含本科生与研究生" value="4"></el-option>
+          <el-option key="5" label="队伍包含本科生与校外学生" value="5"></el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -424,6 +433,7 @@ export default {
         studentName: undefined,
         level: undefined,
         audit: '2',
+        studentType: undefined,
       },
       // 表单参数
       form: {},
@@ -459,14 +469,21 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询参赛团队列表 */
-    getList() {
-      this.loading = true;
+    /** 查询前的数据处理 */
+    beforeSearch(){
       this.queryParams.params = {};
       if (null != this.awardTimeRange && '' != this.awardTimeRange) {
         this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
         this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
       }
+      if (null != this.queryParams.studentType && '' != this.queryParams.studentType){
+        this.queryParams.params["studentType"] = this.queryParams.studentType;
+      }
+    },
+    /** 查询参赛团队列表 */
+    getList() {
+      this.loading = true;
+      this.beforeSearch();
       listTeam(this.queryParams).then(response => {
         this.teamList = response.rows;
         this.total = response.total;
@@ -511,8 +528,10 @@ export default {
         createBy: undefined,
         updateTime: undefined,
         updateBy: undefined,
-        delFlag: undefined
+        delFlag: undefined,
+        studentType: undefined,
       };
+      this.this.awardTimeRange = [];
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -610,48 +629,35 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      // if (this.queryParams.annual === undefined || this.queryParams.annual === ""){
-      //   this.$message.warning("请在上方输入年份后再进行导出操作！")
-      //   return null;
-      // }
-
-      // this.download('dcims/team/exportHuiZongBiao', {
-      //   ...this.queryParams
-      // }, `获奖信息表${new Date().getTime()}.xlsx`)
-
+      this.beforeSearch();
       this.download('dcims/team/exportDengjiBiao', {
         ...this.queryParams
       }, `省级及以上科技竞赛获奖学生与指导教师名单.xlsx`)
     },
     /** 导出按钮操作 */
     handleExport2() {
+      this.beforeSearch();
       this.download('dcims/team/download', {
         ...this.queryParams
       }, `获奖佐证材料附件${new Date().getTime()}.zip`)
     },
     /** 导出按钮操作 */
     handleExport3() {
-      // this.download('dcims/team/exportDengjiBiao', {
-      //   ...this.queryParams
-      // }, `省级及以上科技竞赛获奖学生情况登记表.xlsx`)
-
+      this.beforeSearch();
       this.download('dcims/team/exportHuiZongBiao', {
         ...this.queryParams
       }, `大学生科技竞赛项目省级以上获奖情况汇总表.xlsx`)
     },
     /** 导出按钮操作 */
     handleExport4() {
+      this.beforeSearch();
       this.download('dcims/team/exportTeamWord', {
         ...this.queryParams
       }, `省级及以上科技竞赛获奖学生情况登记表.docx`)
     },
     /** 导出按钮操作 */
     handleExport5() {
-      if (null != this.awardTimeRange && '' != this.awardTimeRange) {
-        this.queryParams.params["beginAwardTimeRange"] = this.awardTimeRange[0];
-        this.queryParams.params["endAwardTimeRange"] = this.awardTimeRange[1];
-      }
-
+      this.beforeSearch();
       this.download('dcims/team/exportDengjiBiaoSingleStudent', {
         ...this.queryParams
       }, `表6-6-3学生获省级及以上各类竞赛奖励情况.xlsx`)
