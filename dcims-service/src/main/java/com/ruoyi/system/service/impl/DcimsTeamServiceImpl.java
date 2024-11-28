@@ -1032,7 +1032,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
         importTeamData.forEach(dcimsTeamImportExcel -> {
             Optional<DcimsCompetitionVo> match = competitionVos.stream()
                 .filter(dcimsExcel -> StrUtil.equals(dcimsExcel.getName(), dcimsTeamImportExcel.getCompetitionName())
-                    && StrUtil.equals(String.valueOf(dcimsExcel.getAnnual()), dcimsTeamImportExcel.getYear()))
+                    && StrUtil.equals(String.valueOf(dcimsExcel.getAnnual()), dcimsTeamImportExcel.getYear())
+                    && !Objects.equals(dcimsExcel.getState(), "2"))
                 .findFirst();
             match.ifPresent(dcimsExcel -> dcimsTeamImportExcel.setCompetitionId(dcimsExcel.getId()));
         });
