@@ -208,7 +208,8 @@ public class DcimsTeamServiceImpl implements IDcimsTeamService {
             .reversed()
             .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getLevel())
             .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getCollege())
-            .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getId())).collect(Collectors.toList());
+            .thenComparing((DcimsTeamVoV2 e) -> e.getCompetition().getId())
+            .thenComparing((DcimsTeamVoV2 e) -> e.getAwardLevel())).collect(Collectors.toList());
         long start = pageQuery.getPageSize() * (pageQuery.getPageNum() - 1L);
         long end = Math.min(start + pageQuery.getPageSize(), totalRecord);
         VoV2List = VoV2List.subList((int) start, (int) end);
